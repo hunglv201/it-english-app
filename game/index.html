@@ -93,10 +93,10 @@ button,a{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 
 /* map path */
 .chapter{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.chapter .nav{width:44px;height:44px;border-radius:14px;border:3px solid var(--stroke);background:var(--panel2);box-shadow:0 4px 0 var(--stroke);display:flex;align-items:center;justify-content:center;font-size:18px}
+.chapter .nav{width:38px;height:38px;border-radius:12px;border:3px solid var(--stroke);background:var(--panel2);box-shadow:0 4px 0 var(--stroke);display:flex;align-items:center;justify-content:center;font-size:18px}
 .chapter .nav:active{transform:translateY(3px);box-shadow:0 1px 0 var(--stroke)}
-.path{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:14px 8px;padding:14px 4px 6px}
-.node{position:relative;aspect-ratio:1;border-radius:50%;border:3px solid var(--stroke);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:700;font-size:17px;box-shadow:0 5px 0 var(--stroke);background:var(--panel2);color:var(--faint);transition:transform .1s}
+.path{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:12px 6px;padding:12px 2px 8px;justify-items:center}
+.node{position:relative;width:50px;height:50px;border-radius:50%;border:3px solid var(--stroke);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:700;font-size:17px;box-shadow:0 5px 0 var(--stroke);background:var(--panel2);color:var(--faint);transition:transform .1s}
 .node:active{transform:translateY(3px);box-shadow:0 2px 0 var(--stroke)}
 .node.open{background:linear-gradient(180deg,#8ad9ff,#2f9cff);color:#fff}
 .node.cur{background:linear-gradient(180deg,#ffe08a,#ffb703);color:#3a2600;animation:pulse 1.6s ease-in-out infinite}
@@ -257,8 +257,9 @@ button.srow:active{background:var(--panel2)}
 .mini-farm{display:flex;align-items:flex-end;gap:2px;width:64px;height:44px;flex:0 0 auto}
 .mini-farm svg{width:34px;height:44px}
 .mini-farm svg:last-child{width:34px;height:36px;animation:wob 1.6s ease-in-out infinite}
-.card.map .path{gap:12px 6px;padding:10px 2px 4px}
-.node{font-size:16px}
+.card.map .path{gap:12px 6px;padding:10px 2px 6px}
+.node{font-size:15px}
+.node .lk{top:-4px;right:-4px;font-size:11px}
 /* pinned action */
 .pin{position:sticky;bottom:calc(100px + env(safe-area-inset-bottom));z-index:5;margin-top:10px;box-shadow:0 5px 0 var(--stroke),0 12px 30px #000a}
 
@@ -319,6 +320,35 @@ button.srow:active{background:var(--panel2)}
 .tb-mic.rec{background:linear-gradient(180deg,#ff8a8a,#ff3b5c);animation:recp 1s ease-in-out infinite}
 .tb-send{background:linear-gradient(180deg,var(--pink),var(--pink2));color:#fff}
 .tb-mic:active,.tb-send:active{transform:translateY(2px);box-shadow:0 1px 0 var(--stroke)}
+
+/* AFK arena (full card) */
+.card.afk2{padding:12px 12px 12px;background:linear-gradient(180deg,#2a2160,#1b1147);cursor:pointer}
+.arena2{position:relative;height:98px;margin-top:8px;border-radius:14px;overflow:hidden;background:radial-gradient(70% 60% at 50% 100%,#4a3aa8 0%,#2a2160 55%,transparent 100%),linear-gradient(180deg,#1a1447,#221a4d)}
+.arena2 .ground{position:absolute;left:0;right:0;bottom:0;height:22px;background:linear-gradient(180deg,#3b2f7a,#2a2160);border-top:3px solid #0d0826}
+.arena2 .ground::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 22px,#ffffff10 22px 24px)}
+.a-mochi{position:absolute;left:12px;bottom:12px;width:66px;height:72px}
+.a-mochi>svg:first-child{width:100%;height:100%;filter:drop-shadow(0 4px 0 var(--stroke))}
+.a-mochi .sword{position:absolute;width:18px;height:52px;right:-4px;bottom:18px;transform-origin:50% 92%;transform:rotate(28deg);filter:drop-shadow(0 3px 0 var(--stroke))}
+.a-bug{position:absolute;right:14px;bottom:14px;width:66px;height:58px}
+.a-bug>svg{width:100%;height:100%;filter:drop-shadow(0 4px 0 var(--stroke));animation:wob 1.6s ease-in-out infinite}
+.a-hp{position:absolute;left:6px;right:6px;top:-12px;height:8px;border-width:2px}
+.a-slash{position:absolute;right:50px;bottom:22px;width:56px;height:56px;opacity:0;filter:drop-shadow(0 0 6px #ff7eb6)}
+.arena2.go .a-mochi{animation:dash 1s cubic-bezier(.3,.9,.3,1)}
+.arena2.go .a-mochi .sword{animation:swing 1s ease-in-out}
+.arena2.go .a-slash{animation:slash2 .45s .42s ease-out}
+.arena2.go .a-bug>svg{animation:bughit .45s .5s,wob 1.6s ease-in-out infinite}
+@keyframes dash{0%{transform:translateX(0)}40%{transform:translateX(170px) translateY(-6px)}62%{transform:translateX(178px)}100%{transform:translateX(0)}}
+@keyframes swing{0%,30%{transform:rotate(28deg)}45%{transform:rotate(-70deg)}58%{transform:rotate(60deg)}75%,100%{transform:rotate(28deg)}}
+@keyframes slash2{0%{opacity:0;transform:scale(.4) rotate(-20deg)}35%{opacity:1;transform:scale(1.15) rotate(0)}100%{opacity:0;transform:scale(1.4) rotate(15deg) translateX(8px)}}
+.a-bug.dead>svg{animation:die .5s forwards}
+.a-bug.spawn{animation:spawnIn .6s cubic-bezier(.2,1.2,.4,1)}
+@keyframes spawnIn{from{transform:translateX(90px)}to{transform:translateX(0)}}
+.poof{position:absolute;right:30px;bottom:34px;font-size:34px;opacity:0;pointer-events:none}
+.poof.go{animation:poof .6s ease-out}
+@keyframes poof{0%{opacity:0;transform:scale(.3)}30%{opacity:1;transform:scale(1.3)}100%{opacity:0;transform:scale(1.8) translateY(-14px)}}
+.a-fx{position:absolute;inset:0;pointer-events:none;z-index:3}
+.a-fx .am-dmg{top:22px;font-size:17px}
+.afk2 .btn.sm{min-height:40px}
 /* badges */
 .badges{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .badge{aspect-ratio:1;border-radius:18px;border:3px solid var(--stroke);background:var(--panel2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:26px;box-shadow:0 4px 0 var(--stroke);text-align:center}

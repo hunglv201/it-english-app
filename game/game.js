@@ -188,22 +188,25 @@ function vMap(){
   main.appendChild(play);
   // ---- AFK strip ----
   const p0=idlePending();
-  const afk=el('div','strip afk');
-  afk.innerHTML='<div class="am"><div class="am-mochi">'+mascot('happy')+'</div><div class="am-slash">⚔️</div><div class="am-bug" id="amBug">'+bug()+'<div class="bar mon am-hp"><i id="amHp" style="width:100%"></i></div></div><div class="am-fx" id="amFx"></div></div>'+
-    '<div class="grow" style="min-width:0"><b class="h" style="font-size:14px;white-space:nowrap">AFK <span style="color:var(--yellow)">+'+idleRate()+' xu/giờ</span></b><div class="mono" id="afkLine" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">🪙 <b id="afkCoins">'+p0.coins+'</b> · ✨ <span id="afkXp">'+p0.xp+'</span> XP · <span id="afkTime">'+fmtDur(p0.ms)+'</span></div><div class="mono" style="margin-top:2px">🐛 <span id="amKills">'+(G.idle.bugs||0)+'</span> bug đã hạ</div></div>';
-  const col=el('button','btn yellow sm','Thu');col.id='afkCollect';col.onclick=e=>{e.stopPropagation();const p=idlePending();if(p.coins<=0){toast('Chưa có gì để thu — chờ Mochi cày thêm nhé');return;}collectIdle();confetti();vMap();};
-  afk.appendChild(col);afk.onclick=afkSheet;main.appendChild(afk);
+  const afk=el('div','card afk2');
+  afk.innerHTML='<div class="row between"><b class="h" style="font-size:14px">AFK · Mochi tự cày</b><span class="kbd">+'+idleRate()+' xu/giờ</span></div>'+
+    '<div class="arena2"><div class="ground"></div><div class="a-fx" id="amFx"></div>'+
+    '<div class="a-mochi" id="amMochi">'+mascot('cheer')+'<svg class="sword" viewBox="0 0 40 120"><path d="M20 4l7 14v70h-14V18z" fill="#dfe7ff" stroke="#0d0826" stroke-width="3" stroke-linejoin="round"/><path d="M20 10v76" stroke="#8fa3ff" stroke-width="3"/><rect x="4" y="86" width="32" height="8" rx="4" fill="#ffd166" stroke="#0d0826" stroke-width="3"/><rect x="14" y="94" width="12" height="20" rx="4" fill="#7c5cff" stroke="#0d0826" stroke-width="3"/></svg></div>'+
+    '<svg class="a-slash" viewBox="0 0 100 100"><path d="M15 85 Q60 60 85 10" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M25 90 Q65 66 92 22" stroke="#ff7eb6" stroke-width="4" fill="none" stroke-linecap="round" opacity=".8"/></svg>'+
+    '<div class="a-bug" id="amBug">'+bug()+'<div class="bar mon a-hp"><i id="amHp" style="width:100%"></i></div></div><div class="poof" id="amPoof">💥</div></div>'+
+    '<div class="row between" id="afkRow" style="margin-top:8px;gap:8px"><div class="mono grow" style="font-size:11.5px;min-width:0">🪙 <b id="afkCoins" style="color:var(--yellow);font-size:14px">'+p0.coins+'</b> · ✨ <span id="afkXp">'+p0.xp+'</span> XP<br><span id="afkTime">'+fmtDur(p0.ms)+'</span> · 🐛 <span id="amKills">'+(G.idle.bugs||0)+'</span> bug</div></div>';
+  const col=el('button','btn yellow sm','Thu hoạch');col.id='afkCollect';col.onclick=e=>{e.stopPropagation();const p=idlePending();if(p.coins<=0){toast('Chưa có gì để thu — chờ Mochi cày thêm nhé');return;}collectIdle();confetti();vMap();};
+  afk.querySelector('#afkRow').appendChild(col);afk.onclick=afkSheet;main.appendChild(afk);
   function paintAfk(){const p=idlePending();const a=$('#afkCoins'),x=$('#afkXp'),t=$('#afkTime');if(!a)return;a.textContent=p.coins;x.textContent=p.xp;t.textContent=p.capped?'⚠️ đầy túi':fmtDur(p.ms);}
-  // vòng lặp đánh nhau mini (chỉ hiệu ứng, xu tính theo thời gian thật)
   let amHp=100,amTick=0;
-  function amCycle(){const am=afk.querySelector('.am'),bugEl=$('#amBug'),hp=$('#amHp'),fx=$('#amFx');if(!am||!bugEl)return;
-    am.classList.remove('go');void am.offsetWidth;am.classList.add('go');
-    setTimeout(()=>{if(!bugEl.isConnected)return;const dmg=25+Math.floor(Math.random()*20);amHp=Math.max(0,amHp-dmg);hp.style.width=amHp+'%';
-      const f=el('span','am-dmg','-'+dmg);f.style.left=(60+Math.random()*30)+'%';fx.appendChild(f);setTimeout(()=>f.remove(),800);
-      if(amHp<=0){bugEl.classList.add('dead');const c=el('span','am-dmg coin','+xu');c.style.left='70%';fx.appendChild(c);setTimeout(()=>c.remove(),900);
-        setTimeout(()=>{if(!bugEl.isConnected)return;amHp=100;hp.style.width='100%';bugEl.classList.remove('dead');bugEl.classList.add('spawn');setTimeout(()=>bugEl.classList.remove('spawn'),400);const k=$('#amKills');if(k)k.textContent=(+k.textContent||0)+1;},520);}
-    },420);}
-  paintAfk();amCycle();
+  function amCycle(){const ar=afk.querySelector('.arena2'),bugEl=$('#amBug'),hp=$('#amHp'),fx=$('#amFx'),poof=$('#amPoof');if(!ar||!bugEl||bugEl.classList.contains('dead'))return;
+    ar.classList.remove('go');void ar.offsetWidth;ar.classList.add('go');
+    setTimeout(()=>{if(!bugEl.isConnected)return;const dmg=22+Math.floor(Math.random()*22);amHp=Math.max(0,amHp-dmg);hp.style.width=amHp+'%';
+      const f=el('span','am-dmg','-'+dmg);f.style.left=(66+Math.random()*16)+'%';fx.appendChild(f);setTimeout(()=>f.remove(),800);
+      if(amHp<=0){bugEl.classList.add('dead');poof.classList.remove('go');void poof.offsetWidth;poof.classList.add('go');const c=el('span','am-dmg coin','+xu');c.style.left='72%';c.style.top='-4px';fx.appendChild(c);setTimeout(()=>c.remove(),900);
+        setTimeout(()=>{if(!bugEl.isConnected)return;amHp=100;hp.style.width='100%';bugEl.classList.remove('dead');bugEl.classList.add('spawn');setTimeout(()=>bugEl.classList.remove('spawn'),600);const k=$('#amKills');if(k)k.textContent=(+k.textContent||0)+1;},700);}
+    },520);}
+  paintAfk();setTimeout(amCycle,600);
   mapTimer=setInterval(()=>{paintAfk();if(++amTick%2===0)amCycle();},1000);
   // ---- Daily strip ----
   const dl=daily();const qdone=DQ.filter(q=>(dl[q[0]]||0)>=q[2]).length,qclaim=DQ.filter(q=>dl.claimed[q[0]]).length;const hasNew=(!dl.chest)||(qdone>qclaim);
