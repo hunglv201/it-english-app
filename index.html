@@ -219,7 +219,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.2.2", APP_BUILD="2026-09-13";
+const APP_VERSION="1.2.3", APP_BUILD="2026-09-13";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -985,17 +985,21 @@ function aiSettingsCard(){
     card.appendChild(note);
     const keyIn=el('input','input');keyIn.type='password';keyIn.placeholder='API key ('+prov.keyHint+')';keyIn.value=store.ai.key||'';keyIn.autocomplete='off';keyIn.id='aiKeyIn';
     card.appendChild(keyIn);
-    // Chọn model từ danh sách (gọn), có "Khác…" để tự nhập
+    // Chọn model — dùng danh sách kéo từ key nếu có, kèm "Khác…" để tự nhập
     card.appendChild(el('div','muted','Model'));
     const curModel=store.ai.model||prov.model;
-    const known=prov.models.some(function(m){return m[0]===curModel;});
+    const fetched=aiModelsFetched[store.ai.provider];
+    const optList=(fetched&&fetched.length)?fetched.map(function(id){return [id,id];}):prov.models;
+    const known=optList.some(function(m){return m[0]===curModel;});
     const sel=el('select','input');sel.id='aiModelSel';sel.style.fontFamily='var(--mono)';sel.style.fontSize='13px';
-    prov.models.forEach(function(m){const o=document.createElement('option');o.value=m[0];o.textContent=m[1];if(m[0]===curModel)o.selected=true;sel.appendChild(o);});
+    optList.forEach(function(m){const o=document.createElement('option');o.value=m[0];o.textContent=m[1];if(m[0]===curModel)o.selected=true;sel.appendChild(o);});
     const oc=document.createElement('option');oc.value='__custom__';oc.textContent='Khác… (tự nhập)';if(!known)oc.selected=true;sel.appendChild(oc);
     card.appendChild(sel);
     const modIn=el('input','input');modIn.id='aiModelIn';modIn.placeholder='Tên model tùy chỉnh';modIn.value=known?'':curModel;modIn.autocomplete='off';modIn.style.fontFamily='var(--mono)';modIn.style.fontSize='13px';modIn.hidden=known;
     sel.onchange=function(){modIn.hidden=(sel.value!=='__custom__');if(!modIn.hidden)modIn.focus();};
     card.appendChild(modIn);
+    const fm=el('button','btn ghost sm');fm.style.alignSelf='flex-start';fm.innerHTML='↻ Tải model của key &amp; chọn loại rẻ nhất';fm.onclick=aiLoadModelsAndPickCheapest;card.appendChild(fm);
+    if(fetched&&fetched.length)card.appendChild(el('div','muted','Đã tải '+fetched.length+' model từ key. Đang chọn: '+curModel));
     const row=el('div','row');row.style.gap='10px';
     const sv=el('button','btn accent grow');sv.textContent='Lưu';
     sv.onclick=function(){
@@ -1121,6 +1125,79 @@ async function aiInit(){
   return aiSample;
 }
 function aiReset(){aiSample=undefined;}
+// ---- Tự kéo danh sách model của key + chọn loại rẻ nhất ----
+let aiModelsFetched={};
+function cheapScore(provider,id){
+  id=String(id).toLowerCase();
+  if(provider==='gemini'){
+    if(/embedding|aqa|imagen|image|tts|audio|vision|learnlm|gemma-3n/.test(id))return 999;
+    if(/flash-lite/.test(id))return 1;
+    if(/flash-8b/.test(id))return 2;
+    if(/gemma/.test(id))return 2;
+    if(/flash/.test(id))return 3;
+    if(/pro/.test(id))return 5;
+    return 4;
+  }
+  if(provider==='groq'){
+    if(/whisper|tts|guard|embed|prompt/.test(id))return 999;
+    if(/8b|instant|gemma|1b|3b/.test(id))return 1;
+    if(/70b|versatile|large|120b|90b/.test(id))return 4;
+    return 2;
+  }
+  if(provider==='claude'){
+    if(/haiku/.test(id))return 1;
+    if(/sonnet/.test(id))return 3;
+    if(/opus/.test(id))return 5;
+    return 2;
+  }
+  return 3;
+}
+function pickCheapest(provider,ids){
+  var usable=ids.filter(function(x){return cheapScore(provider,x)<999;});
+  if(!usable.length)return ids[0]||'';
+  usable.sort(function(a,b){
+    var sa=cheapScore(provider,a),sb=cheapScore(provider,b);
+    if(sa!==sb)return sa-sb;
+    var la=/latest/.test(a)?0:1, lb=/latest/.test(b)?0:1; if(la!==lb)return la-lb;
+    return a.length-b.length;
+  });
+  return usable[0];
+}
+async function aiFetchModels(cfg){
+  if(cfg.provider==='gemini'){
+    var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',{headers:{'x-goog-api-key':cfg.key}});
+    if(!r.ok)throw new Error('list '+r.status);
+    var j=await r.json();
+    return (j.models||[]).filter(function(m){return (m.supportedGenerationMethods||[]).indexOf('generateContent')>=0;}).map(function(m){return String(m.name).replace(/^models\//,'');});
+  }
+  if(cfg.provider==='groq'){
+    var r2=await fetch('https://api.groq.com/openai/v1/models',{headers:{'authorization':'Bearer '+cfg.key}});
+    if(!r2.ok)throw new Error('list '+r2.status);
+    var j2=await r2.json();return (j2.data||[]).map(function(m){return m.id;});
+  }
+  if(cfg.provider==='claude'){
+    var r3=await fetch('https://api.anthropic.com/v1/models',{headers:{'x-api-key':cfg.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}});
+    if(!r3.ok)throw new Error('list '+r3.status);
+    var j3=await r3.json();return (j3.data||[]).map(function(m){return m.id;});
+  }
+  return [];
+}
+async function aiLoadModelsAndPickCheapest(){
+  var p=store.ai.provider;var key=($("#aiKeyIn")&&$("#aiKeyIn").value.trim())||store.ai.key;
+  if(!p){toast('Chọn nhà cung cấp trước');return;}
+  if(!key){toast('Dán API key trước đã');return;}
+  store.ai.key=key;
+  toast('Đang tải danh sách model…');
+  try{
+    var ids=await aiFetchModels({provider:p,key:key});
+    if(!ids.length){toast('Không lấy được model');return;}
+    aiModelsFetched[p]=ids;
+    var cheap=pickCheapest(p,ids);
+    store.ai.model=cheap;save(store);aiReset();
+    toast('Đã chọn model rẻ nhất: '+cheap);
+  }catch(e){toast('Lỗi tải model (kiểm tra key)');}
+  vTalkAI();
+}
 function aiParse(t){const i=t.indexOf('FIX:');if(i<0)return {reply:t.trim(),fix:''};return {reply:t.slice(0,i).trim(),fix:t.slice(i+4).trim()};}
 function aiScObj(){
   if(aiScenario==='custom')return {k:'custom',l:(aiCustom||'Tự chọn'),s:(aiCustomS||('The user wants to practice this workplace situation (may be written in Vietnamese): "'+aiCustom+'". Play the appropriate other person for this situation.'))};
@@ -1218,7 +1295,11 @@ function vTalkAI(){
     }else{
       const wrap=el('div');wrap.style.cssText='display:flex;flex-direction:column;gap:5px;align-items:flex-end';
       const w=el('div','who','Bạn');w.style.marginRight='6px';wrap.appendChild(w);
-      wrap.appendChild(el('div','bubble you',m.content));
+      const yrow=el('div','row');yrow.style.cssText='gap:8px;align-items:flex-end;justify-content:flex-end';
+      const sv2=el('button','play');const on2=isSaved(m.content);sv2.style.cssText='width:40px;height:40px;color:'+(on2?'var(--accent)':'var(--faint)');sv2.innerHTML=on2?ICO.bookmarkOn:ICO.bookmark;sv2.setAttribute('aria-label','Lưu câu của bạn');
+      sv2.onclick=function(){toggleSaved(m.content,'câu mình viết');vTalkAI();};
+      yrow.appendChild(sv2);yrow.appendChild(playBtn(m.content));yrow.appendChild(el('div','bubble you',m.content));
+      wrap.appendChild(yrow);
       log.appendChild(wrap);
     }
   });
