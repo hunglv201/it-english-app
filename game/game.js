@@ -131,7 +131,7 @@ const APP_URL='https://hunglv201.github.io/it-english-app/';
 function openApp(){if(/github\.io$/.test(location.hostname))location.href=APP_URL;else window.open(APP_URL,'_blank','noopener');}
 function renderTabs(){const n=$('#tabs');n.innerHTML='';TABS.forEach(t=>{const b=el('button','tab'+(cur===t[0]?' on':''),'<span>'+t[1]+'</span>'+t[2]);b.onclick=()=>go(t[0]);n.appendChild(b);});}
 let mapTimer=null;
-function go(k){document.body.classList.remove('infight');cur=k;renderTabs();window.scrollTo(0,0);if(mapTimer){clearInterval(mapTimer);mapTimer=null;}stopSR();({map:vMap,talk:vTalk,shop:vShop,profile:vProfile})[k]();}
+function go(k){document.body.classList.remove('infight');main.classList.remove('chatlay');cur=k;renderTabs();window.scrollTo(0,0);if(mapTimer){clearInterval(mapTimer);mapTimer=null;}stopSR();({map:vMap,talk:vTalk,shop:vShop,profile:vProfile})[k]();}
 /* ---------- speech recognition + word matching ---------- */
 let SRcur=null;
 function stopSR(){try{if(SRcur){SRcur.onend=null;SRcur.stop();}}catch(e){}SRcur=null;}
@@ -464,32 +464,27 @@ const SCEN=['We are in a daily standup. Ask what I did yesterday, what I do toda
 function parseReply(t){const i=t.indexOf('FIX:');return i<0?{reply:t.trim(),fix:''}:{reply:t.slice(0,i).trim(),fix:t.slice(i+4).trim()};}
 function aiBossStart(n){
   document.body.classList.add('infight');const sc=rnd(SCEN);V={n,ai:true,sc,turns:[],user:0,bossHp:60};cur='boss';renderTabs();window.scrollTo(0,0);
-  main.innerHTML='';
-  const head=el('div','card');head.style.padding='12px 14px';
-  head.innerHTML='<div class="row between"><div><div class="eyebrow">BOSS AI · nói tự do</div><b class="h" style="font-size:17px">Minh-senpai</b></div><button class="btn ghost sm" id="quitV">✕ Rút lui</button></div>';
+  main.innerHTML='';tipHist=[];main.classList.add('chatlay');
+  const head=el('div','card');head.style.padding='10px 12px';
+  head.innerHTML='<div class="row between"><div><div class="eyebrow">BOSS AI · ngày '+n+'</div><b class="h" style="font-size:15px">Minh-senpai <small id="abturn" class="mono">· lượt 0/4</small></b></div><button class="btn ghost sm" id="quitV">✕</button></div>';
   main.appendChild(head);
-  const vn=el('div','vn');vn.innerHTML='<div class="scene"><div class="bosshp"><div class="bar mon" id="bosshp"><i style="width:100%"></i><span>BOSS 60 · chấm điểm sau 4 lượt</span></div></div><div class="npc" id="npc">'+senpai()+'</div></div><div class="box"><span class="name">Minh-senpai</span><div class="txt" id="vtxt"></div></div>';
+  const vn=el('div','vn compact');vn.innerHTML='<div class="scene"><div class="npc" id="npc">'+npc('minh')+'</div></div><div class="box"><span class="name">Minh-senpai</span><div class="txt" id="vtxt"><span class="muted">…</span></div></div>';
   main.appendChild(vn);
-  const tips=el('div');tips.id='tips';tips.style.cssText='display:flex;flex-direction:column;gap:8px';main.appendChild(tips);
-  const inrow=el('div','row');inrow.style.gap='8px';
-  const inp=el('input','input grow');inp.id='vin';inp.placeholder='Trả lời bằng tiếng Anh…';inp.autocomplete='off';
-  const mic=el('button','btn blue sm','🎤');mic.style.minHeight='50px';mic.onclick=()=>micTo(inp);
-  const send=el('button','btn sm','Gửi');send.style.minHeight='50px';send.onclick=()=>aiSend();
-  inp.onkeydown=e=>{if(e.key==='Enter')aiSend();};
-  inrow.appendChild(inp);inrow.appendChild(mic);inrow.appendChild(send);main.appendChild(inrow);
-  const endb=el('button','btn yellow block','Kết thúc & chấm điểm');endb.id='endB';endb.disabled=true;endb.onclick=aiScore;main.appendChild(endb);
+  const tips=el('div');tips.id='tips';tips.className='tips';main.appendChild(tips);
+  const endb=el('button','btn yellow block','Kết thúc & chấm điểm');endb.id='endB';endb.disabled=true;endb.onclick=aiScore;endb.style.display='none';main.appendChild(endb);
+  main.appendChild(talkBar(t=>aiSend(t)));
   $('#quitV').onclick=()=>{V=null;go('map');};
   (async()=>{try{const t=await aiCall(aiRules(sc),[{role:'user',content:'Start the conversation now with your first line.'}]);const p=parseReply(t);V.turns.push({role:'assistant',content:t});npcSay(p.reply);}catch(e){toast('AI lỗi: '+(e.message||''));}})();
 }
 function npcSay(txt){const npc=$('#npc');npc.classList.add('talk');typeText($('#vtxt'),txt,()=>npc.classList.remove('talk'));speak(txt);}
 function micTo(inp){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){toast('Trình duyệt không hỗ trợ mic');return;}const r=new SR();r.lang='en-US';r.onresult=e=>{inp.value=e.results[0][0].transcript;inp.focus();};r.onerror=()=>toast('Không nghe được');try{r.start();toast('Đang nghe… nói tiếng Anh');}catch(e){}}
-async function aiSend(){
-  if(!V||!V.ai)return;const inp=$('#vin');const t=(inp.value||'').trim();if(!t)return;inp.value='';V.user++;
+async function aiSend(t){
+  if(!V||!V.ai||!t)return;V.user++;const tt=$('#abturn');if(tt)tt.textContent='· lượt '+V.user+'/4';
   V.turns.push({role:'user',content:t});$('#vtxt').innerHTML='<span class="muted">…</span>';
   try{const out=await aiCall(aiRules(V.sc),V.turns);const p=parseReply(out);V.turns.push({role:'assistant',content:out});npcSay(p.reply);
-    if(p.fix&&p.fix.replace(/[.\s]/g,'')!=='OK'){const tip=el('div','tip');tip.innerHTML='<b>✎ Mochi sửa:</b>'+p.fix.split('\n').filter(Boolean).map(l=>{const m=l.match(/^(.*?)=>(.*?)(?:~(.*))?$/);return m?'<span class="fixl"><s>'+esc(m[1].trim())+'</s> → <b class="r">'+esc(m[2].trim())+'</b>'+(m[3]?' <span class="muted">('+esc(m[3].trim())+')</span>':'')+'</span>':'<span class="fixl">'+esc(l)+'</span>';}).join('');$('#tips').prepend(tip);}
-    else{const tip=el('div','tip');tip.innerHTML='<b>✓ Mochi:</b> câu này ổn!';$('#tips').prepend(tip);gainXp(10,3);}
-    if(V.user>=4)$('#endB').disabled=false;
+    if(p.fix&&p.fix.replace(/[.\s]/g,'')!=='OK'){showTip('<b>✎ Mochi sửa</b> <span class="muted">“'+esc(t.slice(0,50))+'”</span>'+fixHtml(p.fix));}
+    else{showTip('<b>✓ Câu ổn!</b> <span class="muted">“'+esc(t.slice(0,60))+'”</span>');gainXp(10,3);}
+    if(V.user>=4){const e=$('#endB');if(e){e.disabled=false;e.style.display='';}}
   }catch(e){toast('AI lỗi, thử lại');}
 }
 async function aiScore(){
@@ -502,6 +497,20 @@ async function aiScore(){
     openModal((m,close)=>{m.innerHTML='<div class="eyebrow" style="text-align:center">'+(win?'BOSS AI BỊ HẠ':'CHƯA HẠ ĐƯỢC')+'</div><div class="big">'+sc+'<span style="font-size:20px;color:var(--muted)">/10</span></div>'+(win?'<div class="stars3">'+'★'.repeat(stars)+'</div>':'')+'<div class="mascot-row" style="margin-top:12px"><div class="mascot">'+mascot(win?'cheer':'think')+'</div><div class="bubble grow"><span class="who">Mochi</span>'+esc(r.tip||(win?'Quá đỉnh!':'Cần ≥ 6 điểm. Thử lại nhé!'))+'</div></div>';const b=el('button','btn yellow block','Về ngày '+n);b.style.marginTop='14px';b.onclick=()=>{close();go('map');questSelect(n);};m.appendChild(b);});
   }catch(e){toast('AI lỗi khi chấm');$('#endB').disabled=false;}
 }
+
+
+/* ---- talk chat layout helpers (mobile) ---- */
+function talkBar(onSend){const bar=el('div','talkbar');const mic=el('button','tb-mic','🎤');mic.setAttribute('aria-label','Nói');
+  const inp=el('input','input grow');inp.id='vin';inp.placeholder='Nói hoặc gõ tiếng Anh…';inp.autocomplete='off';inp.enterKeyHint='send';
+  const send=el('button','tb-send','➤');send.setAttribute('aria-label','Gửi');
+  const go_=()=>{const t=inp.value.trim();if(!t)return;inp.value='';onSend(t);};send.onclick=go_;inp.onkeydown=e=>{if(e.key==='Enter')go_();};
+  mic.onclick=()=>{if(mic.classList.contains('rec')){stopSR();mic.classList.remove('rec');return;}mic.classList.add('rec');inp.placeholder='● Đang nghe… nói đi';
+    listenOnce(t=>{inp.value=t;},st=>{mic.classList.remove('rec');inp.placeholder='Nói hoặc gõ tiếng Anh…';if(st==='nosr')toast('Không có mic — gõ bên dưới');else if(st==='ok'){go_();}},8000);};
+  bar.appendChild(mic);bar.appendChild(inp);bar.appendChild(send);return bar;}
+let tipHist=[];
+function showTip(html){const box=$('#tips');if(!box)return;tipHist.unshift(html);const latest=el('div','tip pop');latest.innerHTML=html;box.innerHTML='';box.appendChild(latest);
+  if(tipHist.length>1){const more=el('button','tip-more','Xem '+(tipHist.length-1)+' lượt trước ›');more.onclick=()=>openModal((m,close)=>{m.innerHTML='<div class="eyebrow">Nhận xét các lượt</div>';const l=el('div');l.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:10px';tipHist.forEach(h=>{const t=el('div','tip');t.innerHTML=h;l.appendChild(t);});m.appendChild(l);const k=el('button','btn ghost block sm','Đóng');k.style.marginTop='10px';k.onclick=close;m.appendChild(k);});box.appendChild(more);}}
+function fixHtml(fix){return fix.split('\n').filter(Boolean).map(l=>{const m=l.match(/^(.*?)=>(.*?)(?:~(.*))?$/);return m?'<span class="fixl"><s>'+esc(m[1].trim())+'</s> → <b class="r">'+esc(m[2].trim())+'</b>'+(m[3]?' <span class="muted">('+esc(m[3].trim())+')</span>':'')+'</span>':'<span class="fixl">'+esc(l)+'</span>';}).join('');}
 
 /* ================= TALK HUB (5 chế độ luyện nói) ================= */
 const TALK=[
@@ -530,7 +539,7 @@ function addEquip(en){if(!G.talk.equipped.includes(en)){G.talk.equipped.push(en)
 
 /* ---- 2) Đọc theo nhịp (shadowing) ---- */
 let SH=null;
-document.body.classList.add('infight');function shadowStart(){SH={qs:pickSentences(8),i:0,sum:0,equipped:0};cur='talk';main.innerHTML='';talkHeader('ĐỌC THEO NHỊP','Câu '+1+'/8');shadowRound();}
+function shadowStart(){document.body.classList.add('infight');SH={qs:pickSentences(8),i:0,sum:0,equipped:0};cur='talk';main.innerHTML='';talkHeader('ĐỌC THEO NHỊP','Câu '+1+'/8');shadowRound();}
 function shadowRound(){
   if(!SH)return;if(SH.i>=SH.qs.length){shadowEnd();return;}
   const q=SH.qs[SH.i];main.innerHTML='';talkHeader('ĐỌC THEO NHỊP','Câu '+(SH.i+1)+'/'+SH.qs.length,'<div class="bar time" style="margin-top:10px"><i id="shbar" style="width:0%"></i></div>');
@@ -554,7 +563,7 @@ function shadowEnd(){const avg=Math.round(SH.sum/SH.qs.length);const best=Math.m
 
 /* ---- 4) Phản xạ 5 giây ---- */
 let RF=null;
-document.body.classList.add('infight');function reflexStart(){RF={qs:shuffle(DIALOGS).slice(0,8),i:0,score:0};cur='talk';reflexRound();}
+function reflexStart(){document.body.classList.add('infight');RF={qs:shuffle(DIALOGS).slice(0,8),i:0,score:0};cur='talk';reflexRound();}
 function reflexRound(){
   if(!RF)return;if(RF.i>=RF.qs.length){reflexEnd();return;}
   const d=RF.qs[RF.i];main.innerHTML='';talkHeader('PHẢN XẠ 5 GIÂY','Câu '+(RF.i+1)+'/'+RF.qs.length+' · '+RF.score+' điểm','<div class="bar time" style="margin-top:10px"><i id="rfbar" style="width:100%"></i></div>');
@@ -609,12 +618,11 @@ function parseBattle(t){const s=(t.match(/SCORE:\s*(\d+)/)||[])[1];const fi=t.in
 function talkBattleStart(){
   if(!aiConfigured()){openModal((m,close)=>{m.innerHTML='<div class="h" style="font-size:20px">Cần AI</div><div class="mascot-row" style="margin-top:12px"><div class="mascot">'+mascot('think')+'</div><div class="bubble grow"><span class="who">Mochi</span>Chế độ này cần AI chấm câu. Nhập key (Gemini miễn phí) ngay tại đây — dùng chung với app IT English.</div></div>';const r=el('div','row');r.style.cssText='gap:10px;margin-top:14px';const a=el('button','btn ghost grow','Đóng');a.onclick=close;const k=el('button','btn grow','Nhập key');k.onclick=()=>{close();aiSetupSheet();};r.appendChild(a);r.appendChild(k);m.appendChild(r);});return;}
   if(G.hp<=0)G.hp=Math.ceil(G.maxHp/2);
-  document.body.classList.add('infight');TB={sc:rnd(SCEN),turns:[],user:0,bossHp:300,combo:0,busy:false};cur='talk';main.innerHTML='';
-  talkHeader('ĐẤU THOẠI · AI','Minh-senpai · 6 lượt','<div class="row" style="gap:8px;margin-top:8px"><small style="font-family:var(--mono);font-size:10.5px;color:var(--faint)">HP</small><div class="bar hp grow" id="tbhp"><i style="width:'+Math.round(G.hp/G.maxHp*100)+'%"></i></div></div>');
-  const vn=el('div','vn');vn.innerHTML='<div class="scene"><div class="bosshp"><div class="bar mon" id="tbboss"><i style="width:100%"></i><span>BOSS 300</span></div></div><div class="combo" style="top:36px" id="tbcombo">COMBO x0</div><div class="npc" id="npc">'+npc('minh')+'</div></div><div class="box"><span class="name">Minh-senpai</span><div class="txt" id="vtxt"><span class="muted">…</span></div></div>';main.appendChild(vn);
-  const tips=el('div');tips.id='tips';tips.style.cssText='display:flex;flex-direction:column;gap:8px';main.appendChild(tips);
-  const mic=micButton('🎤 Bấm rồi nói',b=>{if(TB.busy)return;b.textContent='● Đang nghe…';b.classList.add('rec');listenOnce(t=>{b.textContent='🎤 Bấm rồi nói';b.classList.remove('rec');tbSend(t);},st=>{b.textContent='🎤 Bấm rồi nói';b.classList.remove('rec');if(st==='nosr')toast('Không có mic — gõ bên dưới');},7000);});
-  main.appendChild(mic);main.appendChild(typeFallback('…hoặc gõ câu trả lời',t=>tbSend(t)));
+  document.body.classList.add('infight');TB={sc:rnd(SCEN),turns:[],user:0,bossHp:300,combo:0,busy:false};cur='talk';main.innerHTML='';tipHist=[];main.classList.add('chatlay');
+  talkHeader('ĐẤU THOẠI · AI','Minh-senpai · 6 lượt','<div class="row" style="gap:8px;margin-top:8px"><small class="mono">HP</small><div class="bar hp mini grow" id="tbhp"><i style="width:'+Math.round(G.hp/G.maxHp*100)+'%"></i></div><small class="mono">BOSS</small><div class="bar mon mini grow" id="tbboss"><i style="width:100%"></i></div><span class="combo inl" id="tbcombo">x0</span></div>');
+  const vn=el('div','vn compact');vn.innerHTML='<div class="scene"><div class="npc" id="npc">'+npc('minh')+'</div></div><div class="box"><span class="name">Minh-senpai <small id="tbturn" style="opacity:.8">· lượt 0/6</small></span><div class="txt" id="vtxt"><span class="muted">…</span></div></div>';main.appendChild(vn);
+  const tips=el('div');tips.id='tips';tips.className='tips';main.appendChild(tips);
+  main.appendChild(talkBar(t=>tbSend(t)));
   (async()=>{try{const t=await aiCall(battleRules(TB.sc),[{role:'user',content:'Start the conversation now with your first line.'}]);const p=parseBattle(t);TB.turns.push({role:'assistant',content:t});npcSay(p.reply);}catch(e){toast('AI lỗi: '+(e.message||''));}})();
 }
 async function tbSend(t){
@@ -623,13 +631,13 @@ async function tbSend(t){
     const sc=p.score==null?5:p.score;const npcEl=$('#npc');
     if(sc>=7){TB.combo++;}else TB.combo=0;
     const dmg=sc*10+Math.min(TB.combo,5)*5;TB.bossHp=Math.max(0,TB.bossHp-dmg);
-    const bb=$('#tbboss');bb.querySelector('i').style.width=Math.round(TB.bossHp/300*100)+'%';bb.querySelector('span').textContent='BOSS '+TB.bossHp;
-    const cb=$('#tbcombo');cb.textContent='COMBO x'+TB.combo;cb.classList.remove('big');void cb.offsetWidth;cb.classList.add('big');
+    const bb=$('#tbboss');bb.querySelector('i').style.width=Math.round(TB.bossHp/300*100)+'%';const tt=$('#tbturn');if(tt)tt.textContent='· lượt '+TB.user+'/6 · boss '+TB.bossHp;
+    const cb=$('#tbcombo');cb.textContent='x'+TB.combo;cb.classList.remove('big');void cb.offsetWidth;cb.classList.add('big');
     const r=npcEl.getBoundingClientRect();fxText(r.left+r.width/2,r.top+30,'-'+dmg);
     if(sc>=7){sfx.ok();npcEl.classList.add('shaking');setTimeout(()=>npcEl.classList.remove('shaking'),400);}
     if(sc<4){G.hp=Math.max(0,G.hp-15);sfx.bad();flashRed();const hb=$('#tbhp');if(hb)hb.querySelector('i').style.width=Math.round(G.hp/G.maxHp*100)+'%';}
     gainXp(sc*3,sc);
-    const tip=el('div','tip');tip.innerHTML='<b>Điểm câu vừa rồi: '+sc+'/10</b>'+(p.fix&&p.fix.replace(/[.\s]/g,'')!=='OK'?p.fix.split('\n').filter(Boolean).map(l=>{const m=l.match(/^(.*?)=>(.*?)(?:~(.*))?$/);return m?'<span class="fixl"><s>'+esc(m[1].trim())+'</s> → <b class="r">'+esc(m[2].trim())+'</b>'+(m[3]?' <span class="muted">('+esc(m[3].trim())+')</span>':'')+'</span>':'<span class="fixl">'+esc(l)+'</span>';}).join(''):'<span class="fixl">✓ Câu ổn!</span>');$('#tips').prepend(tip);
+    showTip('<b>'+(sc>=7?'🔥':sc>=4?'👌':'💦')+' '+sc+'/10 · -'+dmg+'</b> <span class="muted">“'+esc(t.slice(0,60))+(t.length>60?'…':'')+'”</span>'+(p.fix&&p.fix.replace(/[.\s]/g,'')!=='OK'?fixHtml(p.fix):'<span class="fixl">✓ Câu ổn!</span>'));
     saveG();
     if(TB.bossHp<=0||G.hp<=0||TB.user>=6){tbEnd();return;}
     npcSay(p.reply);
