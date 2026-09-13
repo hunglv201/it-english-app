@@ -219,7 +219,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.2.3", APP_BUILD="2026-09-13";
+const APP_VERSION="1.2.4", APP_BUILD="2026-09-13";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -232,6 +232,7 @@ if(!store.cfg)store.cfg={};
 (function(dflt){for(var k in dflt){if(store.cfg[k]===undefined)store.cfg[k]=dflt[k];}})(
   {autoSpeak:true,secCard:5,secPhrase:6,secListen:5,rate:0.95,vRepeat:1,vReadEx:true,pRepeat:1,lRepeat:2});
 if(!store.myVocab)store.myVocab=[];
+if(!store.convos)store.convos=[];
 // Nâng cấp model Gemini cũ đã lưu (đã ngừng hỗ trợ generateContent) -> flash mới nhất
 if(store.ai&&store.ai.provider==='gemini'&&/^gemini-(2\.0-flash$|1\.5-)/.test(store.ai.model||'')){store.ai.model='gemini-flash-latest';save(store);}
 // streak calc
@@ -339,7 +340,7 @@ function renderTabs(){
     n.appendChild(b);
   });
 }
-function go(k){apClear();cur=k;renderTabs();window.scrollTo(0,0);({home:vHome,vocab:vVocab,talk:vTalk,listen:vListen,phrase:vPhrase}[k])();}
+function go(k){apClear();convoView=null;aiSaveMode=false;cur=k;renderTabs();window.scrollTo(0,0);({home:vHome,vocab:vVocab,talk:vTalk,listen:vListen,phrase:vPhrase}[k])();}
 
 // ---------- Autoplay engine (tự động chạy) ----------
 let apOn=false, apTimer=null, apScreen=null;
@@ -961,7 +962,48 @@ function vTalkQuiz(){
 
 // ---- AI conversation (sample capability) ----
 let aiSample=undefined, aiScenario=null, aiTurns=[], aiBusy=false, aiPending='', aiCustom='';
-let aiCustomS='', aiDomain='', aiSuggestions=[], aiSettingsOpen=false;
+let aiCustomS='', aiDomain='', aiSuggestions=[], aiSettingsOpen=false, aiSaveMode=false, convoView=null;
+// ---- Lịch sử hội thoại đã lưu ----
+function saveConvo(name){
+  var sc=aiScObj();
+  store.convos.unshift({id:Date.now(),name:(name||'').trim()||sc.l,scKey:aiScenario,scLabel:sc.l,scPrompt:sc.s,
+    custom:aiScenario==='custom',customLabel:aiCustom,customPrompt:aiCustomS,
+    turns:aiTurns.map(function(m){return {role:m.role,content:m.content};}),date:new Date().toISOString().slice(0,10)});
+  save(store);
+}
+function openConvo(id){convoView=id;vConvo();}
+function vConvo(){
+  var c=store.convos.filter(function(x){return x.id===convoView;})[0];
+  main.innerHTML="";const v=el('div','view');
+  const back=el('button','btn ghost sm');back.style.alignSelf='flex-start';back.textContent='‹ Hội thoại đã lưu';back.onclick=function(){convoView=null;aiScenario=null;vTalkAI();};v.appendChild(back);
+  if(!c){v.appendChild(el('div','empty','Không tìm thấy hội thoại.'));main.appendChild(v);return;}
+  v.appendChild(el('div',null,'<div class="eyebrow">Hội thoại đã lưu · '+c.date+'</div><div style="font-size:21px;font-weight:800;font-family:var(--disp);margin-top:3px">'+c.name+'</div><div class="muted" style="margin-top:2px">Tình huống: '+(c.scLabel||'')+'</div>'));
+  const log=el('div');log.style.cssText='display:flex;flex-direction:column;gap:12px';
+  (c.turns||[]).forEach(function(m){
+    if(m.role==='assistant'){
+      var p=aiParse(m.content);
+      var wrap=el('div');wrap.style.cssText='display:flex;flex-direction:column;gap:5px';
+      wrap.appendChild(el('div','who','Đồng nghiệp'));
+      var brow=el('div','row');brow.style.gap='8px';brow.appendChild(el('div','bubble them',p.reply));brow.appendChild(playBtn(p.reply));wrap.appendChild(brow);
+      if(p.fix&&p.fix.replace(/[.\s]/g,'')!=='OK'){var f=el('div');f.style.cssText='font-size:13px;color:var(--amber);margin-left:6px';f.textContent='Sửa: '+p.fix;wrap.appendChild(f);}
+      log.appendChild(wrap);
+    }else{
+      var wr=el('div');wr.style.cssText='display:flex;flex-direction:column;gap:5px;align-items:flex-end';
+      wr.appendChild(el('div','who','Bạn'));
+      var yr=el('div','row');yr.style.cssText='gap:8px;align-items:flex-end;justify-content:flex-end';
+      yr.appendChild(playBtn(m.content));yr.appendChild(el('div','bubble you',m.content));wr.appendChild(yr);
+      log.appendChild(wr);
+    }
+  });
+  v.appendChild(log);
+  const relearn=el('button','btn accent block');relearn.textContent='↻ Học lại tình huống này';
+  relearn.onclick=function(){convoView=null;if(c.custom){aiUseCustom(c.customLabel||c.name,c.customPrompt||'');}else{aiScenario=c.scKey;aiTurns=[];aiStart();}};
+  v.appendChild(relearn);
+  const del=el('button','btn ghost block');del.textContent='Xoá hội thoại';del.style.color='var(--danger)';
+  del.onclick=function(){store.convos=store.convos.filter(function(x){return x.id!==c.id;});save(store);convoView=null;aiScenario=null;vTalkAI();toast('Đã xoá');};
+  v.appendChild(del);
+  main.appendChild(v);window.scrollTo(0,0);
+}
 function aiSettingsCard(){
   const card=el('div','card');card.style.gap='12px';
   const inClaude=!!(window.claude&&window.claude.use);
@@ -1069,23 +1111,37 @@ async function providerChat(cfg,input,opts){
   const model=cfg.model||AI_PROVIDERS[cfg.provider].model;
   let text='';
   if(cfg.provider==='gemini'){
-    const body={contents:turns.map(function(m){return {role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]};}),
-      generationConfig:{temperature:0.7,maxOutputTokens:400}};
-    if(system)body.systemInstruction={parts:[{text:system}]};
     // Chuẩn hoá tên model: "Gemini 2.5 Flash" -> "gemini-2.5-flash"; bỏ tiền tố models/
     var gmodel=String(model||'').trim().replace(/^models\//,'');
     if(/\s|[A-Z]/.test(gmodel))gmodel=gmodel.toLowerCase().replace(/\s+/g,'-');
     if(gmodel&&gmodel!==cfg.model){try{store.ai.model=gmodel;save(store);}catch(e){}}
-    function callG(mdl){return fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(mdl)+':generateContent',
-      {method:'POST',headers:{'content-type':'application/json','x-goog-api-key':cfg.key},body:JSON.stringify(body)});}
-    let res=await callG(gmodel);
-    if(res.status===404 && gmodel!=='gemini-flash-latest'){
-      var res2=await callG('gemini-flash-latest');
-      if(res2.ok){try{store.ai.model='gemini-flash-latest';save(store);aiReset();}catch(e){}res=res2;}
+    var gContents=turns.map(function(m){return {role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]};});
+    // noThink=true: tắt "suy nghĩ" (thinkingBudget:0) để model không tiêu hết token đầu ra cho thought
+    function callG(mdl,maxTok,noThink){
+      var gc={temperature:0.7,maxOutputTokens:maxTok};
+      if(noThink)gc.thinkingConfig={thinkingBudget:0};
+      var b={contents:gContents,generationConfig:gc};
+      if(system)b.systemInstruction={parts:[{text:system}]};
+      return fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(mdl)+':generateContent',
+        {method:'POST',headers:{'content-type':'application/json','x-goog-api-key':cfg.key},body:JSON.stringify(b)});
     }
+    function gText(j){return ((((j.candidates||[])[0]||{}).content||{}).parts||[]).map(function(p){return p.text||'';}).join('').trim();}
+    function gFinish(j){return (((j.candidates||[])[0]||{}).finishReason)||'';}
+    let res=await callG(gmodel,2048,true);
+    if(res.status===404 && gmodel!=='gemini-flash-latest'){
+      var res404=await callG('gemini-flash-latest',2048,true);
+      if(res404.ok){try{store.ai.model='gemini-flash-latest';save(store);aiReset();}catch(e){}res=res404;gmodel='gemini-flash-latest';}
+    }
+    if(res.status===400){var res400=await callG(gmodel,8192,false);if(res400.ok)res=res400;} // model không cho thinkingBudget:0
     if(!res.ok)throw new Error('gemini '+res.status);
-    const j=await res.json();
-    text=((((j.candidates||[])[0]||{}).content||{}).parts||[]).map(function(p){return p.text||'';}).join('');
+    var j=await res.json();
+    text=gText(j);
+    // Rỗng do model suy nghĩ hết token -> thử lại với ngân sách lớn hơn, không thinking
+    if(!text && gFinish(j)==='MAX_TOKENS'){
+      var r2=await callG(gmodel,8192,false);
+      if(r2.ok){text=gText(await r2.json());}
+    }
+    if(!text)throw new Error('gemini-empty');
   }else if(cfg.provider==='claude'){
     const body={model:model,max_tokens:400,messages:turns.map(function(m){return {role:m.role==='assistant'?'assistant':'user',content:m.content};})};
     if(system)body.system=system;
@@ -1225,6 +1281,7 @@ function toggleSaved(en,note){
   save(store);
 }
 function vTalkAI(){
+  if(convoView){vConvo();return;}
   main.innerHTML="";const v=el('div','view');
   if(!aiScenario){
     const head=el('div');head.style.cssText='padding:8px 2px 2px';
@@ -1262,6 +1319,17 @@ function vTalkAI(){
     });
     quick.appendChild(chips);
     v.appendChild(quick);
+    // Hội thoại đã lưu
+    if((store.convos||[]).length){
+      const hc=el('div','card');hc.appendChild(el('div','eyebrow','Hội thoại đã lưu ('+store.convos.length+')'));
+      store.convos.slice(0,12).forEach(function(c){
+        const r=el('button','si');
+        r.innerHTML='<span><b>'+c.name+'</b><br><small>'+(c.scLabel||'')+' · '+c.date+' · '+((c.turns||[]).length)+' lượt</small></span><span style="color:var(--faint);display:inline-flex">'+ICO.chev+'</span>';
+        r.onclick=(function(id){return function(){openConvo(id);};})(c.id);
+        hc.appendChild(r);
+      });
+      v.appendChild(hc);
+    }
     // Trạng thái AI + cài đặt provider
     const statusRow=el('div','row between');
     const ok=aiConfigured();
@@ -1275,10 +1343,24 @@ function vTalkAI(){
     if(aiSettingsOpen)v.appendChild(aiSettingsCard());
     main.appendChild(v);return;
   }
-  const hd=el('div','row between');
+  const hd=el('div','row between wrap');hd.style.gap='8px';
   hd.appendChild(el('span','chip ok',aiScObj().l));
-  const ch=el('button','btn ghost sm');ch.textContent='Đổi tình huống';ch.onclick=function(){aiScenario=null;aiTurns=[];vTalkAI();};hd.appendChild(ch);
+  const hbtns=el('div','row');hbtns.style.gap='8px';
+  if(aiTurns.length>=2){const sb=el('button','btn ghost sm');sb.textContent='Lưu hội thoại';sb.onclick=function(){aiSaveMode=true;vTalkAI();};hbtns.appendChild(sb);}
+  const ch=el('button','btn ghost sm');ch.textContent='Đổi tình huống';ch.onclick=function(){aiScenario=null;aiTurns=[];aiSaveMode=false;vTalkAI();};hbtns.appendChild(ch);
+  hd.appendChild(hbtns);
   v.appendChild(hd);
+  if(aiSaveMode){
+    const sp=el('div','card');sp.appendChild(el('div','eyebrow','Lưu hội thoại này'));
+    const inp=el('input','input');inp.id='convoName';inp.value=aiScObj().l;inp.placeholder='Tên hội thoại (theo tình huống hoặc tự đặt)';inp.autocomplete='off';
+    inp.onkeydown=function(e){if(e.key==='Enter'){saveConvo(inp.value);aiSaveMode=false;toast('Đã lưu hội thoại');vTalkAI();}};
+    sp.appendChild(inp);
+    const srow=el('div','row');srow.style.gap='10px';
+    const sv=el('button','btn accent grow');sv.textContent='Lưu';sv.onclick=function(){saveConvo(($("#convoName")||{}).value);aiSaveMode=false;toast('Đã lưu hội thoại');vTalkAI();};
+    const cc=el('button','btn ghost');cc.textContent='Huỷ';cc.onclick=function(){aiSaveMode=false;vTalkAI();};
+    srow.appendChild(sv);srow.appendChild(cc);sp.appendChild(srow);
+    v.appendChild(sp);
+  }
   const log=el('div');log.style.cssText='display:flex;flex-direction:column;gap:12px';
   aiTurns.forEach(function(m){
     if(m.role==='assistant'){
