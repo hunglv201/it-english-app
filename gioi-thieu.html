@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1b4dff">
+<meta name="theme-color" content="#0a0c10">
 <meta name="description" content="IT English — phòng tập nói tiếng Anh cho dev, lấy AI làm trọng tâm.">
 </head>
 <body>
@@ -12,39 +12,30 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
-:root{
+/* Mặc định NỀN ĐEN (dark-first); sáng chỉ khi bấm nút chuyển */
+:root, :root[data-theme="dark"]{
+  --bg:#0a0c10; --surface:#151922; --surface2:#0f131b; --raise:#1a1f29;
+  --ink:#f4f6fb; --muted:#c2cad8; --faint:#828c9e;
+  --line:#272d38; --line2:#1c212b;
+  --accent:#7b96ff; --accent-ink:#aec0ff; --accent-soft:#1a2440;
+  --amber:#e4b968; --amber-soft:#2a2210;
+  --term:#57e0aa;
+  --disp:'Bricolage Grotesque','Hanken Grotesk',system-ui,sans-serif;
+  --sans:'Hanken Grotesk',system-ui,-apple-system,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --shadow:0 1px 2px rgba(0,0,0,.45),0 26px 54px rgba(0,0,0,.55);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4),0 12px 28px rgba(0,0,0,.45);
+  --maxw:1080px;
+}
+:root[data-theme="light"]{
   --bg:#f4f6f9; --surface:#ffffff; --surface2:#eef1f6; --raise:#ffffff;
-  --ink:#14171c; --muted:#586170; --faint:#8b93a1;
+  --ink:#14171c; --muted:#4a5462; --faint:#828b9a;
   --line:#e3e7ee; --line2:#eef1f6;
   --accent:#1b4dff; --accent-ink:#1740d6; --accent-soft:#e8edff;
   --amber:#9a6300; --amber-soft:#f7efdd;
   --term:#0c7a52;
-  --disp:'Bricolage Grotesque','Hanken Grotesk',system-ui,sans-serif;
-  --sans:'Hanken Grotesk',system-ui,-apple-system,sans-serif;
-  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
   --shadow:0 1px 2px rgba(18,28,58,.05),0 22px 48px rgba(18,28,58,.10);
   --shadow-sm:0 1px 2px rgba(18,28,58,.05),0 10px 24px rgba(18,28,58,.07);
-  --maxw:1080px;
-}
-:root:not([data-theme="light"]){ @media (prefers-color-scheme:dark){
-  --bg:#0c0e12; --surface:#15181f; --surface2:#101319; --raise:#191d25;
-  --ink:#eceef3; --muted:#98a0ad; --faint:#646c7a;
-  --line:#242932; --line2:#1b1f27;
-  --accent:#6f8cff; --accent-ink:#9db2ff; --accent-soft:#182138;
-  --amber:#dcae55; --amber-soft:#2a2210;
-  --term:#4bd6a0;
-  --shadow:0 1px 2px rgba(0,0,0,.4),0 24px 50px rgba(0,0,0,.5);
-  --shadow-sm:0 1px 2px rgba(0,0,0,.35),0 12px 26px rgba(0,0,0,.4);
-}}
-:root[data-theme="dark"]{
-  --bg:#0c0e12; --surface:#15181f; --surface2:#101319; --raise:#191d25;
-  --ink:#eceef3; --muted:#98a0ad; --faint:#646c7a;
-  --line:#242932; --line2:#1b1f27;
-  --accent:#6f8cff; --accent-ink:#9db2ff; --accent-soft:#182138;
-  --amber:#dcae55; --amber-soft:#2a2210;
-  --term:#4bd6a0;
-  --shadow:0 1px 2px rgba(0,0,0,.4),0 24px 50px rgba(0,0,0,.5);
-  --shadow-sm:0 1px 2px rgba(0,0,0,.35),0 12px 26px rgba(0,0,0,.4);
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
@@ -497,9 +488,10 @@ html{scroll-behavior:smooth}
   var sun='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6L19 19M19 5l-1.4 1.4M6.4 17.6L5 19"/></svg>';
   var moon='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
   var btn=document.getElementById('themeBtn');
-  function cur(){var t=document.documentElement.getAttribute('data-theme');if(t)return t;try{return matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';}catch(e){return 'light';}}
+  function cur(){return document.documentElement.getAttribute('data-theme')||'dark';}
   function paint(){btn.innerHTML=cur()==='dark'?sun:moon;}
-  try{var s=localStorage.getItem('ite-theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  var s=null;try{s=localStorage.getItem('ite-theme');}catch(e){}
+  document.documentElement.setAttribute('data-theme', s||'dark'); // mặc định đen
   paint();
   btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('ite-theme',n);}catch(e){}paint();});
 
