@@ -303,7 +303,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.17.5", APP_BUILD="2026-09-13";
+const APP_VERSION="1.17.6", APP_BUILD="2026-09-13";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -2360,9 +2360,10 @@ function vTalkAI(){
     if(aiSettingsOpen)v.appendChild(aiSettingsCard());
     main.appendChild(v);return;
   }
-  const hd=el('div','row between wrap');hd.style.gap='8px';
-  const hleft=el('div','row');hleft.style.gap='8px';
-  hleft.appendChild(el('span','chip ok',aiScObj().l));
+  const hd=el('div','row between');hd.style.cssText='gap:8px;flex-wrap:nowrap';
+  const hleft=el('div','row');hleft.style.cssText='gap:8px;flex:1 1 auto;min-width:0';
+  const scChip=el('span','chip ok',aiScObj().l);scChip.style.cssText='flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;display:block';scChip.title=aiScObj().l;
+  hleft.appendChild(scChip);
   if(aiTurns.length){
     const pa=el('button','btn ghost sm');pa.id='aiPlayAll';pa.style.flex='0 0 auto';
     pa.innerHTML=aiPlayingAll?'⏸ Dừng':(ICO.play+' Nghe hết');
@@ -2370,7 +2371,7 @@ function vTalkAI(){
     pa.onclick=function(){playAllTurns();};hleft.appendChild(pa);
   }
   hd.appendChild(hleft);
-  const menuBtn=el('button','btn ghost sm');menuBtn.textContent='⋯ Tùy chọn';menuBtn.setAttribute('aria-label','Tùy chọn');
+  const menuBtn=el('button','btn ghost sm');menuBtn.textContent='⋯ Tùy chọn';menuBtn.setAttribute('aria-label','Tùy chọn');menuBtn.style.flex='0 0 auto';
   menuBtn.onclick=function(){
     var items=[];
     items.push({label:'✨ Tạo hội thoại mẫu tự động',onClick:sampleConvoModal});
