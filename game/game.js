@@ -16,7 +16,27 @@ function loadG(){try{return JSON.parse(localStorage.getItem(GKEY))||{};}catch(e)
 function saveG(){try{localStorage.setItem(GKEY,JSON.stringify(G));}catch(e){}}
 function loadApp(){try{return JSON.parse(localStorage.getItem(APPKEY))||{};}catch(e){return {};}}
 function saveApp(a){try{localStorage.setItem(APPKEY,JSON.stringify(a));}catch(e){}}
-let G=Object.assign({name:'Dev',lv:1,xp:0,hp:100,maxHp:100,coins:0,combo:0,bestCombo:0,cleared:{},badges:{},cur:1,ch:null,wins:0,correct:0,total:0,bossWins:0,streak:0,lastDay:null},loadG());
+let G=Object.assign({name:'Dev',lv:1,xp:0,hp:100,maxHp:100,coins:0,combo:0,bestCombo:0,cleared:{},badges:{},cur:1,ch:null,wins:0,correct:0,total:0,bossWins:0,streak:0,lastDay:null,
+  items:{hint:2,potion:1},up:{hp:0,timer:0,combo:0,rate:0,cap:0},idle:{last:Date.now(),bugs:0},daily:{},seenTut:false,sound:true},loadG());
+G.items=Object.assign({hint:0,potion:0},G.items||{});G.up=Object.assign({hp:0,timer:0,combo:0,rate:0,cap:0},G.up||{});G.idle=Object.assign({last:Date.now(),bugs:0},G.idle||{});G.daily=G.daily||{};
+/* ---------- AFK / idle economy ---------- */
+function clearedDays(){return Object.keys(G.cleared).filter(n=>dayCleared(+n)).length;}
+function idleRate(){return 20+clearedDays()*4+(G.up.rate||0)*12;} // xu mỗi giờ
+function idleCapMs(){return (8+(G.up.cap||0)*4)*3600e3;}
+function idlePending(){const e=Math.max(0,Math.min(Date.now()-(G.idle.last||Date.now()),idleCapMs()));const coins=Math.floor(e/3600e3*idleRate());return {coins,xp:Math.floor(coins/4),bugs:Math.floor(e/90e3),ms:e,capped:e>=idleCapMs()};}
+function fmtDur(ms){const h=Math.floor(ms/3600e3),m=Math.floor(ms%3600e3/60e3);return h?h+' giờ '+m+' phút':m+' phút';}
+function collectIdle(){const p=idlePending();G.idle.last=Date.now();G.idle.bugs=(G.idle.bugs||0)+p.bugs;if(p.coins>0){gainXp(p.xp,p.coins);toast('🪙 +'+p.coins+' xu · ✨ +'+p.xp+' XP');}saveG();}
+function daily(){const t=todayStr();if(G.daily.date!==t){G.daily={date:t,wins:0,combo:0,boss:0,claimed:{},chest:false};saveG();}return G.daily;}
+const DQ=[['wins','Thắng 3 trận Bug',3,60,'⚔️'],['combo','Đạt combo x5 trong trận',5,40,'🔥'],['boss','Hạ 1 Boss',1,100,'👑']];
+const SHOP=[
+ ['hp','❤️','Máu tối đa +10','Chịu đòn tốt hơn',k=>100+k*80,99,()=>{G.maxHp+=10;G.hp=Math.min(G.maxHp,G.hp+10);}],
+ ['timer','⏱️','Thêm 2 giây trả lời','Mỗi câu có thêm thời gian',k=>150+k*120,5,null],
+ ['combo','🔥','Combo +10% XP','XP mỗi câu đúng tăng theo combo',k=>200+k*150,5,null],
+ ['rate','🌙','Mochi cày nhanh hơn','+12 xu/giờ khi AFK',k=>120+k*100,99,null],
+ ['cap','⏰','Giới hạn offline +4 giờ','Tích xu lâu hơn khi vắng',k=>300+k*250,4,null],
+ ['hint','💡','Gợi ý ×1','Loại 1 đáp án sai trong trận',k=>40,999,()=>{G.items.hint++;}],
+ ['potion','🧪','Bình máu ×1','Hồi 50 HP giữa trận',k=>80,999,()=>{G.items.potion++;}]
+];
 // bootstrap từ tiến trình app cũ (ngày đang học)
 (function(){const a=loadApp();if(a.days&&a.days.cur&&a.days.cur>G.cur&&!Object.keys(G.cleared).length){G.cur=a.days.cur;}})();
 if(G.ch==null)G.ch=DAYS[G.cur-1]?DAYS[G.cur-1].phase:0;
@@ -84,7 +104,7 @@ function confetti(){const w=el('div','confetti');w.style.cssText='position:fixed
 function petals(){const w=$('#petals');for(let i=0;i<12;i++){const p=el('i','petal');p.style.left=Math.random()*100+'vw';p.style.animationDuration=(9+Math.random()*9)+'s';p.style.animationDelay=(-Math.random()*14)+'s';p.style.transform='scale('+(.6+Math.random())+')';w.appendChild(p);}}
 petals();
 /* sfx */
-let AC=null;function beep(f,d,type,v){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.value=v||.05;o.connect(g);g.connect(AC.destination);const t=AC.currentTime;g.gain.setValueAtTime(g.gain.value,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.start(t);o.stop(t+d);}catch(e){}}
+let AC=null;function beep(f,d,type,v){if(G.sound===false)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.value=v||.05;o.connect(g);g.connect(AC.destination);const t=AC.currentTime;g.gain.setValueAtTime(g.gain.value,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.start(t);o.stop(t+d);}catch(e){}}
 const sfx={ok(){beep(660,.12,'triangle');setTimeout(()=>beep(880,.16,'triangle'),90);},bad(){beep(160,.28,'sawtooth',.04);},win(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,.22,'triangle',.06),i*110));},hit(){beep(240,.1,'square',.03);},lv(){[784,988,1175,1568].forEach((f,i)=>setTimeout(()=>beep(f,.26,'sine',.06),i*120));}};
 /* tts */
 let VOICE=null;function pickVoice(){try{const vs=speechSynthesis.getVoices();VOICE=vs.find(v=>/^en/i.test(v.lang)&&/google|natural|samantha|daniel|libby|sonia/i.test(v.name))||vs.find(v=>/^en/i.test(v.lang))||null;}catch(e){}}
@@ -105,9 +125,10 @@ function paintCoins(){$('#coinN').textContent=G.coins;}
 
 /* ---------- router ---------- */
 let cur='map';
-const TABS=[['map','🗺️','Bản đồ'],['profile','👤','Hồ sơ'],['app','📱','App']];
+const TABS=[['map','🗺️','Bản đồ'],['shop','🛒','Shop'],['profile','👤','Hồ sơ'],['app','📱','App']];
 function renderTabs(){const n=$('#tabs');n.innerHTML='';TABS.forEach(t=>{const b=el('button','tab'+(cur===t[0]?' on':''),'<span>'+t[1]+'</span>'+t[2]);b.onclick=()=>{if(t[0]==='app'){location.href='../';return;}go(t[0]);};n.appendChild(b);});}
-function go(k){cur=k;renderTabs();window.scrollTo(0,0);({map:vMap,profile:vProfile})[k]();}
+let mapTimer=null;
+function go(k){cur=k;renderTabs();window.scrollTo(0,0);if(mapTimer){clearInterval(mapTimer);mapTimer=null;}({map:vMap,shop:vShop,profile:vProfile})[k]();}
 function playerCard(){
   const c=el('div','card player');
   c.innerHTML='<div class="avatar">'+mascot(G.hp<=30?'sad':'happy')+'</div><div class="grow stat"><div class="row between"><b class="h" style="font-size:17px">'+esc(G.name)+'</b><span class="lv">Lv '+G.lv+'</span></div>'+
@@ -122,6 +143,26 @@ function vMap(){
   main.innerHTML='';touchStreak();saveG();
   main.appendChild(playerCard());
   const mr=el('div','mascot-row');mr.innerHTML='<div class="mascot">'+mascot('wink')+'</div><div class="bubble grow"><span class="who">Mochi</span>'+esc(rnd(TIPS))+'</div>';main.appendChild(mr);
+  // ---- AFK farm ----
+  const afk=el('div','card afk');
+  afk.innerHTML='<div class="row between"><div><div class="eyebrow">AFK · Mochi tự cày</div><b class="h" style="font-size:16px">+'+idleRate()+' xu/giờ · tối đa '+Math.round(idleCapMs()/3600e3)+'g offline</b></div><span class="kbd" id="afkBugs">🐛 '+(G.idle.bugs||0)+'</span></div>'+
+    '<div class="farm"><div class="fm">'+mascot('happy')+'</div><div class="fx-hit" id="farmHit">⚔️</div><div class="fb">'+bug()+'</div></div>'+
+    '<div class="row between" style="margin-top:6px"><div><div class="h" style="font-size:22px;color:var(--yellow)">🪙 <span id="afkCoins">0</span> <small style="font-size:12px;color:var(--muted)">· ✨ <span id="afkXp">0</span> XP</small></div><small class="muted" id="afkTime">đang tích…</small></div><button class="btn yellow sm" id="afkCollect">Thu hoạch</button></div>';
+  main.appendChild(afk);
+  function paintAfk(){const p=idlePending();const a=$('#afkCoins'),x=$('#afkXp'),t=$('#afkTime');if(!a)return;a.textContent=p.coins;x.textContent=p.xp;t.textContent=(p.capped?'⚠️ đầy túi — thu hoạch đi! ':'đã cày '+fmtDur(p.ms)+' ')+'· '+(p.bugs)+' bug';const h=$('#farmHit');if(h&&Math.random()<.35){h.classList.remove('go');void h.offsetWidth;h.classList.add('go');}}
+  paintAfk();mapTimer=setInterval(paintAfk,1000);
+  $('#afkCollect').onclick=()=>{const p=idlePending();if(p.coins<=0){toast('Chưa có gì để thu — chờ Mochi cày thêm nhé');return;}collectIdle();confetti();paintAfk();vMap();};
+  // ---- Daily: chest + quests ----
+  const dl=daily();const dc=el('div','card');
+  dc.innerHTML='<div class="row between"><div><div class="eyebrow">Hằng ngày</div><b class="h" style="font-size:16px">Rương đăng nhập · chuỗi '+(G.streak||0)+' ngày</b></div></div>';
+  const chest=el('button','btn '+(dl.chest?'ghost':'violet')+' block sm',dl.chest?'✅ Đã nhận hôm nay':'🎁 Mở rương ('+(50+(G.streak||0)*10)+' xu + 💡)');chest.style.marginTop='10px';chest.disabled=!!dl.chest;
+  chest.onclick=()=>{const d=daily();if(d.chest)return;d.chest=true;const c=50+(G.streak||0)*10;G.items.hint++;let extra='';if((G.streak||0)%3===0){G.items.potion++;extra=' + 🧪';}gainXp(20,c);saveG();confetti();sfx.win();toast('🎁 +'+c+' xu + 💡'+extra);vMap();};
+  dc.appendChild(chest);
+  const ql=el('div');ql.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px';
+  DQ.forEach(q=>{const v=Math.min(dl[q[0]]||0,q[2]);const done=v>=q[2];const cl=dl.claimed[q[0]];const r=el('div','dq'+(done?' done':''));
+    r.innerHTML='<span class="qi">'+q[4]+'</span><span class="grow"><b>'+q[1]+'</b><div class="bar mini"><i style="width:'+Math.round(v/q[2]*100)+'%"></i></div><small class="muted">'+v+'/'+q[2]+' · thưởng '+q[3]+' xu</small></span>';
+    const b=el('button','btn sm '+(cl?'ghost':done?'yellow':'ghost'),cl?'✓':done?'Nhận':'…');b.disabled=!done||cl;b.onclick=()=>{const d=daily();if(d.claimed[q[0]])return;d.claimed[q[0]]=1;gainXp(30,q[3]);saveG();sfx.win();toast('+'+q[3]+' xu');vMap();};r.appendChild(b);ql.appendChild(r);});
+  dc.appendChild(ql);main.appendChild(dc);
   const c=el('div','card');
   const ch=G.ch;const days=DAYS.filter(d=>d.phase===ch);
   const head=el('div','chapter');
@@ -195,7 +236,7 @@ function battleStart(n,type){
   const d=dayInfo(n);const qs=type==='v'?vocabQs(d):type==='p'?phraseQs(d):listenQs(d);
   if(!qs.length){toast('Chưa có dữ liệu cho quest này');return;}
   if(G.hp<=0){G.hp=Math.ceil(G.maxHp/2);}
-  B={n,type,queue:qs.slice(),total:qs.length,monHp:qs.length*10,monMax:qs.length*10,right:0,wrong:0,combo:0,timer:null,t0:0,limit:type==='l'?15:12,cur:null,locked:false};
+  B={n,type,queue:qs.slice(),total:qs.length,monHp:qs.length*10,monMax:qs.length*10,right:0,wrong:0,combo:0,timer:null,t0:0,limit:(type==='l'?15:12)+(G.up.timer||0)*2,cur:null,locked:false,hinted:false};
   G.combo=0;cur='battle';renderTabs();window.scrollTo(0,0);vBattle();nextQ();
 }
 function vBattle(){
@@ -203,6 +244,12 @@ function vBattle(){
   const top=el('div','card');top.style.padding='12px 14px';
   top.innerHTML='<div class="row between"><div class="row" style="gap:8px"><span class="avatar" style="width:40px;height:40px;border-radius:12px">'+mascot('happy')+'</span><div class="grow" style="min-width:120px"><small style="font-family:var(--mono);font-size:10.5px;color:var(--faint)">HP <b id="php">'+G.hp+'</b>/'+G.maxHp+'</small><div class="bar hp" id="phpbar"><i style="width:'+Math.round(G.hp/G.maxHp*100)+'%"></i></div></div></div><button class="btn ghost sm" id="quitB">✕ Rút lui</button></div>';
   a.appendChild(top);
+  const items=el('div','row');items.style.gap='8px';
+  const hb=el('button','btn violet sm grow','💡 Gợi ý ('+G.items.hint+')');hb.id='itHint';hb.disabled=G.items.hint<=0;
+  hb.onclick=()=>{if(!B||B.locked||B.hinted||G.items.hint<=0)return;const wrong=[...document.querySelectorAll('.opt:not([disabled])')].filter(o=>o.textContent!==B.cur.ans);if(!wrong.length)return;const w=rnd(wrong);w.disabled=true;w.style.opacity='.25';B.hinted=true;G.items.hint--;saveG();hb.textContent='💡 Gợi ý ('+G.items.hint+')';hb.disabled=true;sfx.hit();};
+  const pb=el('button','btn mint sm grow','🧪 Bình máu ('+G.items.potion+')');pb.id='itPotion';pb.disabled=G.items.potion<=0;
+  pb.onclick=()=>{if(!B||G.items.potion<=0||G.hp>=G.maxHp)return;G.items.potion--;G.hp=Math.min(G.maxHp,G.hp+50);saveG();pb.textContent='🧪 Bình máu ('+G.items.potion+')';pb.disabled=G.items.potion<=0;const ph=$('#php'),bar=$('#phpbar');if(ph)ph.textContent=G.hp;if(bar){bar.querySelector('i').style.width=Math.round(G.hp/G.maxHp*100)+'%';bar.classList.toggle('low',G.hp<=30);}const r=bar.getBoundingClientRect();fxText(r.left+40,r.top-10,'+50 HP','heal');sfx.ok();};
+  items.appendChild(hb);items.appendChild(pb);a.appendChild(items);
   const mon=el('div','card');mon.style.background='linear-gradient(180deg,#2a2160,#1b1147)';
   mon.innerHTML='<div class="combo" id="combo">COMBO x0</div><div class="monster" id="mon"><div class="mname">'+MON[B.type][0]+' · Ngày '+B.n+'</div><div class="art">'+bug()+'</div><div style="width:100%;padding:0 6px"><div class="bar mon" id="monbar"><i style="width:100%"></i><span id="montxt">'+B.monHp+' / '+B.monMax+'</span></div></div></div>';
   a.appendChild(mon);
@@ -217,7 +264,7 @@ function nextQ(){
   if(!B)return;
   if(B.monHp<=0){victory();return;}
   if(!B.queue.length){B.queue=shuffle(B.wrongList||[]);B.wrongList=[];if(!B.queue.length){victory();return;}}
-  const q=B.cur=B.queue.shift();B.locked=false;
+  const q=B.cur=B.queue.shift();B.locked=false;B.hinted=false;const ih=$('#itHint');if(ih)ih.disabled=G.items.hint<=0;
   const w=$('#qwrap');w.innerHTML='';
   const card=el('div','qcard pop');card.innerHTML='<div class="kind">'+esc(q.kind)+'</div><div class="q">'+(q.listen&&q.q==='🔊'?'<button class="btn blue" id="replay" style="min-height:64px;width:64px;border-radius:50%;font-size:26px">🔊</button>':esc(q.q))+'</div>'+(q.ipa?'<div class="ipa">'+esc(q.ipa)+'</div>':'')+(q.sub?'<div class="sub">'+esc(q.sub)+'</div>':'')+(q.listen&&q.q!=='🔊'?'<div style="margin-top:8px"><button class="btn blue sm" id="replay">🔊 Nghe lại</button></div>':'');
   w.appendChild(card);
@@ -228,7 +275,7 @@ function nextQ(){
 }
 function answer(o,btn){
   if(!B||B.locked)return;B.locked=true;stopTimer();
-  const q=B.cur;const ok=o===q.ans;B.total;G.total++;
+  const q=B.cur;const ok=o===q.ans;G.total++;
   document.querySelectorAll('.opt').forEach(b=>{b.disabled=true;if(b.textContent===q.ans)b.classList.add('good');});
   const monEl=$('#mon');
   if(ok){
@@ -237,7 +284,9 @@ function answer(o,btn){
     sfx.ok();monEl.classList.remove('hit');void monEl.offsetWidth;monEl.classList.add('hit');
     const r=monEl.getBoundingClientRect();fxText(r.left+r.width/2+(Math.random()*60-30),r.top+40,'-'+dmg+(B.combo>=3?' ✦':''));
     const cb=$('#combo');cb.textContent='COMBO x'+B.combo;cb.classList.remove('big');void cb.offsetWidth;cb.classList.add('big');
-    const xp=10+Math.min(B.combo,10)*2;gainXp(xp,5);
+    const xp=Math.round((10+Math.min(B.combo,10)*2)*(1+(G.up.combo||0)*.1));gainXp(xp,5);
+    const dq=daily();dq.combo=Math.max(dq.combo||0,B.combo);
+    fxText(r.left+r.width/2+60,r.top+70,'+'+xp+' XP','heal');
   }else{
     if(btn)btn.classList.add('bad');B.wrong++;B.combo=0;G.combo=0;$('#combo').textContent='COMBO x0';
     (B.wrongList=B.wrongList||[]).push(q);
@@ -255,7 +304,7 @@ function victory(){
   stopTimer();const monEl=$('#mon');if(monEl)monEl.classList.add('dead');sfx.win();confetti();
   const acc=B.right/Math.max(1,B.right+B.wrong);const stars=acc>=.9?3:acc>=.7?2:1;
   const st=G.cleared[B.n]||(G.cleared[B.n]={});st[B.type]=Math.max(st[B.type]||0,stars);
-  G.wins++;const bonus=50+stars*20;gainXp(bonus,20+stars*10);
+  G.wins++;daily().wins++;const bonus=50+stars*20;gainXp(bonus,20+stars*10);
   let opened=false;if(dayCleared(B.n)&&G.cur<=B.n){G.cur=B.n+1;opened=true;syncApp(B.n);}
   saveG();checkBadges();
   const b=B;B=null;
@@ -321,7 +370,7 @@ function bossPick(o,btn){
 function defeatBoss(){openModal((m,close)=>{m.innerHTML='<div class="eyebrow" style="text-align:center;color:var(--red)">HẾT HP</div><div class="big" style="font-size:24px">Senpai thắng lần này…</div><div class="mascot-row" style="margin-top:14px"><div class="mascot">'+mascot('sad')+'</div><div class="bubble grow"><span class="who">Mochi</span>Đọc kỹ phản hồi rồi thử lại nhé. HP hồi 50%.</div></div>';G.hp=Math.ceil(G.maxHp/2);saveG();const b=el('button','btn block','Về bản đồ');b.style.marginTop='14px';b.onclick=()=>{close();go('map');};m.appendChild(b);});}
 function bossEnd(){
   const win=V.bossHp<=0;const stars=V.right>=3?3:V.right>=2?2:1;const n=V.n;V=null;
-  if(win){const st=G.cleared[n]||(G.cleared[n]={});st.b=Math.max(st.b||0,stars);G.bossWins++;gainXp(120+stars*30,60);sfx.win();confetti();}else sfx.bad();
+  if(win){const st=G.cleared[n]||(G.cleared[n]={});st.b=Math.max(st.b||0,stars);G.bossWins++;daily().boss++;gainXp(120+stars*30,60);sfx.win();confetti();}else sfx.bad();
   saveG();checkBadges();
   const ai=aiConfigured();
   openModal((m,close)=>{
@@ -390,12 +439,26 @@ async function aiScore(){
   const ctx=V.turns.map(m=>(m.role==='user'?'Me: ':'Colleague: ')+parseReply(m.content).reply).join('\n');
   try{const out=await aiCall('You grade English speaking practice. Reply ONLY JSON.',[{role:'user',content:'Evaluate ONLY the developer (Me). Reply ONLY JSON {"score": number 1-10, "tip": one short specific tip in Vietnamese}.\n\n'+ctx}]);
     const r=parseJSON(out)||{score:5,tip:''};const sc=Math.max(1,Math.min(10,+r.score||5));const n=V.n;const win=sc>=6;const stars=sc>=9?3:sc>=7?2:1;V=null;
-    if(win){const st=G.cleared[n]||(G.cleared[n]={});st.b=Math.max(st.b||0,stars);G.bossWins++;gainXp(150+stars*40,80);sfx.win();confetti();}else sfx.bad();
+    if(win){const st=G.cleared[n]||(G.cleared[n]={});st.b=Math.max(st.b||0,stars);G.bossWins++;daily().boss++;gainXp(150+stars*40,80);sfx.win();confetti();}else sfx.bad();
     saveG();checkBadges();
     openModal((m,close)=>{m.innerHTML='<div class="eyebrow" style="text-align:center">'+(win?'BOSS AI BỊ HẠ':'CHƯA HẠ ĐƯỢC')+'</div><div class="big">'+sc+'<span style="font-size:20px;color:var(--muted)">/10</span></div>'+(win?'<div class="stars3">'+'★'.repeat(stars)+'</div>':'')+'<div class="mascot-row" style="margin-top:12px"><div class="mascot">'+mascot(win?'cheer':'think')+'</div><div class="bubble grow"><span class="who">Mochi</span>'+esc(r.tip||(win?'Quá đỉnh!':'Cần ≥ 6 điểm. Thử lại nhé!'))+'</div></div>';const b=el('button','btn yellow block','Về ngày '+n);b.style.marginTop='14px';b.onclick=()=>{close();go('map');questSelect(n);};m.appendChild(b);});
   }catch(e){toast('AI lỗi khi chấm');$('#endB').disabled=false;}
 }
 
+/* ---------- SHOP ---------- */
+function vShop(){
+  main.innerHTML='';
+  const h=el('div','card');h.innerHTML='<div class="row between"><div><div class="eyebrow">Shop nâng cấp</div><b class="h" style="font-size:18px">Tiêu xu cho mạnh hơn</b></div><span class="coins"><i></i>'+G.coins+'</span></div><div class="mascot-row" style="margin-top:12px"><div class="mascot">'+mascot('think')+'</div><div class="bubble grow"><span class="who">Mochi</span>Xu kiếm được từ trận đánh và lúc AFK. Nâng "cày nhanh hơn" sớm là lời nhất đó!</div></div>';
+  main.appendChild(h);
+  const list=el('div');list.style.cssText='display:flex;flex-direction:column;gap:10px';
+  SHOP.forEach(it=>{const key=it[0],isItem=key==='hint'||key==='potion';const k=isItem?0:(G.up[key]||0);const max=it[5];const cost=it[4](k);const maxed=!isItem&&k>=max;
+    const r=el('div','shopi');
+    r.innerHTML='<span class="qi">'+it[1]+'</span><span class="grow"><b>'+it[2]+(isItem?' <span class="kbd">có '+G.items[key]+'</span>':maxed?' <span class="kbd">MAX</span>':' <span class="kbd">Lv '+k+'/'+(max>=99?'∞':max)+'</span>')+'</b><small>'+it[3]+'</small></span>';
+    const b=el('button','btn sm '+(maxed?'ghost':G.coins>=cost?'yellow':'ghost'),maxed?'—':'🪙 '+cost);b.disabled=maxed||G.coins<cost;
+    b.onclick=()=>{if(G.coins<cost)return;G.coins-=cost;if(isItem){it[6]();}else{G.up[key]=k+1;if(it[6])it[6]();}saveG();paintCoins();sfx.ok();toast('Đã mua: '+it[2]);vShop();};
+    r.appendChild(b);list.appendChild(r);});
+  main.appendChild(list);
+}
 /* ---------- PROFILE ---------- */
 function vProfile(){
   main.innerHTML='';main.appendChild(playerCard());
@@ -408,10 +471,29 @@ function vProfile(){
   const s=el('div','card');s.innerHTML='<div class="eyebrow">Cài đặt</div>';
   const nm=el('input','input');nm.value=G.name;nm.placeholder='Tên nhân vật';nm.style.marginTop='10px';nm.onchange=()=>{G.name=nm.value.trim()||'Dev';saveG();toast('Đã đổi tên');};s.appendChild(nm);
   const ai=aiConfigured();s.appendChild(el('p','muted','🤖 Boss AI: '+(ai?'<b style="color:var(--green)">sẵn sàng</b> (dùng key từ app)':'chưa cấu hình — mở app › Giao tiếp AI › Cài đặt AI')));
+  const snd=el('button','btn ghost block sm',(G.sound===false?'🔇 Âm thanh: tắt':'🔊 Âm thanh: bật'));snd.style.marginBottom='8px';snd.onclick=()=>{G.sound=G.sound===false?true:false;saveG();vProfile();};s.appendChild(snd);
+  const tut=el('button','btn ghost block sm','📖 Xem lại hướng dẫn');tut.style.marginBottom='8px';tut.onclick=tutorial;s.appendChild(tut);
   const rs=el('button','btn ghost block sm','Đặt lại tiến trình game');rs.onclick=()=>openModal((m,close)=>{m.innerHTML='<div class="h" style="font-size:20px">Đặt lại?</div><p class="muted">Xoá toàn bộ XP, huy hiệu, sao. Không ảnh hưởng app học.</p>';const r=el('div','row');r.style.gap='10px';const a=el('button','btn ghost grow','Huỷ');a.onclick=close;const b2=el('button','btn grow','Đặt lại');b2.onclick=()=>{localStorage.removeItem(GKEY);location.reload();};r.appendChild(a);r.appendChild(b2);m.appendChild(r);});
   s.appendChild(rs);main.appendChild(s);
 }
 
+/* ---------- tutorial + offline welcome ---------- */
+function tutorial(){
+  const steps=[['wink','Chào! Mình là <b>Mochi</b>, bạn đồng hành của bạn. Đây là <b>IT English Quest</b> — học tiếng Anh IT bằng cách… đánh quái!'],
+   ['happy','Trên <b>bản đồ</b>, mỗi ngày trong lộ trình là một màn. Mỗi màn có 3 con <b>Bug</b> (từ vựng · ngữ pháp · nghe) và 1 <b>Boss</b>.'],
+   ['cheer','Trả lời đúng = gây sát thương + <b>combo</b>. Sai = mất HP. Xong đủ 3 Bug là mở ngày tiếp theo!'],
+   ['think','Khi bạn vắng, mình <b>tự cày</b> bug kiếm xu (AFK). Nhớ về <b>thu hoạch</b>, mở <b>rương ngày</b> và ghé <b>Shop</b> nâng cấp nhé!']];
+  let i=0;
+  openModal((m,close)=>{const draw=()=>{m.innerHTML='<div class="eyebrow">Hướng dẫn '+(i+1)+'/'+steps.length+'</div><div class="mascot-row" style="margin-top:12px"><div class="mascot" style="width:96px;height:96px">'+mascot(steps[i][0])+'</div><div class="bubble grow"><span class="who">Mochi</span>'+steps[i][1]+'</div></div>';
+      const b=el('button','btn yellow block',i<steps.length-1?'Tiếp ›':'Bắt đầu chơi!');b.style.marginTop='14px';b.onclick=()=>{if(i<steps.length-1){i++;draw();}else{G.seenTut=true;saveG();close();}};m.appendChild(b);};draw();});
+}
+function offlineWelcome(){
+  const p=idlePending();if(p.ms<15*60e3||p.coins<=0)return false;
+  openModal((m,close)=>{m.innerHTML='<div class="eyebrow" style="text-align:center">CHÀO MỪNG TRỞ LẠI</div><div class="mascot-row" style="margin-top:12px"><div class="mascot" style="width:96px;height:96px">'+mascot('cheer')+'</div><div class="bubble grow"><span class="who">Mochi</span>Bạn vắng <b>'+fmtDur(p.ms)+'</b>. Mình đã hạ <b>'+p.bugs+' bug</b> và tích được:</div></div><div class="row" style="justify-content:center;gap:16px;margin-top:14px;font-family:var(--disp);font-weight:700;font-size:22px"><span>🪙 +'+p.coins+'</span><span>✨ +'+p.xp+' XP</span></div>'+(p.capped?'<p class="muted" style="text-align:center;margin-top:8px">Túi đã đầy — nâng "giới hạn offline" ở Shop để tích lâu hơn.</p>':'');
+    const b=el('button','btn yellow block','Thu hoạch');b.style.marginTop='14px';b.onclick=()=>{close();collectIdle();confetti();vMap();};m.appendChild(b);});
+  return true;
+}
 /* ---------- boot ---------- */
 paintCoins();renderTabs();vMap();checkBadges();
+if(!G.seenTut){G.idle.last=Date.now();saveG();tutorial();}else offlineWelcome();
 })();
