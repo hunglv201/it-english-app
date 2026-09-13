@@ -131,7 +131,8 @@ const APP_URL='https://hunglv201.github.io/it-english-app/';
 function openApp(){if(/github\.io$/.test(location.hostname))location.href=APP_URL;else window.open(APP_URL,'_blank','noopener');}
 function renderTabs(){const n=$('#tabs');n.innerHTML='';TABS.forEach(t=>{const b=el('button','tab'+(cur===t[0]?' on':''),'<span>'+t[1]+'</span>'+t[2]);b.onclick=()=>go(t[0]);n.appendChild(b);});}
 let mapTimer=null;
-function go(k){document.body.classList.remove('infight');main.classList.remove('chatlay');cur=k;renderTabs();window.scrollTo(0,0);if(mapTimer){clearInterval(mapTimer);mapTimer=null;}stopSR();({map:vMap,talk:vTalk,shop:vShop,profile:vProfile})[k]();}
+function animIn(){main.classList.remove('vin');void main.offsetWidth;main.classList.add('vin');}
+function go(k){document.body.classList.remove('infight');main.classList.remove('chatlay');animIn();cur=k;renderTabs();window.scrollTo(0,0);if(mapTimer){clearInterval(mapTimer);mapTimer=null;}stopSR();({map:vMap,talk:vTalk,shop:vShop,profile:vProfile})[k]();}
 /* ---------- speech recognition + word matching ---------- */
 let SRcur=null;
 function stopSR(){try{if(SRcur){SRcur.onend=null;SRcur.stop();}}catch(e){}SRcur=null;}
@@ -301,7 +302,7 @@ function listenQs(d){
 /* ---------- BATTLE ---------- */
 let B=null;
 const MON={v:['Bug Từ Vựng','#5ec8ff'],p:['Bug Ngữ Pháp','#a78bfa'],l:['Bug Tai Nghe','#5eead4']};
-function battleStart(n,type){
+function battleStart(n,type){animIn();
   const d=dayInfo(n);const qs=type==='v'?vocabQs(d):type==='p'?phraseQs(d):listenQs(d);
   if(!qs.length){toast('Chưa có dữ liệu cho quest này');return;}
   if(G.hp<=0){G.hp=Math.ceil(G.maxHp/2);}
@@ -396,7 +397,7 @@ function defeat(){
 /* ---------- BOSS (visual novel) ---------- */
 let V=null;
 function typeText(elm,text,cb){let i=0;elm.innerHTML='';const c=el('span','cur');elm.appendChild(c);const step=()=>{if(!elm.isConnected)return;if(i<text.length){c.insertAdjacentText('beforebegin',text[i++]);setTimeout(step,18);}else{c.remove();cb&&cb();}};step();}
-function bossStart(n){
+function bossStart(n){animIn();
   const d=dayInfo(n);const rounds=[DIALOGS[d.di]].concat(pickOthers(DIALOGS,d.di,2,x=>x.them));
   if(G.hp<=0)G.hp=Math.ceil(G.maxHp/2);
   document.body.classList.add('infight');V={n,rounds,i:0,bossHp:100,right:0};cur='boss';renderTabs();window.scrollTo(0,0);vBoss();bossRound();
@@ -464,7 +465,7 @@ function parseJSON(t){try{const m=String(t).match(/\{[\s\S]*\}|\[[\s\S]*\]/);ret
 function aiRules(sc){const lvl=(loadApp().cfg||{}).level||'A2';return 'You are Minh, a friendly senior developer and English conversation partner for a Vietnamese junior developer (CEFR '+lvl+'). Roleplay this work scenario: '+sc+' Reply IN CHARACTER in 1-2 short simple sentences (about 20 words) ending with a question. Your English must be grammatically correct. Then, on a NEW line starting exactly with "FIX:", list up to 2 corrections of the user\'s last message as: wrong => right ~ short Vietnamese note (with full diacritics). If the user\'s English was fine, write exactly "FIX: OK".';}
 const SCEN=['We are in a daily standup. Ask what I did yesterday, what I do today, and blockers.','I am reporting a blocker to you, my team lead. React and ask short follow-up questions.','You are reviewing my pull request. Give short feedback and ask why I made some choices.','We are about to deploy to production. Talk about the plan and the risks.'];
 function parseReply(t){const i=t.indexOf('FIX:');return i<0?{reply:t.trim(),fix:''}:{reply:t.slice(0,i).trim(),fix:t.slice(i+4).trim()};}
-function aiBossStart(n){
+function aiBossStart(n){animIn();
   document.body.classList.add('infight');const sc=rnd(SCEN);V={n,ai:true,sc,turns:[],user:0,bossHp:60};cur='boss';renderTabs();window.scrollTo(0,0);
   main.innerHTML='';tipHist=[];main.classList.add('chatlay');
   const head=el('div','card');head.style.padding='10px 12px';
@@ -546,7 +547,7 @@ function addEquip(en){if(!G.talk.equipped.includes(en)){G.talk.equipped.push(en)
 let SH=null;
 function shadowStart(){document.body.classList.add('infight');SH={qs:pickSentences(8),i:0,sum:0,equipped:0};cur='talk';main.innerHTML='';main.classList.add('chatlay');shadowRound();}
 function shadowRound(){
-  if(!SH)return;if(SH.i>=SH.qs.length){shadowEnd();return;}
+  if(!SH)return;if(SH.i>=SH.qs.length){shadowEnd();return;}animIn();
   const q=SH.qs[SH.i];main.innerHTML='';talkHeader('ĐỌC THEO NHỊP','Câu '+(SH.i+1)+'/'+SH.qs.length,'<div class="bar time mini" style="margin-top:8px"><i id="shbar" style="width:0%"></i></div>');
   const c=el('div','qcard pop fill');c.innerHTML='<div class="kind">Nghe rồi đọc theo</div><div class="q" style="font-size:21px" id="shTxt">'+esc(q.en)+'</div>'+(q.vi?'<div class="sub">'+esc(q.vi)+'</div>':'')+'<div class="row" style="justify-content:center;gap:8px;margin-top:12px"><button class="btn blue sm" id="shPlay">🔊 Nghe lại</button></div><div id="shRes"></div>';
   main.appendChild(c);
@@ -568,7 +569,7 @@ function shadowEnd(){const avg=Math.round(SH.sum/SH.qs.length);const best=Math.m
 let RF=null;
 function reflexStart(){document.body.classList.add('infight');RF={qs:shuffle(DIALOGS).slice(0,8),i:0,score:0};cur='talk';main.classList.add('chatlay');reflexRound();}
 function reflexRound(){
-  if(!RF)return;if(RF.i>=RF.qs.length){reflexEnd();return;}
+  if(!RF)return;if(RF.i>=RF.qs.length){reflexEnd();return;}animIn();
   const d=RF.qs[RF.i];main.innerHTML='';talkHeader('PHẢN XẠ 5 GIÂY','Câu '+(RF.i+1)+'/'+RF.qs.length+' · '+RF.score+' điểm','<div class="bar time mini" style="margin-top:8px"><i id="rfbar" style="width:100%"></i></div>');
   const vn=el('div','vn compact fill');vn.innerHTML='<div class="scene"><div class="npc" id="npc">'+npc('minh')+'</div></div><div class="box"><span class="name">Minh-senpai</span><div class="txt" id="vtxt"></div></div>';main.appendChild(vn);
   const status=el('div','tip');status.id='rfStat';status.textContent='🔊 Nghe câu hỏi…';main.appendChild(status);
@@ -596,7 +597,7 @@ let ST=null;
 const ENDINGS=[[85,'🌟 Được khen trước cả team',3],[60,'☕ Một ngày làm việc ổn',2],[0,'📝 Bị PM nhắc nhở nhẹ',1]];
 function storyStart(){const who=['minh','linh','an'];document.body.classList.add('infight');ST={scenes:shuffle(DIALOGS).slice(0,5).map((d,i)=>({d,who:who[i%3]})),i:0,rep:50};cur='talk';main.classList.add('chatlay');storyScene();}
 function storyScene(){
-  if(!ST)return;if(ST.i>=ST.scenes.length){storyEnd();return;}
+  if(!ST)return;if(ST.i>=ST.scenes.length){storyEnd();return;}animIn();
   const s=ST.scenes[ST.i],c=CAST[s.who];main.innerHTML='';
   talkHeader('CHUYỆN VĂN PHÒNG','Cảnh '+(ST.i+1)+'/5','<div class="row" style="gap:8px;margin-top:8px"><small class="mono">UY TÍN</small><div class="bar xp mini grow"><i id="repbar" style="width:'+ST.rep+'%"></i></div><span class="kbd" id="repn">'+ST.rep+'</span></div>');
   const vn=el('div','vn compact fill '+s.who);vn.innerHTML='<div class="scene"><div class="npc talk" id="npc">'+npc(s.who)+'</div></div><div class="box"><span class="name">'+c.name+' · '+c.role+'</span><div class="txt" id="vtxt"></div></div>';main.appendChild(vn);
@@ -618,7 +619,7 @@ function storyEnd(){const e=ENDINGS.find(x=>ST.rep>=x[0]);const stars=e[2];G.tal
 let TB=null;
 function battleRules(sc){const lvl=(loadApp().cfg||{}).level||'A2';return 'You are Minh, a friendly senior developer, doing an English speaking battle with a Vietnamese junior developer (CEFR '+lvl+'). Scenario: '+sc+' Each turn: (1) reply IN CHARACTER in 1-2 short simple sentences ending with a question; (2) on a new line write exactly "SCORE: n" where n is 0-10 rating the user\'s LAST message for clarity, grammar and relevance (be fair, 7+ means good); (3) on a new line starting with "FIX:", up to 2 corrections as: wrong => right ~ short Vietnamese note (full diacritics), or exactly "FIX: OK". For the very first turn (no user message yet) write SCORE: 0 and FIX: OK.';}
 function parseBattle(t){const s=(t.match(/SCORE:\s*(\d+)/)||[])[1];const fi=t.indexOf('FIX:');const si=t.search(/SCORE:/);let reply=t;if(si>=0)reply=t.slice(0,si);else if(fi>=0)reply=t.slice(0,fi);return {reply:reply.trim(),score:s!=null?Math.max(0,Math.min(10,+s)):null,fix:fi>=0?t.slice(fi+4).trim():''};}
-function talkBattleStart(){
+function talkBattleStart(){animIn();
   if(!aiConfigured()){openModal((m,close)=>{m.innerHTML='<div class="h" style="font-size:20px">Cần AI</div><div class="mascot-row" style="margin-top:12px"><div class="mascot">'+mascot('think')+'</div><div class="bubble grow"><span class="who">Mochi</span>Chế độ này cần AI chấm câu. Nhập key (Gemini miễn phí) ngay tại đây — dùng chung với app IT English.</div></div>';const r=el('div','row');r.style.cssText='gap:10px;margin-top:14px';const a=el('button','btn ghost grow','Đóng');a.onclick=close;const k=el('button','btn grow','Nhập key');k.onclick=()=>{close();aiSetupSheet();};r.appendChild(a);r.appendChild(k);m.appendChild(r);});return;}
   if(G.hp<=0)G.hp=Math.ceil(G.maxHp/2);
   document.body.classList.add('infight');TB={sc:rnd(SCEN),turns:[],user:0,bossHp:300,combo:0,busy:false};cur='talk';main.innerHTML='';tipHist=[];main.classList.add('chatlay');
@@ -652,7 +653,7 @@ function tbEnd(){const win=TB.bossHp<=0;const dealt=300-TB.bossHp;const stars=wi
 
 /* ---- 5) Trang bị cho Mochi ---- */
 function vEquip(){
-  main.innerHTML='';cur='talk';talkHeader('TRANG BỊ CHO MOCHI',G.talk.equipped.length+' câu · +'+equipBonus()+' xu/giờ khi AFK');
+  animIn();main.innerHTML='';cur='talk';talkHeader('TRANG BỊ CHO MOCHI',G.talk.equipped.length+' câu · +'+equipBonus()+' xu/giờ khi AFK');
   const c=el('div','card');c.innerHTML='<div class="mascot-row"><div class="mascot">'+mascot('happy')+'</div><div class="bubble grow"><span class="who">Mochi</span>Mỗi câu bạn <b>đọc theo đạt ≥ 80%</b> mình sẽ học thuộc và nói khi đi cày. Mỗi câu +1 xu/giờ (tối đa 40).</div></div>';main.appendChild(c);
   const go_=el('button','btn blue block','🎵 Đi đọc theo nhịp để trang bị thêm');go_.onclick=shadowStart;main.appendChild(go_);
   if(G.talk.equipped.length){const l=el('div','card');l.innerHTML='<div class="eyebrow">Câu Mochi đã thuộc</div>';const ul=el('div');ul.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:10px';
@@ -669,7 +670,7 @@ function vShop(){
     const r=el('div','shopr');
     r.innerHTML='<span class="qi">'+it[1]+'</span><span class="nm"><b>'+it[2]+'</b><small>'+(isItem?'<span class="kbd">có '+G.items[key]+'</span>':maxed?'<span class="kbd">MAX</span>':'<span class="kbd">Lv '+k+(max>=99?'':'/'+max)+'</span>')+' '+it[3]+'</small></span>';
     const b=el('button','btn sm '+(maxed?'ghost':G.coins>=cost?'yellow':'ghost'),maxed?'MAX':'🪙 '+cost);b.disabled=maxed||G.coins<cost;
-    b.onclick=()=>{if(G.coins<cost)return;G.coins-=cost;if(isItem){it[6]();}else{G.up[key]=k+1;if(it[6])it[6]();}saveG();paintCoins();sfx.ok();toast('Đã mua: '+it[2]);vShop();};
+    b.onclick=()=>{if(G.coins<cost)return;G.coins-=cost;if(isItem){it[6]();}else{G.up[key]=k+1;if(it[6])it[6]();}saveG();paintCoins();sfx.ok();toast('Đã mua: '+it[2]);main.classList.remove('vin');vShop();};
     r.appendChild(b);return r;};
   main.appendChild(group('Nâng cấp vĩnh viễn',SHOP.filter(i=>i[0]!=='hint'&&i[0]!=='potion').map(row)));
   main.appendChild(group('Vật phẩm dùng trong trận',SHOP.filter(i=>i[0]==='hint'||i[0]==='potion').map(row)));
@@ -731,8 +732,8 @@ function vProfile(){
   main.appendChild(group('Huy hiệu · '+Object.keys(G.badges).length+'/'+BADGES.length,[g]));
   main.appendChild(group('Cài đặt',[
     setRow('🤖','Boss AI',inClaude()?'<b style="color:var(--green)">Claude sẵn có</b>':(aiCfg()?'<b style="color:var(--green)">'+(PROV[aiCfg().provider]||[aiCfg().provider])[0].split(' ·')[0]+'</b>':'chưa có key'),aiSetupSheet),
-    toggleRow('🔊','Âm thanh',G.sound!==false,v=>{G.sound=v;saveG();vProfile();}),
-    toggleRow('🌸','Hoa rơi & hiệu ứng nền',G.fx!==false,v=>{G.fx=v;saveG();document.body.classList.toggle('nofx',!v);vProfile();}),
+    toggleRow('🔊','Âm thanh',G.sound!==false,v=>{G.sound=v;saveG();main.classList.remove('vin');vProfile();}),
+    toggleRow('🌸','Hoa rơi & hiệu ứng nền',G.fx!==false,v=>{G.fx=v;saveG();document.body.classList.toggle('nofx',!v);main.classList.remove('vin');vProfile();}),
     setRow('📖','Xem lại hướng dẫn','',tutorial),
     setRow('📱','Mở app học IT English','',openApp),
     setRow('🗑️','Đặt lại tiến trình game','',()=>openModal((m,close)=>{m.innerHTML='<div class="h" style="font-size:20px">Đặt lại?</div><p class="muted">Xoá toàn bộ XP, xu, huy hiệu, sao. Không ảnh hưởng app học.</p>';const r=el('div','row');r.style.cssText='gap:10px;margin-top:12px';const a=el('button','btn ghost grow','Huỷ');a.onclick=close;const b2=el('button','btn grow','Đặt lại');b2.onclick=()=>{localStorage.removeItem(GKEY);location.reload();};r.appendChild(a);r.appendChild(b2);m.appendChild(r);}),'danger')
