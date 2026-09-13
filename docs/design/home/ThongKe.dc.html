@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+  <style>
+body{margin:0;background:#f5f6f8;color:#14161a;font-family:'Hanken Grotesk',system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:#1b4dff}a:hover{color:#1740d6}
+.phone{width:390px;min-height:844px;background:#f5f6f8;display:flex;flex-direction:column;position:relative}
+.top{padding:22px 20px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand-wrap{display:flex;align-items:center;gap:11px}
+.logo{width:40px;height:40px;border-radius:11px;background:linear-gradient(140deg,#4f7bff,#1234d8);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(27,77,255,.3);color:#fff;font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:600;font-size:15px;letter-spacing:-.04em}
+.brand{font-family:'Bricolage Grotesque','Hanken Grotesk',system-ui,sans-serif;font-size:18px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.top-actions{display:flex;align-items:center;gap:8px}
+.streak{display:flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:9px;background:#fff;border:1px solid #e6e8ec;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:14px;font-weight:600}
+.streak b{color:#1b4dff}
+.icobtn{width:38px;height:38px;border-radius:11px;border:1px solid #e6e8ec;background:#fff;color:#6b7280;display:flex;align-items:center;justify-content:center}
+.main{flex-grow:1;padding:6px 18px 100px;display:flex;flex-direction:column;gap:16px}
+.card{background:#fff;border:1px solid #e6e8ec;border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#6b7280}
+.disp{font-family:'Bricolage Grotesque','Hanken Grotesk',system-ui,sans-serif;font-weight:800;letter-spacing:-.02em}
+.muted{color:#6b7280;font-size:14.5px}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:52px;padding:0 18px;border-radius:12px;border:none;background:#1b4dff;color:#fff;font-weight:700;font-size:15px;width:100%}
+.btn.ghost{background:#fff;color:#14161a;border:1px solid #e6e8ec}
+.btn.sm{height:42px;font-size:14px;padding:0 14px;border-radius:10px;width:auto}
+.si{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 4px;border-bottom:1px solid #e6e8ec}
+.si:last-child{border-bottom:none}
+.tick{width:28px;height:28px;border-radius:999px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:#f0f2f5;color:#9aa1ad}
+.tick.on{background:#1b4dff;color:#fff}
+.tick.next{background:#e9eeff;color:#1b4dff;border:2px solid #1b4dff}
+.bar{height:8px;border-radius:5px;background:#e6e8ec;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:5px;background:#1b4dff}
+.chip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:9px;font-size:12.5px;font-weight:600;background:#fff;color:#6b7280;border:1px solid #e6e8ec;white-space:nowrap}
+.chip.ok{background:#e9eeff;color:#1740d6;border-color:transparent}
+.heat{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px}
+.heat i{display:block;aspect-ratio:1;border-radius:4px;background:#f0f2f5;border:1px solid #eef0f3}
+.heat i.l1{background:#d2dbff}.heat i.l2{background:#a9b9ff}.heat i.l3{background:#6f8cff}.heat i.l4{background:#1b4dff}
+.heat i.today{box-shadow:0 0 0 2px #1b4dff}
+.tabs{position:absolute;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e6e8ec;display:flex;padding:9px 6px 11px}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;color:#9aa1ad;font-size:10.5px;font-weight:600}
+.tab.on{color:#1b4dff}
+.tab .ic{width:38px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center}
+.tab.on .ic{background:#e9eeff}
+.tab svg{width:21px;height:21px}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tile{background:#fff;border:1px solid #e6e8ec;border-radius:14px;padding:12px 12px 10px;display:flex;flex-direction:column;gap:2px}
+.tile .n{font-family:'Bricolage Grotesque',system-ui,sans-serif;font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.tile .l{font-size:12px;color:#6b7280}
+
+.phone{height:844px;overflow:hidden}
+.main{gap:14px}
+.main{padding-bottom:120px}
+  </style>
+</helmet>
+<div class="phone">
+<div class="top" style="padding:16px 18px 8px"><div style="display:flex;align-items:center;gap:10px"><div class="icobtn" style="width:36px;height:36px;border-radius:10px;color:#14161a"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg></div><div class="disp" style="font-size:18px">Thống kê</div></div></div>
+<div class="main">
+
+<div class="tiles" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+  <div class="tile"><div class="n" style="color:#1b4dff">5</div><div class="l">ngày liên tiếp</div></div>
+  <div class="tile"><div class="n">128<span style="font-size:13px;color:#6b7280;font-weight:600">/370</span></div><div class="l">từ đã thuộc</div></div>
+  <div class="tile"><div class="n">12<span style="font-size:13px;color:#6b7280;font-weight:600">/370</span></div><div class="l">ngày lộ trình</div></div>
+  <div class="tile"><div class="n">412</div><div class="l">tổng lượt học</div></div>
+</div>
+<div class="card" style="gap:8px;padding:14px 18px">
+  <div style="display:flex;justify-content:space-between;align-items:center"><span class="eyebrow">4 tuần gần đây</span><span class="muted" style="font-size:12px;display:flex;align-items:center;gap:3px">Ít <i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#f0f2f5;border:1px solid #eef0f3"></i><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#a9b9ff;border:1px solid #eef0f3"></i><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#1b4dff;border:1px solid #eef0f3"></i> Nhiều</span></div>
+  <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px"><span class="mono" style="font-size:10.5px;color:#9aa1ad;text-align:center">T2</span><span class="mono" style="font-size:10.5px;color:#9aa1ad;text-align:center">T3</span><span class="mono" style="font-size:10.5px;color:#9aa1ad;text-align:center">T4</span><span class="mono" style="font-size:10.5px;color:#9aa1ad;text-align:center">T5</span><span class="mono" style="font-size:10.5px;color:#9aa1ad;text-align:center">T6</span><span class="mono" style="font-size:10.5px;color:#9aa1ad;text-align:center">T7</span><span class="mono" style="font-size:10.5px;color:#9aa1ad;text-align:center">CN</span><i style="aspect-ratio:1;border-radius:5px;background:#f0f2f5;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#6f8cff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#6f8cff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#f0f2f5;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#d2dbff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#6f8cff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#a9b9ff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#1b4dff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#6f8cff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#f0f2f5;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#6f8cff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#f0f2f5;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#a9b9ff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#d2dbff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#6f8cff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#f0f2f5;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#f0f2f5;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#1b4dff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#a9b9ff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#6f8cff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#6f8cff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#a9b9ff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#a9b9ff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#1b4dff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#f0f2f5;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#f0f2f5;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#1b4dff;border:1px solid #eef0f3"></i><i style="aspect-ratio:1;border-radius:5px;background:#f0f2f5;border:1px solid #eef0f3"></i></div>
+</div>
+<div class="card" style="gap:0;padding:12px 18px">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:6px"><span class="eyebrow">Từ hay sai · 6</span><span class="chip ok" style="height:32px">Ôn ngay</span></div>
+<div class="si" style="min-height:56px;padding:10px 4px"><div><b style="font-size:15px">rollback</b> <span class="mono" style="font-size:13px;color:#6b7280">/ˈrəʊlbæk/</span><br><small class="muted" style="font-size:12.5px">quay lại bản trước</small></div><div style="width:40px;height:40px;border-radius:11px;border:1px solid #e6e8ec;background:#fff;color:#1b4dff;display:flex;align-items:center;justify-content:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"></path></svg></div></div><div class="si" style="min-height:56px;padding:10px 4px"><div><b style="font-size:15px">merge</b> <span class="mono" style="font-size:13px;color:#6b7280">/mɜːdʒ/</span><br><small class="muted" style="font-size:12.5px">gộp nhánh</small></div><div style="width:40px;height:40px;border-radius:11px;border:1px solid #e6e8ec;background:#fff;color:#1b4dff;display:flex;align-items:center;justify-content:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"></path></svg></div></div><div class="si" style="min-height:56px;padding:10px 4px"><div><b style="font-size:15px">staging</b> <span class="mono" style="font-size:13px;color:#6b7280">/ˈsteɪdʒɪŋ/</span><br><small class="muted" style="font-size:12.5px">môi trường thử</small></div><div style="width:40px;height:40px;border-radius:11px;border:1px solid #e6e8ec;background:#fff;color:#1b4dff;display:flex;align-items:center;justify-content:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"></path></svg></div></div>
+</div>
+
+</div>
+
+<div class="tabs">
+  <div class="tab on"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"></path><path d="M5 10v10h14V10"></path></svg></span><b>Hôm nay</b></div>
+  <div class="tab"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg></span><b>Câu</b></div>
+  <div class="tab"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"></path><path d="M19 3v18"></path></svg></span><b>Từ vựng</b></div>
+  <div class="tab"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10h8M8 14h5"></path><path d="M4 5h16v11H8l-4 3z"></path></svg></span><b>Giao tiếp</b></div>
+  <div class="tab"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11a6 6 0 1 1 12 0c0 4-4 4-4 7a3 3 0 0 1-5 2"></path><path d="M9 11a3 3 0 0 1 6 0"></path></svg></span><b>Nghe</b></div>
+</div>
+
+</div>
+</x-dc>
+</body>
+</html>

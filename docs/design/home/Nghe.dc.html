@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+  <style>
+body{margin:0;background:#f5f6f8;color:#14161a;font-family:'Hanken Grotesk',system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:#1b4dff}a:hover{color:#1740d6}
+.phone{width:390px;min-height:844px;background:#f5f6f8;display:flex;flex-direction:column;position:relative}
+.top{padding:22px 20px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand-wrap{display:flex;align-items:center;gap:11px}
+.logo{width:40px;height:40px;border-radius:11px;background:linear-gradient(140deg,#4f7bff,#1234d8);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(27,77,255,.3);color:#fff;font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:600;font-size:15px;letter-spacing:-.04em}
+.brand{font-family:'Bricolage Grotesque','Hanken Grotesk',system-ui,sans-serif;font-size:18px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.top-actions{display:flex;align-items:center;gap:8px}
+.streak{display:flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:9px;background:#fff;border:1px solid #e6e8ec;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:14px;font-weight:600}
+.streak b{color:#1b4dff}
+.icobtn{width:38px;height:38px;border-radius:11px;border:1px solid #e6e8ec;background:#fff;color:#6b7280;display:flex;align-items:center;justify-content:center}
+.main{flex-grow:1;padding:6px 18px 100px;display:flex;flex-direction:column;gap:16px}
+.card{background:#fff;border:1px solid #e6e8ec;border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#6b7280}
+.disp{font-family:'Bricolage Grotesque','Hanken Grotesk',system-ui,sans-serif;font-weight:800;letter-spacing:-.02em}
+.muted{color:#6b7280;font-size:14.5px}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:52px;padding:0 18px;border-radius:12px;border:none;background:#1b4dff;color:#fff;font-weight:700;font-size:15px;width:100%}
+.btn.ghost{background:#fff;color:#14161a;border:1px solid #e6e8ec}
+.btn.sm{height:42px;font-size:14px;padding:0 14px;border-radius:10px;width:auto}
+.si{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 4px;border-bottom:1px solid #e6e8ec}
+.si:last-child{border-bottom:none}
+.tick{width:28px;height:28px;border-radius:999px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:#f0f2f5;color:#9aa1ad}
+.tick.on{background:#1b4dff;color:#fff}
+.tick.next{background:#e9eeff;color:#1b4dff;border:2px solid #1b4dff}
+.bar{height:8px;border-radius:5px;background:#e6e8ec;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:5px;background:#1b4dff}
+.chip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:9px;font-size:12.5px;font-weight:600;background:#fff;color:#6b7280;border:1px solid #e6e8ec;white-space:nowrap}
+.chip.ok{background:#e9eeff;color:#1740d6;border-color:transparent}
+.heat{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px}
+.heat i{display:block;aspect-ratio:1;border-radius:4px;background:#f0f2f5;border:1px solid #eef0f3}
+.heat i.l1{background:#d2dbff}.heat i.l2{background:#a9b9ff}.heat i.l3{background:#6f8cff}.heat i.l4{background:#1b4dff}
+.heat i.today{box-shadow:0 0 0 2px #1b4dff}
+.tabs{position:absolute;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e6e8ec;display:flex;padding:9px 6px 11px}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;color:#9aa1ad;font-size:10.5px;font-weight:600}
+.tab.on{color:#1b4dff}
+.tab .ic{width:38px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center}
+.tab.on .ic{background:#e9eeff}
+.tab svg{width:21px;height:21px}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tile{background:#fff;border:1px solid #e6e8ec;border-radius:14px;padding:12px 12px 10px;display:flex;flex-direction:column;gap:2px}
+.tile .n{font-family:'Bricolage Grotesque',system-ui,sans-serif;font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.tile .l{font-size:12px;color:#6b7280}
+
+.phone{height:844px;overflow:hidden}
+.main{gap:14px}
+.main{padding-bottom:190px}
+  </style>
+</helmet>
+<div class="phone">
+<div class="top">
+  <div class="brand-wrap"><div class="logo">E&gt;</div><div class="brand">IT English</div></div>
+  <div class="top-actions">
+    <div class="streak"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9z"></path></svg><b>5</b></div>
+    <div class="icobtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div>
+  </div>
+</div>
+
+<div class="main">
+
+<div style="display:flex;border:1px solid #e6e8ec;border-radius:11px;overflow:hidden;background:#fff"><div style="flex:1;height:40px;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:600;background:#1b4dff;color:#fff;border-right:1px solid #e6e8ec">Chép chính tả</div><div style="flex:1;height:40px;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:600;color:#6b7280">Nhại theo</div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;justify-content:space-between"><span class="muted" style="font-size:13.5px">Câu 1 / 148</span><span class="mono" style="font-size:12.5px;color:#6b7280">Nghe &amp; chép</span></div><div class="bar" style="height:6px"><i style="width:1%"></i></div></div>
+<div class="card" style="align-items:center;gap:12px;padding:22px 18px">
+  <div style="width:72px;height:72px;border-radius:20px;background:#1b4dff;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 22px rgba(27,77,255,.3)"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"></path></svg></div>
+  <div style="display:flex;gap:8px"><span class="chip" style="height:34px">0.6× chậm</span><span class="chip ok" style="height:34px">1× thường</span><span class="chip" style="height:34px">Nghe 2 lần</span></div>
+</div>
+<div class="card" style="gap:10px">
+  <div style="display:flex;justify-content:space-between;align-items:center"><span class="eyebrow">Đối chiếu · đúng 1/8 từ</span><span class="chip" style="height:28px;font-size:12px">Nghe lại</span></div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px"><span class="mono" style="padding:7px 11px;border-radius:7px;font-size:13.5px;font-weight:500;background:#fbeeec;color:#c0392b">Today</span><span class="mono" style="padding:7px 11px;border-radius:7px;font-size:13.5px;font-weight:500;background:#fbeeec;color:#c0392b">I</span><span class="mono" style="padding:7px 11px;border-radius:7px;font-size:13.5px;font-weight:500;background:#fbeeec;color:#c0392b">will</span><span class="mono" style="padding:7px 11px;border-radius:7px;font-size:13.5px;font-weight:500;background:#fbeeec;color:#c0392b">work</span><span class="mono" style="padding:7px 11px;border-radius:7px;font-size:13.5px;font-weight:500;background:#e9eeff;color:#1740d6">on</span><span class="mono" style="padding:7px 11px;border-radius:7px;font-size:13.5px;font-weight:500;background:#fbeeec;color:#c0392b">the</span><span class="mono" style="padding:7px 11px;border-radius:7px;font-size:13.5px;font-weight:500;background:#fbeeec;color:#c0392b">payment</span><span class="mono" style="padding:7px 11px;border-radius:7px;font-size:13.5px;font-weight:500;background:#fbeeec;color:#c0392b">module</span></div>
+  <div class="muted" style="font-size:13px">Chữ đỏ là từ bạn nghe sót hoặc gõ sai. Thử lại lần 2 rồi hãy sang câu tiếp.</div>
+</div>
+
+</div>
+<div style="position:absolute;left:0;right:0;bottom:66px;padding:12px 18px 10px;background:linear-gradient(180deg,rgba(245,246,248,0) 0%,#f5f6f8 30%)"><div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;gap:8px;align-items:center"><div style="flex-grow:1;height:52px;border-radius:14px;border:1px solid #1b4dff;background:#fff;display:flex;align-items:center;padding:0 15px;font-size:15px">we deploy on friday</div><div style="width:52px;height:52px;border-radius:14px;border:1px solid #e6e8ec;background:#fff;color:#1b4dff;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0"></path><path d="M12 18v3"></path></svg></div></div><div style="display:flex;gap:10px"><div class="btn ghost" style="flex:0 0 110px">Thử lại</div><div class="btn">Câu tiếp <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg></div></div></div></div>
+<div class="tabs">
+  <div class="tab"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"></path><path d="M5 10v10h14V10"></path></svg></span><b>Hôm nay</b></div>
+  <div class="tab"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg></span><b>Câu</b></div>
+  <div class="tab"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"></path><path d="M19 3v18"></path></svg></span><b>Từ vựng</b></div>
+  <div class="tab"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10h8M8 14h5"></path><path d="M4 5h16v11H8l-4 3z"></path></svg></span><b>Giao tiếp</b></div>
+  <div class="tab on"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11a6 6 0 1 1 12 0c0 4-4 4-4 7a3 3 0 0 1-5 2"></path><path d="M9 11a3 3 0 0 1 6 0"></path></svg></span><b>Nghe</b></div>
+</div>
+
+</div>
+</x-dc>
+</body>
+</html>

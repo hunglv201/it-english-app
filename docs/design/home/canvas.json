@@ -5,50 +5,164 @@
    "x": 0,
    "y": 0,
    "w": 390,
-   "h": 1010,
-   "title": "A · Học tiếp"
+   "h": 844,
+   "title": "Đề xuất · Mobile-first",
+   "page": "page-1"
   },
   {
-   "file": "OptionB.dc.html",
+   "file": "OptionA.dc.html",
    "x": 480,
    "y": 0,
    "w": 390,
-   "h": 1290,
-   "title": "B · Bảng tổng quan"
+   "h": 1010,
+   "title": "A · Học tiếp",
+   "page": "page-1"
   },
   {
-   "file": "OptionC.dc.html",
+   "file": "OptionB.dc.html",
    "x": 960,
    "y": 0,
    "w": 390,
+   "h": 1290,
+   "title": "B · Bảng tổng quan",
+   "page": "page-1"
+  },
+  {
+   "file": "OptionC.dc.html",
+   "x": 1440,
+   "y": 0,
+   "w": 390,
    "h": 1090,
-   "title": "C · Theo lộ trình"
+   "title": "C · Theo lộ trình",
+   "page": "page-1"
+  },
+  {
+   "file": "TheLat.dc.html",
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Từ vựng · Thẻ lật",
+   "page": "page-2"
+  },
+  {
+   "file": "KiemTra.dc.html",
+   "x": 480,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Từ vựng · Kiểm tra",
+   "page": "page-2"
+  },
+  {
+   "file": "Cau.dc.html",
+   "x": 960,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Câu · phiên luyện",
+   "page": "page-2"
+  },
+  {
+   "file": "GiaoTiep.dc.html",
+   "x": 1440,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Giao tiếp · chat AI",
+   "page": "page-2"
+  },
+  {
+   "file": "Nghe.dc.html",
+   "x": 0,
+   "y": 1000,
+   "w": 390,
+   "h": 844,
+   "title": "Nghe · chép chính tả",
+   "page": "page-2"
+  },
+  {
+   "file": "Ngay.dc.html",
+   "x": 480,
+   "y": 1000,
+   "w": 390,
+   "h": 844,
+   "title": "Lộ trình · một ngày",
+   "page": "page-2"
+  },
+  {
+   "file": "ThongKe.dc.html",
+   "x": 960,
+   "y": 1000,
+   "w": 390,
+   "h": 844,
+   "title": "Thống kê",
+   "page": "page-2"
+  },
+  {
+   "file": "CauHinh.dc.html",
+   "x": 1440,
+   "y": 1000,
+   "w": 390,
+   "h": 844,
+   "title": "Cấu hình",
+   "page": "page-2"
   }
  ],
  "annotations": [
   {
-   "id": "note-a",
+   "id": "note-main",
    "x": 0,
-   "y": -150,
+   "y": -190,
    "w": 390,
-   "text": "A · Học tiếp — Một việc tiếp theo là trung tâm.\nƯu: rõ phải bấm gì, gọn, ít cuộn. Nhược: ít số liệu, người thích thống kê phải bấm thêm."
+   "text": "ĐỀ XUẤT · Mobile-first — Mọi thứ cần thiết trong 1 màn 390×844, không cuộn.\n• Nút 'Học tiếp' ghim trên tab bar, trong tầm ngón cái.\n• Mỗi dòng việc cao ≥56px, chạm được cả dòng.\n• Tuần này: 7 ô có nhãn thứ, chạm để mở thống kê.\n• Thông tin phụ (lộ trình, từ thuộc, từ hay sai) là thẻ vuốt ngang.\n• Một con số tiến độ duy nhất: 3/4 việc.",
+   "page": "page-1"
   },
   {
-   "id": "note-b",
+   "id": "note-a",
    "x": 480,
    "y": -150,
    "w": 390,
-   "text": "B · Bảng tổng quan — Nhiều thông tin: 3 ô số, hôm nay, lộ trình, hoạt động, từ hay sai.\nƯu: đúng ý 'home có đủ thông tin'. Nhược: dài nhất, phải cuộn 1,5 màn."
+   "text": "A · Học tiếp — Một việc tiếp theo là trung tâm.\nƯu: rõ phải bấm gì, gọn, ít cuộn. Nhược: ít số liệu, người thích thống kê phải bấm thêm.",
+   "page": "page-1"
   },
   {
-   "id": "note-c",
+   "id": "note-b",
    "x": 960,
    "y": -150,
    "w": 390,
-   "text": "C · Theo lộ trình — Ngày đang học là trung tâm, 4 việc là phần ôn bổ trợ.\nƯu: gắn Hôm nay với Lộ trình (sửa mục A4). Nhược: đổi cách hiểu 'bài hôm nay', cần sửa logic nhiều hơn."
+   "text": "B · Bảng tổng quan — Nhiều thông tin: 3 ô số, hôm nay, lộ trình, hoạt động, từ hay sai.\nƯu: đúng ý 'home có đủ thông tin'. Nhược: dài nhất, phải cuộn 1,5 màn.",
+   "page": "page-1"
+  },
+  {
+   "id": "note-c",
+   "x": 1440,
+   "y": -150,
+   "w": 390,
+   "text": "C · Theo lộ trình — Ngày đang học là trung tâm, 4 việc là phần ôn bổ trợ.\nƯu: gắn Hôm nay với Lộ trình (sửa mục A4). Nhược: đổi cách hiểu 'bài hôm nay', cần sửa logic nhiều hơn.",
+   "page": "page-1"
+  },
+  {
+   "id": "note-others",
+   "x": 0,
+   "y": -170,
+   "w": 900,
+   "page": "page-2",
+   "text": "CÁC MÀN KHÁC · cùng nguyên tắc mobile-first:\n• Hành động chính ghim trên tab bar (chấm thẻ, câu tiếp, gửi, hoàn thành ngày).\n• Nội dung chính vừa 1 màn 390×844, không phải cuộn để thấy nút.\n• Chip chủ đề có fade mép phải; hàng chạm ≥52px; ô nhập 52px.\n• Chat: thẻ sửa lỗi nổi, nhiều lỗi, nút nghe câu đúng, báo còn mấy lượt được chấm.\n• Ngày lộ trình: 4 phần dạng bước, nút hoàn thành chỉ sáng khi đủ 4/4."
   }
  ],
  "launch": {
-  "view": "canvas"
- }
+  "view": "canvas",
+  "page": "page-2"
+ },
+ "pages": [
+  {
+   "id": "page-1",
+   "name": "Hôm nay"
+  },
+  {
+   "id": "page-2",
+   "name": "Các màn khác"
+  }
+ ]
 }
