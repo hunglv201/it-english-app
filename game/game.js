@@ -31,11 +31,11 @@ function daily(){const t=todayStr();if(G.daily.date!==t){G.daily={date:t,wins:0,
 const DQ=[['wins','Thắng 3 trận Bug',3,60,'⚔️'],['combo','Đạt combo x5 trong trận',5,40,'🔥'],['boss','Hạ 1 Boss',1,100,'👑']];
 const SHOP=[
  ['hp','❤️','Máu tối đa +10','Chịu đòn tốt hơn',k=>100+k*80,99,()=>{G.maxHp+=10;G.hp=Math.min(G.maxHp,G.hp+10);}],
- ['timer','⏱️','Thêm 2 giây trả lời','Mỗi câu có thêm thời gian',k=>150+k*120,5,null],
- ['combo','🔥','Combo +10% XP','XP mỗi câu đúng tăng theo combo',k=>200+k*150,5,null],
+ ['timer','⏱️','Thêm 2 giây trả lời','Thêm thời gian mỗi câu',k=>150+k*120,5,null],
+ ['combo','🔥','Combo +10% XP','Nhiều XP hơn khi combo',k=>200+k*150,5,null],
  ['rate','🌙','Mochi cày nhanh hơn','+12 xu/giờ khi AFK',k=>120+k*100,99,null],
- ['cap','⏰','Giới hạn offline +4 giờ','Tích xu lâu hơn khi vắng',k=>300+k*250,4,null],
- ['hint','💡','Gợi ý ×1','Loại 1 đáp án sai trong trận',k=>40,999,()=>{G.items.hint++;}],
+ ['cap','⏰','Giới hạn offline +4 giờ','Tích xu lâu hơn khi AFK',k=>300+k*250,4,null],
+ ['hint','💡','Gợi ý ×1','Loại 1 đáp án sai',k=>40,999,()=>{G.items.hint++;}],
  ['potion','🧪','Bình máu ×1','Hồi 50 HP giữa trận',k=>80,999,()=>{G.items.potion++;}]
 ];
 // bootstrap từ tiến trình app cũ (ngày đang học)
@@ -184,7 +184,10 @@ function vMap(){
   const chips=el('div','qchips');
   ['v','p','l','b'].forEach(k=>{const c=el('button','qchip'+(st[k]?' done':''));c.style.setProperty('--c',QI[k][2]);c.innerHTML='<span class="ic">'+QI[k][0]+'</span><span>'+QI[k][1]+'</span><small>'+(st[k]?'★'.repeat(st[k]):'—')+'</small>';c.onclick=()=>{k==='b'?bossStart(G.cur):battleStart(G.cur,k);};chips.appendChild(c);});
   play.appendChild(chips);
-  play.appendChild(el('div','tipline','💬 '+esc(rnd(TIPS))));
+  const dl0=daily();const qd0=DQ.filter(q=>(dl0[q[0]]||0)>=q[2]).length,qc0=DQ.filter(q=>dl0.claimed[q[0]]).length;const hasNew0=(!dl0.chest)||(qd0>qc0);
+  const drow=el('button','drow'+(hasNew0?' new':''));
+  drow.innerHTML='<span class="qi">🎁</span><span class="grow"><b>Hằng ngày</b> <span class="mono">· '+(dl0.chest?'rương đã mở':'<span style="color:var(--yellow)">rương chưa mở</span>')+' · nhiệm vụ '+qc0+'/'+DQ.length+'</span></span><span class="sc">›</span>';
+  drow.onclick=e=>{e.stopPropagation();dailySheet();};play.appendChild(drow);
   main.appendChild(play);
   // ---- AFK strip ----
   const p0=idlePending();
@@ -208,11 +211,6 @@ function vMap(){
     },520);}
   paintAfk();setTimeout(amCycle,600);
   mapTimer=setInterval(()=>{paintAfk();if(++amTick%2===0)amCycle();},1000);
-  // ---- Daily strip ----
-  const dl=daily();const qdone=DQ.filter(q=>(dl[q[0]]||0)>=q[2]).length,qclaim=DQ.filter(q=>dl.claimed[q[0]]).length;const hasNew=(!dl.chest)||(qdone>qclaim);
-  const ds=el('button','strip daily'+(hasNew?' new':''));
-  ds.innerHTML='<span class="qi">🎁</span><span class="grow"><b class="h" style="font-size:14px">Hằng ngày</b><div class="mono">'+(dl.chest?'rương đã mở':'<span style="color:var(--yellow)">rương chưa mở</span>')+' · nhiệm vụ '+qclaim+'/'+DQ.length+'</div></span><span class="sc">›</span>';
-  ds.onclick=dailySheet;main.appendChild(ds);
   // ---- Dải ngày (cuộn ngang) ----
   const ch=G.ch;const days=DAYS.filter(x=>x.phase===ch);
   const rc=el('div','card railc');
@@ -526,13 +524,14 @@ const TALK=[
 ];
 function vTalk(){
   main.innerHTML='';
-  const h=el('div','card');h.innerHTML='<div class="mascot-row"><div class="mascot">'+mascot('cheer')+'</div><div class="bubble grow"><span class="who">Mochi</span>Đây là phòng tập <b>nói</b>. Bật mic lên, nói thật to — chọn đáp án không tính đâu nha!</div></div>'+(hasSR()?'':'<p class="tip" style="margin-top:10px">Trình duyệt này không có nhận diện giọng nói — các chế độ vẫn chơi được bằng cách gõ.</p>');
+  const h=el('div','card thead');h.innerHTML='<div class="mascot xs">'+mascot('cheer')+'</div><div class="grow"><div class="eyebrow">Phòng tập nói</div><b class="h" style="font-size:16px">Bật mic, nói thật to!</b>'+(hasSR()?'<small class="muted" style="display:block;font-size:12px">Không chọn đáp án — nói hoặc gõ câu tiếng Anh</small>':'<small style="display:block;font-size:12px;color:var(--yellow)">Trình duyệt không có mic nhận diện — chơi bằng cách gõ</small>')+'</div>';
   main.appendChild(h);
-  const list=el('div');list.style.cssText='display:flex;flex-direction:column;gap:10px';
-  TALK.forEach(t=>{const b=el('button','quest');const rec=t[0]==='shadow'?(G.talk.shadowBest?'kỷ lục '+G.talk.shadowBest+'%':''):t[0]==='reflex'?(G.talk.reflexBest?'kỷ lục '+G.talk.reflexBest+' điểm':''):t[0]==='battle'?(G.talk.battleWins?G.talk.battleWins+' trận thắng':''):t[0]==='story'?(Object.keys(G.talk.endings).length+'/3 kết cục'):(G.talk.equipped.length+' câu · +'+equipBonus()+' xu/giờ');
-    b.innerHTML='<span class="qi" style="background:'+t[5]+'">'+t[1]+'</span><span class="grow"><b>'+t[2]+(t[4]?' <span class="kbd">AI</span>':'')+'</b><small>'+t[3]+(rec?' · <span style="color:var(--yellow)">'+rec+'</span>':'')+'</small></span><span class="ok">›</span>';
-    b.onclick=()=>({battle:talkBattleStart,shadow:shadowStart,story:storyStart,reflex:reflexStart,equip:vEquip})[t[0]]();list.appendChild(b);});
-  main.appendChild(list);
+  const rec=k=>k==='shadow'?(G.talk.shadowBest?'kỷ lục '+G.talk.shadowBest+'%':'chưa chơi'):k==='reflex'?(G.talk.reflexBest?'kỷ lục '+G.talk.reflexBest+' điểm':'chưa chơi'):k==='battle'?(G.talk.battleWins?G.talk.battleWins+' trận thắng':'chưa thắng trận nào'):k==='story'?(Object.keys(G.talk.endings).length+'/3 kết cục'):(G.talk.equipped.length+' câu · +'+equipBonus()+' xu/giờ');
+  const fn={battle:talkBattleStart,shadow:shadowStart,story:storyStart,reflex:reflexStart,equip:vEquip};
+  const bt=TALK[0];const hero=el('button','thero');hero.innerHTML='<span class="qi">'+bt[1]+'</span><span class="grow"><b>'+bt[2]+' <span class="kbd">AI</span></b><small>'+bt[3]+'</small><small class="rec">'+rec('battle')+(aiConfigured()?'':' · cần cài AI')+'</small></span><span class="sc">›</span>';hero.onclick=fn.battle;main.appendChild(hero);
+  const grid=el('div','tgrid');
+  TALK.slice(1).forEach(t=>{const b=el('button','tmode');b.style.setProperty('--c',t[5]);b.innerHTML='<span class="qi">'+t[1]+'</span><b>'+t[2]+'</b><small>'+t[3]+'</small><span class="rec">'+rec(t[0])+'</span>';b.onclick=fn[t[0]];grid.appendChild(b);});
+  main.appendChild(grid);
 }
 function talkHeader(title,sub,extra){const h=el('div','card');h.style.padding='12px 14px';h.innerHTML='<div class="row between"><div><div class="eyebrow">'+title+'</div><b class="h" style="font-size:16px">'+sub+'</b></div><button class="btn ghost sm" id="quitT">✕ Thoát</button></div>'+(extra||'');main.appendChild(h);$('#quitT').onclick=()=>{stopSR();speechSynthesis&&speechSynthesis.cancel();go('talk');};}
 function micButton(label,onStart){const b=el('button','btn blue block',label||'🎤 Bấm rồi nói');b.onclick=()=>onStart(b);return b;}
@@ -664,16 +663,16 @@ function vEquip(){
 /* ---------- SHOP ---------- */
 function vShop(){
   main.innerHTML='';
-  const h=el('div','card');h.innerHTML='<div class="row between"><div><div class="eyebrow">Shop nâng cấp</div><b class="h" style="font-size:18px">Tiêu xu cho mạnh hơn</b></div><span class="coins"><i></i>'+G.coins+'</span></div><div class="mascot-row" style="margin-top:12px"><div class="mascot">'+mascot('think')+'</div><div class="bubble grow"><span class="who">Mochi</span>Xu kiếm được từ trận đánh và lúc AFK. Nâng "cày nhanh hơn" sớm là lời nhất đó!</div></div>';
+  const h=el('div','card thead');h.innerHTML='<div class="mascot xs">'+mascot('think')+'</div><div class="grow"><div class="eyebrow">Shop nâng cấp</div><b class="h" style="font-size:16px">Tiêu xu cho mạnh hơn</b><small class="muted" style="display:block;font-size:12px">Xu từ trận đánh & AFK. Nâng "cày nhanh" sớm là lời nhất!</small></div>';
   main.appendChild(h);
-  const list=el('div');list.style.cssText='display:flex;flex-direction:column;gap:10px';
-  SHOP.forEach(it=>{const key=it[0],isItem=key==='hint'||key==='potion';const k=isItem?0:(G.up[key]||0);const max=it[5];const cost=it[4](k);const maxed=!isItem&&k>=max;
-    const r=el('div','shopi');
-    r.innerHTML='<span class="qi">'+it[1]+'</span><span class="grow"><b>'+it[2]+(isItem?' <span class="kbd">có '+G.items[key]+'</span>':maxed?' <span class="kbd">MAX</span>':' <span class="kbd">Lv '+k+'/'+(max>=99?'∞':max)+'</span>')+'</b><small>'+it[3]+'</small></span>';
-    const b=el('button','btn sm '+(maxed?'ghost':G.coins>=cost?'yellow':'ghost'),maxed?'—':'🪙 '+cost);b.disabled=maxed||G.coins<cost;
+  const row=it=>{const key=it[0],isItem=key==='hint'||key==='potion';const k=isItem?0:(G.up[key]||0);const max=it[5];const cost=it[4](k);const maxed=!isItem&&k>=max;
+    const r=el('div','shopr');
+    r.innerHTML='<span class="qi">'+it[1]+'</span><span class="nm"><b>'+it[2]+'</b><small>'+(isItem?'<span class="kbd">có '+G.items[key]+'</span>':maxed?'<span class="kbd">MAX</span>':'<span class="kbd">Lv '+k+(max>=99?'':'/'+max)+'</span>')+' '+it[3]+'</small></span>';
+    const b=el('button','btn sm '+(maxed?'ghost':G.coins>=cost?'yellow':'ghost'),maxed?'MAX':'🪙 '+cost);b.disabled=maxed||G.coins<cost;
     b.onclick=()=>{if(G.coins<cost)return;G.coins-=cost;if(isItem){it[6]();}else{G.up[key]=k+1;if(it[6])it[6]();}saveG();paintCoins();sfx.ok();toast('Đã mua: '+it[2]);vShop();};
-    r.appendChild(b);list.appendChild(r);});
-  main.appendChild(list);
+    r.appendChild(b);return r;};
+  main.appendChild(group('Nâng cấp vĩnh viễn',SHOP.filter(i=>i[0]!=='hint'&&i[0]!=='potion').map(row)));
+  main.appendChild(group('Vật phẩm dùng trong trận',SHOP.filter(i=>i[0]==='hint'||i[0]==='potion').map(row)));
 }
 
 /* ---------- AI key setup (dùng chung với app) ---------- */
@@ -719,27 +718,23 @@ function group(title,rows){const g=el('div','sgroup');if(title)g.appendChild(el(
 function vProfile(){
   main.innerHTML='';
   const hero=el('div','card phero');
-  hero.innerHTML='<div class="avatar big">'+mascot(G.hp<=30?'sad':'happy')+'</div><div class="pname h">'+esc(G.name)+'</div><div class="row" style="justify-content:center;gap:8px;margin-top:6px"><span class="lv">Lv '+G.lv+'</span><span class="kbd">'+rankName()+'</span></div>'+
-    '<div class="pbars"><div><small>HP '+G.hp+'/'+G.maxHp+'</small><div class="bar hp'+(G.hp<=30?' low':'')+'"><i style="width:'+Math.round(G.hp/G.maxHp*100)+'%"></i></div></div><div><small>XP '+G.xp+'/'+xpNeed(G.lv)+'</small><div class="bar xp"><i style="width:'+Math.round(G.xp/xpNeed(G.lv)*100)+'%"></i></div></div></div>';
+  hero.innerHTML='<div class="ptop"><div class="avatar">'+mascot(G.hp<=30?'sad':'happy')+'</div><div class="grow"><div class="row" style="gap:8px;flex-wrap:wrap"><b class="pname h">'+esc(G.name)+'</b><span class="lv">Lv '+G.lv+'</span></div><div class="prank">'+rankName()+' · <span class="mono">'+(G.streak||0)+' ngày liên tiếp</span></div></div><button class="nav sm" id="pEdit" title="Đổi tên">✏️</button></div>'+
+    '<div class="pbars"><div><small>HP <b>'+G.hp+'/'+G.maxHp+'</b></small><div class="bar mini hp'+(G.hp<=30?' low':'')+'"><i style="width:'+Math.round(G.hp/G.maxHp*100)+'%"></i></div></div><div><small>XP <b>'+G.xp+'/'+xpNeed(G.lv)+'</b></small><div class="bar mini xp"><i style="width:'+Math.round(G.xp/xpNeed(G.lv)*100)+'%"></i></div></div></div>';
   main.appendChild(hero);
+  const rename=()=>openModal((m,close)=>{m.innerHTML='<div class="h" style="font-size:20px">Đổi tên</div>';const i=el('input','input');i.value=G.name;i.maxLength=16;i.style.marginTop='12px';m.appendChild(i);const r=el('div','row');r.style.cssText='gap:10px;margin-top:12px';const c=el('button','btn ghost grow','Huỷ');c.onclick=close;const ok=el('button','btn grow','Lưu');ok.onclick=()=>{G.name=i.value.trim()||'Dev';saveG();close();toast('Đã đổi tên');vProfile();};r.appendChild(c);r.appendChild(ok);m.appendChild(r);setTimeout(()=>i.focus(),50);});
+  $('#pEdit').onclick=rename;
   const done=clearedDays();
   const stats=el('div','stats');
-  [['⚔️',G.wins,'trận thắng'],['👑',G.bossWins,'boss'],['🗓️',done,'ngày xong'],['🔥',G.bestCombo||0,'combo max'],['🎯',G.total?Math.round(G.correct/G.total*100)+'%':'—','chính xác'],['🔥',(G.streak||0),'chuỗi ngày']].forEach(s=>{stats.appendChild(el('div','stile','<div class="ic">'+s[0]+'</div><div class="h n">'+s[1]+'</div><small>'+s[2]+'</small>'));});
-  main.appendChild(group('Thống kê',[stats]));
-  const g=el('div','badges');BADGES.forEach(x=>{g.appendChild(el('div','badge'+(G.badges[x[0]]?'':' lock'),x[1]+'<small>'+x[2]+'</small>'));});
+  [['⚔️',G.wins,'thắng'],['👑',G.bossWins,'boss'],['🗓️',done,'ngày'],['🔥',G.bestCombo||0,'combo'],['🎯',G.total?Math.round(G.correct/G.total*100)+'%':'—','đúng'],['🪙',G.coins,'xu']].forEach(s=>{stats.appendChild(el('div','stile','<span class="ic">'+s[0]+'</span><b class="h n">'+s[1]+'</b><small>'+s[2]+'</small>'));});
+  hero.appendChild(stats);
+  const g=el('div','badges rail');BADGES.forEach(x=>{g.appendChild(el('div','badge'+(G.badges[x[0]]?'':' lock'),x[1]+'<small>'+x[2]+'</small>'));});
   main.appendChild(group('Huy hiệu · '+Object.keys(G.badges).length+'/'+BADGES.length,[g]));
-  const ai=aiConfigured();
-  main.appendChild(group('Tài khoản',[
-    setRow('✏️','Tên nhân vật',esc(G.name),()=>openModal((m,close)=>{m.innerHTML='<div class="h" style="font-size:20px">Đổi tên</div>';const i=el('input','input');i.value=G.name;i.maxLength=16;i.style.marginTop='12px';m.appendChild(i);const r=el('div','row');r.style.cssText='gap:10px;margin-top:12px';const c=el('button','btn ghost grow','Huỷ');c.onclick=close;const ok=el('button','btn grow','Lưu');ok.onclick=()=>{G.name=i.value.trim()||'Dev';saveG();close();toast('Đã đổi tên');vProfile();};r.appendChild(c);r.appendChild(ok);m.appendChild(r);setTimeout(()=>i.focus(),50);})),
-    setRow('🤖','Boss AI',inClaude()?'<b style="color:var(--green)">Claude sẵn có</b>':(aiCfg()?'<b style="color:var(--green)">'+(PROV[aiCfg().provider]||[aiCfg().provider])[0].split(' ·')[0]+'</b>':'chưa có key'),aiSetupSheet)
-  ]));
   main.appendChild(group('Cài đặt',[
+    setRow('🤖','Boss AI',inClaude()?'<b style="color:var(--green)">Claude sẵn có</b>':(aiCfg()?'<b style="color:var(--green)">'+(PROV[aiCfg().provider]||[aiCfg().provider])[0].split(' ·')[0]+'</b>':'chưa có key'),aiSetupSheet),
     toggleRow('🔊','Âm thanh',G.sound!==false,v=>{G.sound=v;saveG();vProfile();}),
     toggleRow('🌸','Hoa rơi & hiệu ứng nền',G.fx!==false,v=>{G.fx=v;saveG();document.body.classList.toggle('nofx',!v);vProfile();}),
     setRow('📖','Xem lại hướng dẫn','',tutorial),
-    setRow('📱','Mở app học IT English','',openApp)
-  ]));
-  main.appendChild(group('Dữ liệu',[
+    setRow('📱','Mở app học IT English','',openApp),
     setRow('🗑️','Đặt lại tiến trình game','',()=>openModal((m,close)=>{m.innerHTML='<div class="h" style="font-size:20px">Đặt lại?</div><p class="muted">Xoá toàn bộ XP, xu, huy hiệu, sao. Không ảnh hưởng app học.</p>';const r=el('div','row');r.style.cssText='gap:10px;margin-top:12px';const a=el('button','btn ghost grow','Huỷ');a.onclick=close;const b2=el('button','btn grow','Đặt lại');b2.onclick=()=>{localStorage.removeItem(GKEY);location.reload();};r.appendChild(a);r.appendChild(b2);m.appendChild(r);}),'danger')
   ]));
   main.appendChild(el('p','muted','<small style="font-family:var(--mono);font-size:11px">IT English Quest · dữ liệu lưu trên máy này</small>')).style.textAlign='center';
