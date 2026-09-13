@@ -265,7 +265,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.5.0", APP_BUILD="2026-09-13";
+const APP_VERSION="1.5.1", APP_BUILD="2026-09-13";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -623,12 +623,15 @@ function vHome(){
   const pg=el('button','btn ghost block');pg.textContent='Tiến độ & thống kê ›';pg.onclick=vProgress;v.appendChild(pg);
   main.appendChild(v);
 }
+function vnDate(key){var d=new Date(key+'T00:00:00');var wd=['CN','T2','T3','T4','T5','T6','T7'][d.getDay()];return wd+' '+d.getDate()+'/'+(d.getMonth()+1);}
 function miniHeat(nDays){
   var wrap=el('div');wrap.style.cssText='display:flex;gap:4px;margin-top:12px';
   var maxN=1;Object.keys(store.hist||{}).forEach(function(k){if(store.hist[k]>maxN)maxN=store.hist[k];});
-  var today=new Date();
+  var today=new Date(),tkey=todayStr();
   for(var i=nDays-1;i>=0;i--){var d=new Date(today);d.setDate(today.getDate()-i);var key=d.toISOString().slice(0,10);var n=(store.hist&&store.hist[key])||0;var lvl=n===0?0:Math.min(4,Math.ceil(n/maxN*4));
-    var cell=el('div');cell.style.cssText='flex:1;aspect-ratio:1;border-radius:4px;background:'+(lvl===0?'var(--surface2)':'color-mix(in srgb, var(--accent) '+(lvl*22+12)+'%, var(--surface2))')+';border:1px solid var(--line2)';cell.title=key+' · '+n+' lượt';wrap.appendChild(cell);}
+    var cell=el('div');cell.style.cssText='flex:1;aspect-ratio:1;border-radius:4px;background:'+(lvl===0?'var(--surface2)':'color-mix(in srgb, var(--accent) '+(lvl*22+12)+'%, var(--surface2))')+';border:1px solid var(--line2)'+(key===tkey?';box-shadow:0 0 0 2px var(--accent)':'');cell.title=vnDate(key)+' · '+n+' lượt';
+    cell.onclick=(function(kk,nn){return function(ev){ev.stopPropagation();toast(vnDate(kk)+(kk===tkey?' (hôm nay)':'')+' · '+nn+' lượt',nn>0?'ok':'');};})(key,n);
+    wrap.appendChild(cell);}
   return wrap;
 }
 function statTile(n,label){
@@ -663,24 +666,30 @@ function vProgress(){
   pc.appendChild(barRow('Ngày lộ trình',daysDone,DAYS.length));
   v.appendChild(pc);
   // Lịch hoạt động (heatmap 5 tuần)
-  const hc0=el('div','card');hc0.appendChild(el('div','eyebrow','35 ngày gần đây'));
-  const grid=el('div');grid.style.cssText='display:grid;grid-template-columns:repeat(7,1fr);gap:5px';
+  const hc0=el('div','card');hc0.appendChild(el('div','eyebrow','Lịch học · 7 tuần gần đây'));
   const days=['CN','T2','T3','T4','T5','T6','T7'];
-  var today=new Date();var start=new Date(today);start.setDate(today.getDate()-34);
-  // căn về đầu tuần (CN)
+  const grid=el('div');grid.style.cssText='display:grid;grid-template-columns:repeat(7,1fr);gap:5px';
+  // hàng nhãn thứ
+  days.forEach(function(w){var h=el('div');h.style.cssText='text-align:center;font-family:var(--mono);font-size:10px;color:var(--faint);padding-bottom:2px';h.textContent=w;grid.appendChild(h);});
+  var today=new Date(),tkey=todayStr();var start=new Date(today);start.setDate(today.getDate()-34);
   start.setDate(start.getDate()-start.getDay());
   var maxN=1;Object.keys(store.hist||{}).forEach(function(k){if(store.hist[k]>maxN)maxN=store.hist[k];});
+  var monShown={};
   for(var i=0;i<49;i++){
     var d=new Date(start);d.setDate(start.getDate()+i);
     var key=d.toISOString().slice(0,10);var n=(store.hist&&store.hist[key])||0;
     var cell=el('div');var lvl=n===0?0:Math.min(4,Math.ceil(n/maxN*4));
     var future=d>today;
     var bg=future?'transparent':(lvl===0?'var(--surface2)':'color-mix(in srgb, var(--accent) '+(lvl*22+12)+'%, var(--surface2))');
-    cell.style.cssText='aspect-ratio:1;border-radius:5px;background:'+bg+';border:1px solid var(--line2)';
-    cell.title=key+' · '+n+' lượt';grid.appendChild(cell);
+    cell.style.cssText='position:relative;aspect-ratio:1;border-radius:5px;background:'+bg+';border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--faint)'+(key===tkey?';box-shadow:0 0 0 2px var(--accent)':'');
+    // hiện số ngày ở ô đầu mỗi tháng để định vị
+    var mk=d.getFullYear()+'-'+d.getMonth();
+    if(!future&&(d.getDate()===1||!monShown[mk])){monShown[mk]=1;cell.textContent=d.getDate()+'/'+(d.getMonth()+1);cell.style.fontSize='8px';}
+    if(!future){cell.title=vnDate(key)+' · '+n+' lượt';cell.onclick=(function(kk,nn){return function(){toast(vnDate(kk)+(kk===tkey?' (hôm nay)':'')+' · '+nn+' lượt',nn>0?'ok':'');};})(key,n);}
+    grid.appendChild(cell);
   }
   hc0.appendChild(grid);
-  hc0.appendChild(el('div','muted','Mỗi ô là một ngày; càng đậm càng học nhiều.'));
+  hc0.appendChild(el('div','muted','Chạm một ô để xem ngày · ô viền xanh là hôm nay · càng đậm càng học nhiều.'));
   v.appendChild(hc0);
   // weak words
   const wc=el('div','card');
