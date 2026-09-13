@@ -30,6 +30,22 @@ Phần Giao tiếp hỗ trợ nhiều nhà cung cấp — vào **Giao tiếp →
 
 Khi mở app *bên trong* claude.ai thì tự dùng Claude sẵn có, không cần key.
 
+### Học từ văn bản công việc (AI rút từ)
+
+Vào **Từ vựng → ＋ Thêm từ công việc (AI)**: dán một đoạn tiếng Anh thật (tin nhắn Teams, mô tả PR, tài liệu) → AI rút thuật ngữ IT, tạo thẻ từ + câu ví dụ + nghĩa, và thêm vào chủ đề **“Của tôi”** để ôn cùng SRS.
+
+### Tiến độ & Ôn từ hay sai
+
+Nút **Tiến độ & thống kê** ở Hôm nay: streak, số từ đã thuộc, số ngày lộ trình, tổng lượt học, và danh sách **từ hay sai** (dựa trên điểm SRS) kèm nút *Ôn ngay*. Trong Từ vựng có thêm chủ đề **“Hay sai”** để dồn ôn những từ hay quên.
+
+### Luyện lại
+
+Cuối mỗi phiên (Từ vựng, Câu, một Ngày trong lộ trình) đều có nút **↻ Luyện lại** (và *Luyện lại tự động* cho Từ vựng/Câu).
+
+### Cài như app (PWA, offline)
+
+Khi mở qua HTTPS (GitHub Pages), app có thể **cài ra màn hình chính** điện thoại/desktop và **chạy offline** (service worker cache app + dữ liệu). Trên điện thoại: mở site → menu trình duyệt → *Thêm vào màn hình chính*. Phần này tự tắt khi mở trong claude.ai.
+
 ---
 
 ## Công nghệ

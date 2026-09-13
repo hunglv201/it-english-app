@@ -1,0 +1,16 @@
+{
+  "name": "IT English — Tiếng Anh IT cơ bản",
+  "short_name": "IT English",
+  "description": "Luyện tiếng Anh IT / công sở: từ vựng, câu, giao tiếp AI, nghe.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f6f8",
+  "theme_color": "#1b4dff",
+  "lang": "vi",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

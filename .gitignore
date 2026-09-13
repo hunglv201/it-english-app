@@ -11,3 +11,7 @@ __pycache__/
 *.mjs
 build_push/
 index.html.bak
+
+# PWA icons (giữ lại)
+!icon-192.png
+!icon-512.png

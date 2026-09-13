@@ -1,5 +1,11 @@
 <title>IT English Basics</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1b4dff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="IT English">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -224,6 +230,7 @@ if(!store.ai)store.ai={provider:'',key:'',model:''};
 if(!store.cfg)store.cfg={};
 (function(dflt){for(var k in dflt){if(store.cfg[k]===undefined)store.cfg[k]=dflt[k];}})(
   {autoSpeak:true,secCard:5,secPhrase:6,secListen:5,rate:0.95,vRepeat:1,vReadEx:true,pRepeat:1,lRepeat:2});
+if(!store.myVocab)store.myVocab=[];
 // streak calc
 (function(){
   const today=new Date().toISOString().slice(0,10);
@@ -236,9 +243,14 @@ if(!store.cfg)store.cfg={};
 })();
 
 // ---------- SRS (SM-2 lite) ----------
+function allVocab(){return VOCAB.concat(store.myVocab||[]);}
+function weakWords(){
+  return allVocab().filter(function(v){var c=store.srs[v.t];return c&&(c.ease<=2.0||c.reps===0);})
+    .sort(function(a,b){return (store.srs[a.t].ease||9)-(store.srs[b.t].ease||9);});
+}
 function due(){
   const now=Date.now();
-  return VOCAB.filter(v=>{const c=store.srs[v.t];return !c||c.due<=now;});
+  return allVocab().filter(v=>{const c=store.srs[v.t];return !c||c.due<=now;});
 }
 function grade(term,g){ // g: 0 again,1 hard,2 good,3 easy
   const c=store.srs[term]||{ease:2.3,int:0,reps:0};
@@ -257,7 +269,7 @@ function grade(term,g){ // g: 0 again,1 hard,2 good,3 easy
   store.stats.done=(store.stats.done||0)+1;
   save(store);markToday('vocab');
 }
-function learnedCount(){return VOCAB.filter(v=>{const c=store.srs[v.t];return c&&c.reps>=2}).length}
+function learnedCount(){return allVocab().filter(v=>{const c=store.srs[v.t];return c&&c.reps>=2}).length}
 
 // ---------- speech ----------
 let VOICE=null;
@@ -499,6 +511,51 @@ function vHome(){
   });
   v.appendChild(card);
   const rl=el('button','btn ghost block');rl.textContent='Lộ trình '+DAYS.length+' ngày theo chủ đề ›';rl.onclick=vRoadmap;v.appendChild(rl);
+  const pg=el('button','btn ghost block');pg.textContent='Tiến độ & thống kê ›';pg.onclick=vProgress;v.appendChild(pg);
+  main.appendChild(v);
+}
+function statTile(n,label){
+  const t=el('div','tile');t.style.cursor='default';
+  t.innerHTML='<div class="n">'+n+'</div><div class="l">'+label+'</div>';return t;
+}
+function vProgress(){
+  apClear();cur='progress';renderTabs();window.scrollTo(0,0);main.innerHTML='';
+  const v=el('div','view');
+  const back=el('button','btn ghost sm');back.style.alignSelf='flex-start';back.textContent='‹ Hôm nay';back.onclick=function(){go('home');};v.appendChild(back);
+  v.appendChild(el('div',null,'<div class="eyebrow">Tiến độ</div><div style="font-size:24px;font-weight:800;font-family:var(--disp);letter-spacing:-.01em;margin-top:4px">Thống kê học tập</div>'));
+  const learned=learnedCount(), totalV=allVocab().length;
+  const daysDone=Object.keys(store.days.done||{}).length;
+  const weak=weakWords();
+  const tiles=el('div','tiles');
+  tiles.appendChild(statTile((store.stats.streak||1),'ngày streak 🔥'));
+  tiles.appendChild(statTile(learned+'/'+totalV,'từ đã thuộc'));
+  tiles.appendChild(statTile(daysDone+'/'+DAYS.length,'ngày lộ trình'));
+  tiles.appendChild(statTile((store.stats.done||0),'tổng lượt học'));
+  v.appendChild(tiles);
+  // progress bars
+  const pc=el('div','card');
+  pc.appendChild(el('div','eyebrow','Tổng quan'));
+  function barRow(label,val,tot){
+    const w=el('div');w.style.cssText='display:flex;flex-direction:column;gap:6px';
+    w.appendChild(el('div','row between')).innerHTML='<span class="muted">'+label+'</span><span class="mono" style="font-size:13px">'+val+'/'+tot+'</span>';
+    const b=el('div','bar');b.innerHTML='<i style="width:'+(tot?Math.round(val/tot*100):0)+'%"></i>';w.appendChild(b);return w;
+  }
+  pc.appendChild(barRow('Từ đã thuộc',learned,totalV));
+  pc.appendChild(barRow('Ngày lộ trình',daysDone,DAYS.length));
+  v.appendChild(pc);
+  // weak words
+  const wc=el('div','card');
+  const wh=el('div','row between');wh.appendChild(el('span','eyebrow','Từ hay sai ('+weak.length+')'));
+  if(weak.length){const rv=el('button','btn accent sm');rv.textContent='Ôn ngay';rv.onclick=function(){vMode='card';vTopic='weak';go('vocab');};wh.appendChild(rv);}
+  wc.appendChild(wh);
+  if(weak.length){
+    weak.slice(0,8).forEach(function(w){
+      const row=el('div','phrase');const tx=el('div','grow');
+      tx.innerHTML='<div class="row" style="gap:8px"><b style="font-size:15px">'+w.t+'</b><span class="ipa">'+w.ipa+'</span></div><div class="vi">'+w.vi+'</div>';
+      row.appendChild(tx);row.appendChild(playBtn(w.t));wc.appendChild(row);
+    });
+  }else{wc.appendChild(el('div','muted','Chưa có từ nào đánh dấu hay sai. Cứ ôn đều, app sẽ tự gom những từ bạn hay quên vào đây.'));}
+  v.appendChild(wc);
   main.appendChild(v);
 }
 function vRoadmap(){
@@ -599,6 +656,7 @@ function openDay(n){
     if(n<DAYS.length)openDay(n+1);else vHome();
   };
   v.appendChild(cbtn);
+  const relearn=el('button','btn ghost block');relearn.textContent='↻ Học lại ngày '+n;relearn.onclick=function(){openDay(n);};v.appendChild(relearn);
   main.appendChild(v);window.scrollTo(0,0);
 }
 
@@ -606,13 +664,23 @@ function openDay(n){
 let vMode='card', vTopic='all';
 let vqueue=[],vidx=0,vshow=false;
 const V_SESSION=15;
-function vTopicPool(){ return vTopic==='all'?VOCAB.slice():VOCAB.slice(vTopic*10,vTopic*10+10); }
+function vTopicPool(){
+  if(vTopic==='all')return allVocab();
+  if(vTopic==='mine')return (store.myVocab||[]).slice();
+  if(vTopic==='weak')return weakWords();
+  return VOCAB.slice(vTopic*10,vTopic*10+10);
+}
 function vVocab(){
   if(vMode==='list'){vList();return;}
   if(vMode==='quiz'){vQuizStart();return;}
   const pool=vTopicPool();
-  let q=pool.filter(function(w){const c=store.srs[w.t];return !c||c.due<=Date.now();});
-  if(q.length===0)q=pool.slice();
+  if(!pool.length){
+    if(vTopic==='mine'){vExtract();return;}
+    if(vTopic==='weak'){toast('Chưa có từ nào hay sai 👍');vTopic='all';}
+  }
+  const pool2=vTopicPool();
+  let q=pool2.filter(function(w){const c=store.srs[w.t];return !c||c.due<=Date.now();});
+  if(q.length===0)q=pool2.slice();
   vqueue=q.slice(0,V_SESSION);vidx=0;vshow=false;drawCard();
 }
 function vModeBar(){
@@ -626,6 +694,8 @@ function vTopicBar(){
   const wrap=el('div');wrap.style.cssText='display:flex;gap:8px;overflow-x:auto;padding-bottom:2px';
   const mk=function(label,val){const c=el('button','chip'+(vTopic===val?' on':''),label);c.style.flex='0 0 auto';c.onclick=function(){vTopic=val;vVocab();};return c;};
   wrap.appendChild(mk('Tất cả','all'));
+  const wk=weakWords().length;if(wk)wrap.appendChild(mk('Hay sai · '+wk,'weak'));
+  const mv=(store.myVocab||[]).length;wrap.appendChild(mk('Của tôi'+(mv?(' · '+mv):''),'mine'));
   D.phaseTitles.forEach(function(t,i){wrap.appendChild(mk(t,i));});
   return wrap;
 }
@@ -634,13 +704,15 @@ function drawCard(){
   v.appendChild(vModeBar());v.appendChild(vTopicBar());
   const total=vqueue.length;
   const prog=el('div','row between');
-  prog.innerHTML='<span class="muted">Phiên · '+Math.min(vidx+1,total)+'/'+total+'</span><span class="chip" style="height:26px">Đã thuộc '+learnedCount()+'/'+VOCAB.length+'</span>';
+  prog.innerHTML='<span class="muted">Phiên · '+Math.min(vidx+1,total)+'/'+total+'</span><span class="chip" style="height:26px">Đã thuộc '+learnedCount()+'/'+allVocab().length+'</span>';
   v.appendChild(prog);
   const barw=el('div','bar');barw.innerHTML='<i style="width:'+Math.round(vidx/total*100)+'%"></i>';v.appendChild(barw);
   if(vidx>=total){
-    const done=el('div','card');done.style.textAlign="center";done.style.padding="36px 16px";done.style.gap="14px";
+    const done=el('div','card');done.style.textAlign="center";done.style.padding="34px 16px";done.style.gap="12px";
     done.innerHTML='<div style="font-size:20px;font-weight:700">Xong phiên này 🎉</div><div class="muted">Bạn đã ôn '+total+' từ.</div>';
-    const nb=el('button','btn accent block');nb.textContent="Phiên mới";nb.onclick=vVocab;done.appendChild(nb);
+    const rp=el('button','btn accent block');rp.textContent="↻ Luyện lại phiên này";rp.onclick=function(){vidx=0;vshow=false;drawCard();};done.appendChild(rp);
+    const ap=el('button','btn ghost block');ap.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg> Luyện lại (tự động)';ap.onclick=function(){vidx=0;vshow=false;apVocabStart();};done.appendChild(ap);
+    const nb=el('button','btn ghost block');nb.textContent="Phiên mới (từ khác)";nb.onclick=vVocab;done.appendChild(nb);
     const qb=el('button','btn ghost block');qb.textContent="Kiểm tra chủ đề này";qb.onclick=function(){vMode='quiz';vVocab();};done.appendChild(qb);
     v.appendChild(done);main.appendChild(v);return;
   }
@@ -682,7 +754,7 @@ function vQuizStart(){
   for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=pool[i];pool[i]=pool[j];pool[j]=t;}
   qz=pool.slice(0,Math.min(10,pool.length)).map(function(w){
     const dir=Math.random()<0.5?'en2vi':'vi2en';
-    const others=VOCAB.filter(function(x){return x.t!==w.t;});
+    const others=allVocab().filter(function(x){return x.t!==w.t;});
     for(let i=others.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=others[i];others[i]=others[j];others[j]=t;}
     const d3=others.slice(0,3);
     let opts,correct,prompt;
@@ -735,9 +807,55 @@ function drawQuiz(){
 function vList(){
   main.innerHTML="";const v=el('div','view');
   v.appendChild(vModeBar());v.appendChild(vTopicBar());
+  const add=el('button','btn ghost sm');add.style.alignSelf='flex-start';add.innerHTML='＋ Thêm từ công việc (AI)';add.onclick=vExtract;v.appendChild(add);
   const sb=el('input','input');sb.id="vlSearch";sb.placeholder="Tìm từ…";sb.autocomplete="off";sb.oninput=paintVL;v.appendChild(sb);
   const list=el('div','card');list.id="vlList";v.appendChild(list);
   main.appendChild(v);paintVL();
+}
+// ---- Học từ văn bản công việc (AI rút từ) ----
+let exResult=[];
+function vExtract(){
+  main.innerHTML="";const v=el('div','view');
+  const back=el('button','btn ghost sm');back.style.alignSelf='flex-start';back.textContent='‹ Từ vựng';back.onclick=function(){vMode='list';vTopic='mine';exResult=[];go('vocab');};v.appendChild(back);
+  v.appendChild(el('div',null,'<div class="eyebrow">Học từ công việc</div><div style="font-size:22px;font-weight:800;font-family:var(--disp);letter-spacing:-.01em;margin-top:4px">Rút từ từ văn bản của bạn</div><div class="muted" style="margin-top:5px">Dán một đoạn tiếng Anh thật (tin nhắn Teams, mô tả PR, tài liệu). AI sẽ rút thuật ngữ + tạo thẻ từ và thêm vào “Của tôi”.</div>'));
+  const card=el('div','card');
+  const ta=el('textarea','input');ta.id='exText';ta.placeholder='Dán đoạn tiếng Anh vào đây…';ta.style.cssText='height:130px;padding:12px 15px;resize:vertical;line-height:1.5';
+  card.appendChild(ta);
+  const btn=el('button','btn accent block');btn.textContent='Rút từ bằng AI';
+  btn.onclick=async function(){
+    const sp=await aiInit();if(!sp){toast('Chưa cấu hình AI — mở “Cài đặt AI”');return;}
+    const txt=($("#exText").value||'').trim();if(txt.length<8){toast('Dán đoạn văn bản trước');return;}
+    btn.disabled=true;btn.textContent='Đang rút từ…';
+    try{
+      const arr=await sp.json('From this English workplace/IT text, extract up to 8 useful vocabulary words or short phrases for a Vietnamese software developer with BASIC English (skip trivial words like the, is, and). For each reply an object {"t": word or short phrase lowercase, "ipa": IPA of the word or "" if a phrase, "pos": short part of speech, "vi": Vietnamese meaning, "ex": a short natural example sentence with the term wrapped in <b></b>, "exVi": Vietnamese translation of the example}. Reply ONLY as a JSON array. Text: """'+txt.slice(0,1500)+'"""',{modelTier:'quick'});
+      exResult=(arr||[]).filter(function(x){return x&&x.t&&x.vi;}).map(function(x){return {t:String(x.t).toLowerCase().trim(),ipa:x.ipa||'',pos:x.pos||'',vi:x.vi,ex:x.ex||('<b>'+x.t+'</b>'),exVi:x.exVi||'',custom:true};});
+      if(!exResult.length)toast('Chưa rút được, thử đoạn khác');
+    }catch(e){toast('Lỗi AI, thử lại');}
+    btn.disabled=false;btn.textContent='Rút từ khác';vExtract();
+  };
+  card.appendChild(btn);v.appendChild(card);
+  if(exResult.length)vExtractResults(v);
+  main.appendChild(v);
+}
+function vExtractResults(v){
+  if(!exResult.length)return;
+  const exist={};(store.myVocab||[]).forEach(function(w){exist[w.t]=1;});VOCAB.forEach(function(w){exist[w.t]=1;});
+  const head=el('div','row between');head.appendChild(el('span','eyebrow',exResult.length+' từ rút được'));
+  const addAll=el('button','btn accent sm');addAll.textContent='Thêm tất cả';
+  addAll.onclick=function(){let n=0;exResult.forEach(function(w){if(!exist[w.t]){store.myVocab.push(w);exist[w.t]=1;n++;}});save(store);toast('Đã thêm '+n+' từ vào “Của tôi”');vMode='list';vTopic='mine';exResult=[];go('vocab');};
+  head.appendChild(addAll);v.appendChild(head);
+  const card=el('div','card');
+  exResult.forEach(function(w){
+    const row=el('div','phrase');const tx=el('div','grow');
+    const dup=!!exist[w.t];
+    tx.innerHTML='<div class="row" style="gap:8px;flex-wrap:wrap"><b style="font-size:16px">'+w.t+'</b><span class="ipa">'+w.ipa+'</span>'+(dup?'<span class="chip" style="height:22px">đã có</span>':'')+'</div><div class="vi">'+w.vi+'</div><div class="ex" style="font-size:13.5px;margin-top:3px">'+String(w.ex).replace(/<b>/g,'<span class="hl">').replace(/<\/b>/g,'</span>')+'</div>';
+    row.appendChild(tx);
+    const col=el('div');col.style.cssText='display:flex;flex-direction:column;gap:6px;align-items:flex-end';
+    col.appendChild(playBtn(w.t));
+    if(!dup){const a=el('button','btn ghost sm');a.textContent='Thêm';a.onclick=function(){if(!exist[w.t]){store.myVocab.push(w);exist[w.t]=1;save(store);toast('Đã thêm “'+w.t+'”');a.textContent='✓';a.disabled=true;}};col.appendChild(a);}
+    row.appendChild(col);card.appendChild(row);
+  });
+  v.appendChild(card);
 }
 function paintVL(){
   const L=$("#vlList");if(!L)return;L.innerHTML="";
@@ -1358,8 +1476,10 @@ function drawRandom(){
   const total=rnQueue.length;
   if(rnIdx>=total){
     const done=el('div','card');done.style.textAlign="center";done.style.gap="14px";done.style.padding="38px 18px";
-    done.innerHTML='<div style="font-size:21px;font-weight:700">Xong '+total+' câu 🎉</div><div class="muted">Làm bộ mới để luyện tiếp.</div>';
-    const again=el('button','btn accent block');again.textContent='Luyện '+total+' câu khác';again.onclick=function(){startRandom(total);};done.appendChild(again);
+    done.innerHTML='<div style="font-size:21px;font-weight:700">Xong '+total+' câu 🎉</div><div class="muted">Luyện lại bộ này hoặc làm bộ mới.</div>';
+    const rp=el('button','btn accent block');rp.textContent='↻ Luyện lại bộ này';rp.onclick=function(){rnIdx=0;rnShow=false;drawRandom();};done.appendChild(rp);
+    const ap=el('button','btn ghost block');ap.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg> Luyện lại (tự động)';ap.onclick=function(){rnIdx=0;rnShow=false;apRandomStart();};done.appendChild(ap);
+    const again=el('button','btn ghost block');again.textContent='Luyện '+total+' câu khác';again.onclick=function(){startRandom(total);};done.appendChild(again);
     v.appendChild(done);main.appendChild(v);return;
   }
   const prog=el('div','row between');prog.innerHTML='<span class="muted">Câu '+(rnIdx+1)+' / '+total+'</span><span class="chip" style="height:26px">Ngẫu nhiên</span>';v.appendChild(prog);
@@ -1392,4 +1512,15 @@ $("#setBtn").innerHTML=ICO.gear;$("#setBtn").onclick=openSettings;
 // ---------- boot ----------
 $("#streakN").textContent=store.stats.streak||1;
 renderTabs();vHome();
+
+// ---------- PWA (cài như app + offline) — chỉ khi tự host, không chạy trong claude.ai ----------
+(function(){
+  try{
+    var h=location.hostname||'';
+    var isClaude=/claude\.ai$|claude\.site$|anthropic/.test(h);
+    if('serviceWorker' in navigator && location.protocol==='https:' && !isClaude){
+      window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});
+    }
+  }catch(e){}
+})();
 </script>
