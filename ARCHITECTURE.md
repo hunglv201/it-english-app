@@ -117,7 +117,10 @@ store = {
   stats: { done, lastDay, streak },                // tổng lượt + streak
   days:  { done: { "<n>": true }, cur },           // ngày đã học + ngày hiện tại
   today: { date: "YYYY-MM-DD", done: { vocab, listen, talk, phrases } },
-  saved: [ { en, note } ]                          // câu đã lưu
+  saved: [ { en, note } ],                         // câu đã lưu
+  theme: "light|dark|system",
+  ai:    { provider, key, model },                 // cấu hình AI (Hướng A)
+  cfg:   { autoSpeak, secCard, secPhrase, secListen } // thời gian autoplay (giây)
 }
 ```
 
@@ -174,7 +177,34 @@ const reply = await aiSample.json(prompt, { modelTier:'quick' });
 - Nếu `window.claude` không tồn tại (chạy ngoài claude.ai), `aiInit()` trả `null` và app
   hiện thông báo — các phần khác không bị ảnh hưởng.
 
-### Tích hợp Claude API (kế hoạch sau)
+### Chạy ngoài claude.ai — đa nhà cung cấp (Hướng A)
+
+`aiInit()` trả về một **adapter** cùng "hình dạng" với `sample`: gọi được như hàm
+`adapter(messages, opts) → {text}` và có `adapter.json(prompt) → object`. Nhờ vậy mọi chỗ
+gọi AI cũ chạy nguyên, không phải sửa.
+
+```
+aiInit():
+  1. Trong claude.ai  → window.claude.use('sample')
+  2. Ngoài claude.ai  → makeAdapter(store.ai)  // Gemini / Claude / Groq
+```
+
+- `AI_PROVIDERS` khai báo model mặc định, gợi ý key, URL lấy key cho từng provider.
+- `providerChat(cfg, input, opts)` map hội thoại sang định dạng REST của từng bên
+  (Gemini `generateContent`, Claude `/v1/messages` + header
+  `anthropic-dangerous-direct-browser-access`, Groq OpenAI-compatible).
+- `parseJSONLoose()` bóc JSON kể cả khi model trả kèm ```json fence.
+- Key lưu trong `store.ai.key` (localStorage), chỉ gửi tới đúng nhà cung cấp đã chọn.
+- UI cấu hình: `aiSettingsCard()` (trong tab Giao tiếp và màn Cấu hình).
+
+### Autoplay engine (tự động chạy)
+
+Một engine dùng chung cho Từ vựng / Câu / Nghe: `apOn`, `apScreen`, `apTimer`, và
+`apClear()` / `apWait(sec, fn)`. Mỗi màn có `apXxxStart()` + `apXxxStep()` đệ quy: đọc →
+chờ `store.cfg.secXxx` giây → chuyển mục kế. `go()` gọi `apClear()` để dừng khi đổi tab.
+Khi đang chạy, nút thao tác tay được thay bằng “⏸ Dừng”.
+
+### Tích hợp Claude API qua proxy (kế hoạch sau, cho public)
 
 Để chạy AI ngoài claude.ai mà **không lộ API key**, cần một proxy nhỏ:
 

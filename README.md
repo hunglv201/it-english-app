@@ -16,7 +16,19 @@ không cần tài khoản.
 - **Câu thường dùng** — 1000 câu chia 25 nhóm; lưu câu yêu thích để ôn lại.
 - **Giao tiếp** — trò chuyện với AI theo tình huống công việc (standup, báo blocker, code review, deploy…). AI đóng vai đồng nghiệp, nói tiếng Anh đơn giản và **sửa lỗi** sau mỗi lượt. Có thể mô tả lĩnh vực của bạn để AI gợi ý tình huống riêng.
 - **Nghe** — 2 chế độ: *chép chính tả* (điền từ trống) và *shadowing* (nhại lại, chấm phát âm qua mic theo %).
-- **Sáng / Tối / Theo hệ thống** — nút đổi giao diện ở góc phải header.
+- **Tự động chạy (autoplay)** — nút *Tự động* trong Từ vựng, Câu, Nghe: app tự đọc và tự chuyển sau số giây bạn đặt, học rảnh tay không cần bấm.
+- **Cấu hình** — màn cài đặt (nút bánh răng ở header): chỉnh thời gian autoplay từng chức năng, bật/tắt tự đọc, chọn giao diện, và cấu hình AI.
+- **Sáng / Tối / Theo hệ thống** — đổi ở header hoặc trong Cấu hình.
+
+### Nhà cung cấp AI (khi chạy ngoài claude.ai)
+
+Phần Giao tiếp hỗ trợ nhiều nhà cung cấp — vào **Giao tiếp → Cài đặt AI** (hoặc **Cấu hình**), chọn provider và dán API key của bạn (key lưu localStorage, chỉ trên máy bạn):
+
+- **Google Gemini** — free tier, gọi thẳng từ trình duyệt.
+- **Claude (Anthropic)** — chất lượng cao, tính phí theo dùng.
+- **Groq** — free, nhanh (model Llama).
+
+Khi mở app *bên trong* claude.ai thì tự dùng Claude sẵn có, không cần key.
 
 ---
 
