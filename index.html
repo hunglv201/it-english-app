@@ -219,6 +219,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
+const APP_VERSION="1.2.0", APP_BUILD="2026-09-13";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -458,6 +459,9 @@ function openSettings(){
   v.appendChild(aiSettingsCard());
 
   const back=el('button','btn ghost block');back.textContent='‹ Về Hôm nay';back.onclick=function(){go('home');};v.appendChild(back);
+  const ver=el('div');ver.style.cssText='text-align:center;color:var(--faint);font-family:var(--mono);font-size:12px;padding:6px 0 2px';
+  ver.textContent='IT English · v'+APP_VERSION+' · '+APP_BUILD;
+  v.appendChild(ver);
   main.appendChild(v);
 }
 
@@ -512,6 +516,7 @@ function vHome(){
   v.appendChild(card);
   const rl=el('button','btn ghost block');rl.textContent='Lộ trình '+DAYS.length+' ngày theo chủ đề ›';rl.onclick=vRoadmap;v.appendChild(rl);
   const pg=el('button','btn ghost block');pg.textContent='Tiến độ & thống kê ›';pg.onclick=vProgress;v.appendChild(pg);
+  const vf=el('div');vf.style.cssText='text-align:center;color:var(--faint);font-family:var(--mono);font-size:11.5px;padding:8px 0 2px';vf.textContent='v'+APP_VERSION;v.appendChild(vf);
   main.appendChild(v);
 }
 function statTile(n,label){
