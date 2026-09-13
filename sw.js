@@ -1,5 +1,5 @@
 /* IT English — service worker (offline app shell) */
-const CACHE = 'it-english-v1.10.1';
+const CACHE = 'it-english-v1.11.0';
 const ASSETS = [
   './', 'index.html', 'data.gen.js', 'phrases.gen.js',
   'manifest.webmanifest', 'icon-192.png', 'icon-512.png'
@@ -15,6 +15,17 @@ self.addEventListener('activate', function (e) {
     caches.keys().then(function (keys) {
       return Promise.all(keys.filter(function (k) { return k !== CACHE; }).map(function (k) { return caches.delete(k); }));
     }).then(function () { return self.clients.claim(); })
+  );
+});
+
+// Nhắc học: bấm vào thông báo thì mở/focus app
+self.addEventListener('notificationclick', function (e) {
+  e.notification.close();
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
+      for (var i = 0; i < list.length; i++) { if ('focus' in list[i]) return list[i].focus(); }
+      if (self.clients.openWindow) return self.clients.openWindow('./');
+    })
   );
 });
 
