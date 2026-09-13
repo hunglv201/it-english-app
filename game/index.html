@@ -376,7 +376,7 @@ button.srow:active{background:var(--panel2)}
 .arena2.go .a-mochi .sword{animation:swing 1s ease-in-out}
 .arena2.go .a-slash{animation:slash2 .45s .42s ease-out}
 .arena2.go .a-bug>svg{animation:bughit .45s .5s,wob 1.6s ease-in-out infinite}
-@keyframes dash{0%{transform:translateX(0)}40%{transform:translateX(170px) translateY(-6px)}62%{transform:translateX(178px)}100%{transform:translateX(0)}}
+@keyframes dash{0%{transform:translateX(0)}40%{transform:translateX(200px) translateY(-6px)}62%{transform:translateX(208px)}100%{transform:translateX(0)}}
 @keyframes swing{0%,30%{transform:rotate(28deg)}45%{transform:rotate(-70deg)}58%{transform:rotate(60deg)}75%,100%{transform:rotate(28deg)}}
 @keyframes slash2{0%{opacity:0;transform:scale(.4) rotate(-20deg)}35%{opacity:1;transform:scale(1.15) rotate(0)}100%{opacity:0;transform:scale(1.4) rotate(15deg) translateX(8px)}}
 .a-bug.dead>svg{animation:die .5s forwards}
@@ -398,6 +398,7 @@ button.srow:active{background:var(--panel2)}
 .rail .node{flex:0 0 auto;scroll-snap-align:center;width:46px;height:46px;font-size:15px}
 .rail .node.cur{transform:scale(1.12)}
 .rail .node .st{bottom:-12px;font-size:9px}
+.drow .grow{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .drow{display:flex;align-items:center;gap:10px;width:100%;margin-top:10px;padding:8px 10px;border-radius:14px;border:3px solid var(--stroke);background:var(--panel2);box-shadow:0 3px 0 var(--stroke);text-align:left;color:var(--ink);font-size:13.5px}
 .drow .qi{width:34px;height:34px;border-radius:11px;background:#3b2f7a;border:3px solid var(--stroke);display:flex;align-items:center;justify-content:center;font-size:17px;flex:0 0 auto}
 .drow .mono{font-size:11px}
@@ -468,6 +469,27 @@ button.srow:active{background:var(--panel2)}
 .modal .h{font-size:22px}
 .tip{font-size:13px;padding:9px 11px}
 .kbd{font-size:11px}
+.card.afk2{padding:8px 10px 8px}
+.arena2{height:60px;margin-top:6px;border-radius:12px}
+.arena2 .ground{height:16px}
+.a-mochi{width:44px;height:48px;bottom:8px;left:8px}
+.a-mochi .sword{width:14px;height:40px;right:-3px;bottom:14px}
+.a-bug{width:44px;height:40px;right:10px;bottom:9px}
+.a-bug .a-hp{height:6px;top:-9px}
+.a-slash{right:40px;bottom:14px;width:44px;height:44px}
+.afk2 .btn.sm{min-height:34px;font-size:13px;padding:0 12px;flex:0 0 auto}
+.shell{padding-bottom:calc(74px + env(safe-area-inset-bottom))}
+.tabs{padding:4px;gap:3px;border-radius:26px;bottom:calc(8px + env(safe-area-inset-bottom))}
+.tab{padding:4px 4px 5px;gap:2px;font-size:10.5px;border-radius:20px}
+.tab span{font-size:17px;width:30px;height:30px}
+.top{padding:2px 2px 4px}
+#main{gap:8px!important}
+.hud{padding:6px 10px}.avatar.sm{width:38px;height:38px}
+.card.play{padding:10px 12px 11px}.card.play .mascot.xs{width:40px;height:40px}.card.play .h{font-size:15.5px!important}
+.qchips{gap:6px;margin-top:8px}.qchip{padding:6px 3px 5px;border-top-width:5px;font-size:10.5px}.qchip .ic{font-size:18px}.qchip small{min-height:10px;font-size:9.5px}
+.drow{padding:6px 8px;margin-top:8px;font-size:12.5px}.drow .qi{width:28px;height:28px;font-size:14px}
+.card.railc{padding:8px 10px 8px}.rail{padding:8px 4px 12px;margin-top:0;gap:9px}.rail .node{width:40px;height:40px;font-size:13.5px}.railc .nav.sm{width:30px;height:30px;font-size:14px}
+.arena2{height:56px}
 
 /* ===== chuyển cảnh & nhấn nút mượt ===== */
 @keyframes viewin{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
@@ -479,6 +501,8 @@ button.srow:active{background:var(--panel2)}
 .tabs{transition:transform .25s cubic-bezier(.2,.8,.2,1),opacity .2s}
 .infight .tabs{display:flex;transform:translateY(120%);opacity:0;pointer-events:none}
 .mback{animation:fade .22s both}
+.mclose{position:absolute;top:10px;right:12px;width:32px;height:32px;border-radius:50%;border:2px solid var(--stroke);background:var(--panel2);color:var(--muted);font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 0 var(--stroke)}
+.mclose:active{transform:translateY(2px);box-shadow:none}
 .pop{animation:pop .38s cubic-bezier(.2,1.3,.4,1) both}
 </style>
 </head>
