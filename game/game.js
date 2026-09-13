@@ -213,25 +213,26 @@ function vMap(){
   const ds=el('button','strip daily'+(hasNew?' new':''));
   ds.innerHTML='<span class="qi">🎁</span><span class="grow"><b class="h" style="font-size:14px">Hằng ngày</b><div class="mono">'+(dl.chest?'rương đã mở':'<span style="color:var(--yellow)">rương chưa mở</span>')+' · nhiệm vụ '+qclaim+'/'+DQ.length+'</div></span><span class="sc">›</span>';
   ds.onclick=dailySheet;main.appendChild(ds);
-  // ---- Bản đồ chặng ----
-  const c=el('div','card map');
+  // ---- Dải ngày (cuộn ngang) ----
   const ch=G.ch;const days=DAYS.filter(x=>x.phase===ch);
-  const head=el('div','chapter');
-  const prev=el('button','nav','‹');prev.disabled=ch<=0;prev.onclick=()=>{G.ch=Math.max(0,ch-1);saveG();vMap();};
-  const next=el('button','nav','›');next.disabled=ch>=PHASES.length-1;next.onclick=()=>{G.ch=Math.min(PHASES.length-1,ch+1);saveG();vMap();};
-  const t=el('div','grow','<div class="eyebrow">Chặng '+(ch+1)+'/'+PHASES.length+'</div><div class="h" style="font-size:16px;line-height:1.15">'+esc(PHASES[ch])+'</div>');t.style.textAlign='center';
-  head.appendChild(prev);head.appendChild(t);head.appendChild(next);c.appendChild(head);
-  const path=el('div','path');
+  const rc=el('div','card railc');
+  const head=el('div','row between');head.style.gap='6px';
+  const prev=el('button','nav sm','‹');prev.disabled=ch<=0;prev.onclick=()=>{G.ch=Math.max(0,ch-1);saveG();vMap();};
+  const next=el('button','nav sm','›');next.disabled=ch>=PHASES.length-1;next.onclick=()=>{G.ch=Math.min(PHASES.length-1,ch+1);saveG();vMap();};
+  const t=el('div','grow','<div class="eyebrow">Chặng '+(ch+1)+'/'+PHASES.length+'</div><div class="h" style="font-size:14px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(PHASES[ch])+'</div>');t.style.cssText='text-align:center;min-width:0';
+  head.appendChild(prev);head.appendChild(t);head.appendChild(next);rc.appendChild(head);
+  const rail=el('div','rail');let curNode=null;
   days.forEach(x=>{const n=x.n;const s2=G.cleared[n]||{};const done=dayCleared(n);
-    const b=el('button','node'+(done?' done':n===G.cur?' cur':n<G.cur?' open':' lock'),String(n));
+    const b=el('button','node sm'+(done?' done':n===G.cur?' cur':n<G.cur?' open':' lock'),String(n));
     if(n>G.cur)b.innerHTML+='<span class="lk">🔒</span>';
     const stars=(s2.v||0)+(s2.p||0)+(s2.l||0)+(s2.b||0);if(stars)b.innerHTML+='<span class="st">'+'★'.repeat(Math.min(3,Math.ceil(stars/4)))+'</span>';
     b.onclick=()=>{if(n>G.cur){toast('🔒 Xong ngày '+G.cur+' để mở');return;}questSelect(n);};
-    path.appendChild(b);
-  });
-  c.appendChild(path);
-  if(dayInfo(G.cur).phase!==ch){const j=el('button','btn ghost sm block','🎯 Về chặng hiện tại');j.style.marginTop='8px';j.onclick=()=>{G.ch=dayInfo(G.cur).phase;saveG();vMap();};c.appendChild(j);}
-  main.appendChild(c);
+    if(n===G.cur)curNode=b;rail.appendChild(b);});
+  rc.appendChild(rail);
+  if(dayInfo(G.cur).phase!==ch){const j=el('button','btn ghost sm block','🎯 Về chặng hiện tại');j.style.marginTop='8px';j.onclick=()=>{G.ch=dayInfo(G.cur).phase;saveG();vMap();};rc.appendChild(j);}
+  // chèn dải ngày ngay sau thẻ Chơi tiếp
+  main.insertBefore(rc,afk);
+  requestAnimationFrame(()=>{if(curNode)rail.scrollLeft=Math.max(0,curNode.offsetLeft-rail.clientWidth/2+curNode.offsetWidth/2);});
 }
 function afkSheet(){
   openModal((m,close)=>{const p=idlePending();
