@@ -305,7 +305,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.17.6", APP_BUILD="2026-09-13";
+const APP_VERSION="1.18.0", APP_BUILD="2026-09-13";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -531,6 +531,9 @@ function vPractice(){
   var rd=el('button','card');rd.style.cssText='flex-direction:row;align-items:center;gap:12px;text-align:left;cursor:pointer';
   rd.innerHTML='<span class="pt-ic" style="width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto">📖</span><span class="grow"><b style="font-size:16px;font-weight:700">Đọc log / lỗi 30 giây</b><br><small class="muted" style="font-size:12px">Stack trace · README · PR + 2 câu hỏi</small></span><span style="color:var(--faint);display:inline-flex">'+ICO.chev+'</span>';
   rd.onclick=readingStart;v.appendChild(rd);
+  var gm=el('button','card');gm.style.cssText='flex-direction:row;align-items:center;gap:12px;text-align:left;cursor:pointer;background:linear-gradient(135deg,#ff7eb6,#7c5cff);color:#fff;border-color:transparent';
+  gm.innerHTML='<span class="pt-ic" style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.22);display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:22px">🎮</span><span class="grow"><b style="font-size:16px;font-weight:700">IT English Quest</b><br><small style="font-size:12px;opacity:.92">Chơi game: đánh bug, hạ boss, lên level (anime)</small></span><span style="opacity:.9;display:inline-flex;font-size:18px">›</span>';
+  gm.onclick=function(){location.href='game/';};v.appendChild(gm);
   main.appendChild(v);
 }
 let rwOut=null,rwBusy=false,rwPrev='';
