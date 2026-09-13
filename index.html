@@ -219,7 +219,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.2.0", APP_BUILD="2026-09-13";
+const APP_VERSION="1.2.1", APP_BUILD="2026-09-13";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -232,6 +232,8 @@ if(!store.cfg)store.cfg={};
 (function(dflt){for(var k in dflt){if(store.cfg[k]===undefined)store.cfg[k]=dflt[k];}})(
   {autoSpeak:true,secCard:5,secPhrase:6,secListen:5,rate:0.95,vRepeat:1,vReadEx:true,pRepeat:1,lRepeat:2});
 if(!store.myVocab)store.myVocab=[];
+// Nâng cấp model Gemini cũ đã lưu (đã ngừng hỗ trợ generateContent) -> flash mới nhất
+if(store.ai&&store.ai.provider==='gemini'&&/^gemini-(2\.0-flash$|1\.5-)/.test(store.ai.model||'')){store.ai.model='gemini-flash-latest';save(store);}
 // streak calc
 (function(){
   const today=new Date().toISOString().slice(0,10);
@@ -1066,8 +1068,13 @@ async function providerChat(cfg,input,opts){
     const body={contents:turns.map(function(m){return {role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]};}),
       generationConfig:{temperature:0.7,maxOutputTokens:400}};
     if(system)body.systemInstruction={parts:[{text:system}]};
-    const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',
-      {method:'POST',headers:{'content-type':'application/json','x-goog-api-key':cfg.key},body:JSON.stringify(body)});
+    function callG(mdl){return fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(mdl)+':generateContent',
+      {method:'POST',headers:{'content-type':'application/json','x-goog-api-key':cfg.key},body:JSON.stringify(body)});}
+    let res=await callG(model);
+    if(res.status===404 && model!=='gemini-flash-latest'){
+      var res2=await callG('gemini-flash-latest');
+      if(res2.ok){try{store.ai.model='gemini-flash-latest';save(store);aiReset();}catch(e){}res=res2;}
+    }
     if(!res.ok)throw new Error('gemini '+res.status);
     const j=await res.json();
     text=((((j.candidates||[])[0]||{}).content||{}).parts||[]).map(function(p){return p.text||'';}).join('');
