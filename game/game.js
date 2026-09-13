@@ -198,7 +198,7 @@ function vMap(){
     '<div class="arena2"><div class="ground"></div><div class="a-fx" id="amFx"></div>'+
     '<div class="a-mochi" id="amMochi">'+mascot('cheer')+'<svg class="sword" viewBox="0 0 40 120"><path d="M20 4l7 14v70h-14V18z" fill="#dfe7ff" stroke="#0d0826" stroke-width="3" stroke-linejoin="round"/><path d="M20 10v76" stroke="#8fa3ff" stroke-width="3"/><rect x="4" y="86" width="32" height="8" rx="4" fill="#ffd166" stroke="#0d0826" stroke-width="3"/><rect x="14" y="94" width="12" height="20" rx="4" fill="#7c5cff" stroke="#0d0826" stroke-width="3"/></svg></div>'+
     '<svg class="a-slash" viewBox="0 0 100 100"><path d="M15 85 Q60 60 85 10" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M25 90 Q65 66 92 22" stroke="#ff7eb6" stroke-width="4" fill="none" stroke-linecap="round" opacity=".8"/></svg>'+
-    '<div class="a-bug" id="amBug">'+bug()+'<div class="bar mon a-hp"><i id="amHp" style="width:100%"></i></div></div><div class="poof" id="amPoof">💥</div></div>'+
+    '<div class="a-bug" id="amBug">'+bug()+'<div class="bar mon a-hp"><i id="amHp" style="width:100%"></i></div></div><div class="poof" id="amPoof">💥</div><div class="a-say" id="amSay"></div></div>'+
     '';
   const col=el('button','btn yellow sm','Thu hoạch');col.id='afkCollect';col.onclick=e=>{e.stopPropagation();const p=idlePending();if(p.coins<=0){toast('Chưa có gì để thu — chờ Mochi cày thêm nhé');return;}collectIdle();confetti();vMap();};
   afk.querySelector('#afkRow').appendChild(col);afk.onclick=afkSheet;main.appendChild(afk);
@@ -211,8 +211,13 @@ function vMap(){
       if(amHp<=0){bugEl.classList.add('dead');poof.classList.remove('go');void poof.offsetWidth;poof.classList.add('go');const c=el('span','am-dmg coin','+xu');c.style.left='72%';c.style.top='-4px';fx.appendChild(c);setTimeout(()=>c.remove(),900);
         setTimeout(()=>{if(!bugEl.isConnected)return;amHp=100;hp.style.width='100%';bugEl.classList.remove('dead');bugEl.classList.add('spawn');setTimeout(()=>bugEl.classList.remove('spawn'),600);const k=$('#amKills');if(k)k.textContent=(+k.textContent||0)+1;},700);}
     },520);}
-  paintAfk();setTimeout(amCycle,600);
-  mapTimer=setInterval(()=>{paintAfk();if(++amTick%2===0)amCycle();},1000);
+  const QUIPS=['Fixing bugs…','Deploying to prod!','Let me check the logs.','Could you review my PR?','It works on my machine!','Running the tests…','Refactoring this module.','Merge conflict again?!','Coffee first, then code.','One more bug to squash!'];
+  function amSay(){const sb=$('#amSay');if(!sb)return;const pool=G.talk.equipped.length?G.talk.equipped:QUIPS;const t=rnd(pool);sb.textContent=t;sb.classList.remove('on');void sb.offsetWidth;sb.classList.add('on');}
+  const sizeArena=()=>{const ar=afk.querySelector('.arena2');if(!ar)return;const h=ar.clientHeight;ar.classList.toggle('tall',h>=100);ar.classList.toggle('xl',h>=170);};
+  if(window.ResizeObserver){const ro=new ResizeObserver(sizeArena);ro.observe(afk.querySelector('.arena2'));}else{sizeArena();window.addEventListener('resize',sizeArena);}
+  requestAnimationFrame(sizeArena);
+  paintAfk();setTimeout(amCycle,600);setTimeout(amSay,900);
+  mapTimer=setInterval(()=>{paintAfk();if(++amTick%2===0)amCycle();if(amTick%5===0)amSay();},1000);
   // ---- Dải ngày (cuộn ngang) ----
   const ch=G.ch;const days=DAYS.filter(x=>x.phase===ch);
   const rc=el('div','card railc');

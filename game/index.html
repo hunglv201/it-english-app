@@ -491,6 +491,28 @@ button.srow:active{background:var(--panel2)}
 .card.railc{padding:8px 10px 8px}.rail{padding:8px 4px 12px;margin-top:0;gap:9px}.rail .node{width:40px;height:40px;font-size:13.5px}.railc .nav.sm{width:30px;height:30px;font-size:14px}
 .arena2{height:56px}
 
+/* ===== bản đồ lấp đầy màn hình: sân AFK giãn theo chiều cao ===== */
+#main:not(.chatlay){min-height:calc(100dvh - 126px - env(safe-area-inset-bottom))}
+.card.afk2{flex:1;display:flex;flex-direction:column;min-height:0}
+.arena2{flex:1;min-height:56px}
+.a-say{position:absolute;left:58px;top:8px;max-width:58%;padding:5px 9px;border-radius:12px;border:2px solid var(--stroke);background:#fff;color:#221a4d;font-weight:800;font-size:11.5px;line-height:1.25;box-shadow:0 3px 0 var(--stroke);opacity:0;transform:translateY(4px);display:none}
+.a-say::after{content:"";position:absolute;left:-9px;top:10px;border:5px solid transparent;border-right-color:#fff;filter:drop-shadow(-2px 0 0 var(--stroke))}
+.a-say.on{animation:sayin 5s ease both}
+@keyframes sayin{0%{opacity:0;transform:translateY(4px)}8%{opacity:1;transform:none}80%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-3px)}}
+.arena2.tall .a-say{display:block;left:14px;top:auto;bottom:96px;font-size:12.5px;max-width:70%}
+.arena2.tall .a-say::after{left:14px;top:auto;bottom:-11px;border:5px solid transparent;border-top-color:#fff;filter:drop-shadow(0 2px 0 var(--stroke))}
+.arena2.tall::before{content:"";position:absolute;inset:0;background:radial-gradient(1.5px 1.5px at 20% 30%,#fff5 50%,transparent 51%),radial-gradient(1px 1px at 70% 20%,#fff4 50%,transparent 51%),radial-gradient(1.2px 1.2px at 45% 55%,#fff4 50%,transparent 51%),radial-gradient(1px 1px at 85% 45%,#fff3 50%,transparent 51%);background-size:180px 180px;pointer-events:none}
+.arena2.tall .a-mochi{width:60px;height:66px;left:12px}.arena2.tall .a-mochi .sword{width:18px;height:54px;right:-4px;bottom:18px}
+.arena2.tall .a-bug{width:60px;height:54px;right:14px}.arena2.tall .a-bug .a-hp{height:8px;top:-12px}
+.arena2.tall .a-slash{right:52px;bottom:22px;width:56px;height:56px}
+.arena2.tall .ground{height:22px}
+.arena2.xl .a-mochi{width:78px;height:86px;left:16px}.arena2.xl .a-mochi .sword{width:22px;height:68px;right:-5px;bottom:24px}
+.arena2.xl .a-bug{width:78px;height:70px;right:18px}
+.arena2.xl .a-slash{right:70px;bottom:30px;width:70px;height:70px}
+.arena2.xl .a-say{left:18px;bottom:122px;font-size:14px;max-width:70%;padding:7px 11px}
+.arena2.xl .ground{height:28px}
+.arena2.xl .a-bug>svg{animation-duration:2s}
+
 /* ===== chuyển cảnh & nhấn nút mượt ===== */
 @keyframes viewin{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
 #main.vin>*{animation:viewin .32s cubic-bezier(.2,.8,.2,1) both}
