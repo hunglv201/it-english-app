@@ -300,7 +300,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.17.2", APP_BUILD="2026-09-13";
+const APP_VERSION="1.17.3", APP_BUILD="2026-09-13";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -2204,6 +2204,31 @@ function aiScObj(){
   return AI_SCENARIOS.find(function(x){return x.k===aiScenario;});
 }
 function aiUseCustom(label,promptS){aiCustom=label;aiCustomS=promptS||'';aiScenario='custom';aiTurns=[];aiStart();}
+// Tạo hội thoại mẫu tự động (AI viết cả 2 phía, n lượt trao đổi)
+function sampleConvoModal(){
+  openModal(function(card,close){
+    card.appendChild(el('h3',null,'✨ Tạo hội thoại mẫu tự động'));
+    var sc=aiScObj();
+    card.appendChild(el('div','muted','AI tự viết một hội thoại mẫu hoàn chỉnh cho tình huống “'+((sc&&sc.l)||'này')+'” để bạn đọc và nghe. (Sẽ thay hội thoại hiện tại.)'));
+    var row=el('div','row between');row.appendChild(el('span','muted','Số lượt trao đổi'));
+    var inp=el('input','input');inp.type='number';inp.value='5';inp.min='2';inp.max='12';inp.inputMode='numeric';inp.style.cssText='width:96px;text-align:center;height:44px';row.appendChild(inp);card.appendChild(row);
+    var go=el('button','btn accent block');go.textContent='Tạo hội thoại';go.onclick=function(){var n=Math.max(2,Math.min(12,parseInt(inp.value,10)||5));close();genSampleConvo(n);};card.appendChild(go);
+    var cc=el('button','btn ghost block');cc.textContent='Huỷ';cc.onclick=close;card.appendChild(cc);
+    setTimeout(function(){try{inp.focus();inp.select();}catch(e){}},60);
+  });
+}
+async function genSampleConvo(n){
+  var sp=await aiInit();if(!sp){toast('Chưa cấu hình AI — mở “Cài đặt AI”');return;}
+  var sc=aiScObj();if(!sc){toast('Chọn tình huống trước');return;}
+  aiBusy=true;aiPending='';vTalkAI();
+  try{
+    var arr=await sp.json('Write a natural example English conversation for this workplace scenario: "'+sc.s+'". Exactly '+n+' exchanges ('+(n*2)+' messages total), alternating and STARTING with the colleague. English level '+(store.cfg.level||'A2')+' (CEFR): simple but always grammatically correct and natural. Reply ONLY as a JSON array of objects {"who":"colleague" or "me","en":"the sentence"}.',{modelTier:'quick'});
+    arr=(arr||[]).filter(function(m){return m&&m.en;});
+    if(arr.length){aiTurns=arr.map(function(m){return {role:(String(m.who).toLowerCase()==='me'?'user':'assistant'),content:String(m.en)};});bumpActivity();save(store);toast('Đã tạo hội thoại mẫu '+arr.length+' câu','ok');}
+    else toast('Chưa tạo được, thử lại');
+  }catch(e){toast('Lỗi AI, thử lại');}
+  aiBusy=false;aiPending='';vTalkAI();
+}
 async function aiSuggestScenarios(){
   const sp=await aiInit();if(!sp){toast('Chưa cấu hình AI — mở “Cài đặt AI” ở tab Giao tiếp');return;}
   const d=$("#aiDomain");const domain=d?d.value.trim():'';if(!domain){toast('Điền lĩnh vực trước đã');return;}
@@ -2304,6 +2329,7 @@ function vTalkAI(){
   const menuBtn=el('button','btn ghost sm');menuBtn.textContent='⋯ Tùy chọn';menuBtn.setAttribute('aria-label','Tùy chọn');
   menuBtn.onclick=function(){
     var items=[];
+    items.push({label:'✨ Tạo hội thoại mẫu tự động',onClick:sampleConvoModal});
     if(aiTurns.length>=4)items.push({label:'Nhận xét cả buổi (AI)',onClick:aiReview});
     if(aiTurns.length>=2)items.push({label:'Lưu hội thoại',onClick:openSaveConvoModal});
     items.push({label:'Đổi tình huống',onClick:function(){aiScenario=null;aiTurns=[];vTalkAI();}});
