@@ -55,6 +55,12 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 /* Hiệu ứng riêng cho thẻ: trượt vào từ góc dưới-trái + hơi xoay (kiểu thả/lật thẻ) */
 @keyframes cardIn{from{opacity:0;transform:translate(-16px,18px) scale(.965) rotate(-1.4deg)}to{opacity:1;transform:none}}
 .cardIn{animation:cardIn .34s cubic-bezier(.2,.8,.2,1) both;will-change:transform,opacity}
+/* Popup / modal nổi giữa màn hình */
+.modal-back{position:fixed;inset:0;background:rgba(10,14,25,.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:60;animation:mfade .16s ease both}
+@keyframes mfade{from{opacity:0}to{opacity:1}}
+.modal{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 60px rgba(0,0,0,.35);animation:mpop .22s cubic-bezier(.2,.8,.2,1) both}
+@keyframes mpop{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+.modal h3{margin:0;font-family:var(--disp);font-size:19px;font-weight:800;letter-spacing:-.01em}
 
 .shell{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);
   display:flex;flex-direction:column;position:relative}
@@ -224,7 +230,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.2.6", APP_BUILD="2026-09-13";
+const APP_VERSION="1.2.7", APP_BUILD="2026-09-13";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -345,7 +351,7 @@ function renderTabs(){
     n.appendChild(b);
   });
 }
-function go(k){apClear();convoView=null;aiSaveMode=false;cur=k;renderTabs();window.scrollTo(0,0);({home:vHome,vocab:vVocab,talk:vTalk,listen:vListen,phrase:vPhrase}[k])();}
+function go(k){apClear();closeModal();convoView=null;aiSaveMode=false;cur=k;renderTabs();window.scrollTo(0,0);({home:vHome,vocab:vVocab,talk:vTalk,listen:vListen,phrase:vPhrase}[k])();}
 
 // ---------- Autoplay engine (tự động chạy) ----------
 let apOn=false, apTimer=null, apScreen=null;
@@ -994,6 +1000,41 @@ function convoReadStart(c){
     speechSynthesis.speak(u);
   });
 }
+// ---- Popup / modal ----
+function closeModal(){var m=$('#modalBack');if(m)m.remove();}
+function openModal(build){
+  closeModal();
+  var back=el('div','modal-back');back.id='modalBack';
+  var card=el('div','modal');back.appendChild(card);
+  back.onclick=function(e){if(e.target===back)closeModal();};
+  document.addEventListener('keydown',function esc(ev){if(ev.key==='Escape'){closeModal();document.removeEventListener('keydown',esc);}});
+  build(card,closeModal);
+  document.body.appendChild(back);
+}
+function confirmModal(title,msg,okLabel,onOk){
+  openModal(function(card,close){
+    card.appendChild(el('h3',null,title));
+    if(msg)card.appendChild(el('div','muted',msg));
+    var row=el('div','row');row.style.gap='10px';
+    var cc=el('button','btn ghost grow');cc.textContent='Huỷ';cc.onclick=close;
+    var ok=el('button','btn accent grow');ok.textContent=okLabel||'Xoá';ok.style.background='var(--danger)';ok.onclick=function(){close();onOk();};
+    row.appendChild(cc);row.appendChild(ok);card.appendChild(row);
+  });
+}
+function openSaveConvoModal(){
+  openModal(function(card,close){
+    card.appendChild(el('h3',null,'Lưu hội thoại'));
+    card.appendChild(el('div','muted','Đặt tên để xem/học lại sau. Có thể dùng tên tình huống hoặc tự đặt.'));
+    var inp=el('input','input');inp.value=aiScObj().l;inp.placeholder='Tên hội thoại';inp.autocomplete='off';
+    inp.onkeydown=function(e){if(e.key==='Enter'){saveConvo(inp.value);close();toast('Đã lưu hội thoại ✓');}};
+    card.appendChild(inp);
+    var row=el('div','row');row.style.gap='10px';
+    var cc=el('button','btn ghost grow');cc.textContent='Huỷ';cc.onclick=close;
+    var sv=el('button','btn accent grow');sv.textContent='Lưu';sv.onclick=function(){saveConvo(inp.value);close();toast('Đã lưu hội thoại ✓');};
+    row.appendChild(cc);row.appendChild(sv);card.appendChild(row);
+    setTimeout(function(){try{inp.focus();inp.select();}catch(e){}},60);
+  });
+}
 // ---- Lịch sử hội thoại đã lưu ----
 function saveConvo(name){
   var sc=aiScObj();
@@ -1040,8 +1081,9 @@ function vConvo(){
     const fresh=el('button','btn ghost block');fresh.textContent='Luyện tình huống này với AI (tạo mới)';
     fresh.onclick=function(){convoStop();convoView=null;if(c.custom){aiUseCustom(c.customLabel||c.name,c.customPrompt||'');}else{aiScenario=c.scKey;aiTurns=[];aiStart();}};v.appendChild(fresh);
   }
-  const del=confirmBtn('btn ghost block','Xoá hội thoại',function(){store.convos=store.convos.filter(function(x){return x.id!==c.id;});save(store);convoStop();convoView=null;aiScenario=null;vTalkAI();toast('Đã xoá');});
-  del.style.color='var(--danger)';v.appendChild(del);
+  const del=el('button','btn ghost block');del.textContent='Xoá hội thoại';del.style.color='var(--danger)';
+  del.onclick=function(){confirmModal('Xoá hội thoại?','“'+c.name+'” sẽ bị xoá vĩnh viễn.','Xoá',function(){store.convos=store.convos.filter(function(x){return x.id!==c.id;});save(store);convoStop();convoView=null;aiScenario=null;vTalkAI();toast('Đã xoá');});};
+  v.appendChild(del);
   main.appendChild(v);window.scrollTo(0,0);
 }
 function aiSettingsCard(){
@@ -1089,7 +1131,7 @@ function aiSettingsCard(){
       if(m==='__custom__')m=($("#aiModelIn").value||'').trim()||prov.model;
       store.ai.key=($("#aiKeyIn").value||'').trim();store.ai.model=m;save(store);aiReset();aiSettingsOpen=false;toast(store.ai.key?'Đã lưu cấu hình AI':'Đã xoá key');vTalkAI();};
     row.appendChild(sv);
-    if(store.ai.key){const cl=confirmBtn('btn ghost','Xoá key',function(){store.ai.key='';save(store);aiReset();toast('Đã xoá key');vTalkAI();});row.appendChild(cl);}
+    if(store.ai.key){const cl=el('button','btn ghost');cl.textContent='Xoá key';cl.onclick=function(){confirmModal('Xoá API key?','Bạn sẽ cần dán lại key để dùng AI ngoài Claude.','Xoá',function(){store.ai.key='';save(store);aiReset();toast('Đã xoá key');vTalkAI();});};row.appendChild(cl);}
     card.appendChild(row);
   }
   return card;
@@ -1394,21 +1436,10 @@ function vTalkAI(){
   const hd=el('div','row between wrap');hd.style.gap='8px';
   hd.appendChild(el('span','chip ok',aiScObj().l));
   const hbtns=el('div','row');hbtns.style.gap='8px';
-  if(aiTurns.length>=2){const sb=el('button','btn ghost sm');sb.textContent='Lưu hội thoại';sb.onclick=function(){aiSaveMode=true;vTalkAI();};hbtns.appendChild(sb);}
-  const ch=el('button','btn ghost sm');ch.textContent='Đổi tình huống';ch.onclick=function(){aiScenario=null;aiTurns=[];aiSaveMode=false;vTalkAI();};hbtns.appendChild(ch);
+  if(aiTurns.length>=2){const sb=el('button','btn ghost sm');sb.textContent='Lưu hội thoại';sb.onclick=openSaveConvoModal;hbtns.appendChild(sb);}
+  const ch=el('button','btn ghost sm');ch.textContent='Đổi tình huống';ch.onclick=function(){aiScenario=null;aiTurns=[];vTalkAI();};hbtns.appendChild(ch);
   hd.appendChild(hbtns);
   v.appendChild(hd);
-  if(aiSaveMode){
-    const sp=el('div','card');sp.appendChild(el('div','eyebrow','Lưu hội thoại này'));
-    const inp=el('input','input');inp.id='convoName';inp.value=aiScObj().l;inp.placeholder='Tên hội thoại (theo tình huống hoặc tự đặt)';inp.autocomplete='off';
-    inp.onkeydown=function(e){if(e.key==='Enter'){saveConvo(inp.value);aiSaveMode=false;toast('Đã lưu hội thoại');vTalkAI();}};
-    sp.appendChild(inp);
-    const srow=el('div','row');srow.style.gap='10px';
-    const sv=el('button','btn accent grow');sv.textContent='Lưu';sv.onclick=function(){saveConvo(($("#convoName")||{}).value);aiSaveMode=false;toast('Đã lưu hội thoại');vTalkAI();};
-    const cc=el('button','btn ghost');cc.textContent='Huỷ';cc.onclick=function(){aiSaveMode=false;vTalkAI();};
-    srow.appendChild(sv);srow.appendChild(cc);sp.appendChild(srow);
-    v.appendChild(sp);
-  }
   const log=el('div');log.style.cssText='display:flex;flex-direction:column;gap:12px';
   aiTurns.forEach(function(m){
     if(m.role==='assistant'){
