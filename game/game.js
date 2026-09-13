@@ -131,7 +131,7 @@ const APP_URL='https://hunglv201.github.io/it-english-app/';
 function openApp(){if(/github\.io$/.test(location.hostname))location.href=APP_URL;else window.open(APP_URL,'_blank','noopener');}
 function renderTabs(){const n=$('#tabs');n.innerHTML='';TABS.forEach(t=>{const b=el('button','tab'+(cur===t[0]?' on':''),'<span>'+t[1]+'</span>'+t[2]);b.onclick=()=>go(t[0]);n.appendChild(b);});}
 let mapTimer=null;
-function go(k){cur=k;renderTabs();window.scrollTo(0,0);if(mapTimer){clearInterval(mapTimer);mapTimer=null;}stopSR();({map:vMap,talk:vTalk,shop:vShop,profile:vProfile})[k]();}
+function go(k){document.body.classList.remove('infight');cur=k;renderTabs();window.scrollTo(0,0);if(mapTimer){clearInterval(mapTimer);mapTimer=null;}stopSR();({map:vMap,talk:vTalk,shop:vShop,profile:vProfile})[k]();}
 /* ---------- speech recognition + word matching ---------- */
 let SRcur=null;
 function stopSR(){try{if(SRcur){SRcur.onend=null;SRcur.stop();}}catch(e){}SRcur=null;}
@@ -164,53 +164,81 @@ function playerCard(){
   return c;
 }
 
-/* ---------- MAP ---------- */
-const TIPS=['Đánh vài con Bug từ vựng lấy XP nhé!','Combo càng cao, XP và xu càng nhiều!','Hạ Boss bằng cách chọn đúng câu trả lời tiếng Anh!','Sai câu nào mất HP đó — cẩn thận nhé!','Hết HP thì nghỉ chút, HP hồi 50% khi chơi lại.','Xong đủ 3 quest là mở ngày tiếp theo!'];
+/* ---------- MAP (mobile-first) ---------- */
+const TIPS=['Đánh vài con Bug từ vựng lấy XP nhé!','Combo càng cao, XP và xu càng nhiều!','Hạ Boss bằng cách chọn đúng câu trả lời!','Sai câu nào mất HP đó — cẩn thận!','Hết HP thì nghỉ chút, HP hồi 50% khi chơi lại.','Xong đủ 3 quest là mở ngày tiếp theo!','Ghé tab Nói để luyện mic — nói thật mới lên trình!'];
+function hud(){
+  const h=el('div','hud');
+  h.innerHTML='<div class="avatar sm">'+mascot(G.hp<=30?'sad':'happy')+'</div><div class="grow"><div class="row" style="gap:6px"><b class="h" style="font-size:15px">'+esc(G.name)+'</b><span class="lv">Lv '+G.lv+'</span><span class="kbd" style="margin-left:auto">🔥 '+(G.streak||0)+'</span></div>'+
+    '<div class="row" style="gap:6px;margin-top:5px"><div class="bar hp mini grow'+(G.hp<=30?' low':'')+'"><i style="width:'+Math.round(G.hp/G.maxHp*100)+'%"></i></div><div class="bar xp mini grow"><i style="width:'+Math.round(G.xp/xpNeed(G.lv)*100)+'%"></i></div></div>'+
+    '<div class="row between" style="margin-top:2px"><small class="mono">HP '+G.hp+'/'+G.maxHp+'</small><small class="mono">XP '+G.xp+'/'+xpNeed(G.lv)+'</small></div></div>';
+  h.onclick=()=>go('profile');return h;
+}
+const QI={v:['📘','Từ vựng','#5ec8ff'],p:['💬','Ngữ pháp','#a78bfa'],l:['🎧','Nghe','#5eead4'],b:['👑','Boss','#ffd166']};
 function vMap(){
   main.innerHTML='';touchStreak();saveG();
-  main.appendChild(playerCard());
-  const mr=el('div','mascot-row');mr.innerHTML='<div class="mascot">'+mascot('wink')+'</div><div class="bubble grow"><span class="who">Mochi</span>'+esc(rnd(TIPS))+'</div>';main.appendChild(mr);
-  // ---- AFK farm ----
-  const afk=el('div','card afk');
-  afk.innerHTML='<div class="row between"><div><div class="eyebrow">AFK · Mochi tự cày</div><b class="h" style="font-size:16px">+'+idleRate()+' xu/giờ · tối đa '+Math.round(idleCapMs()/3600e3)+'g offline</b></div><span class="kbd" id="afkBugs">🐛 '+(G.idle.bugs||0)+'</span></div>'+
-    '<div class="farm"><div class="fm">'+mascot('happy')+'</div><div class="fx-hit" id="farmHit">⚔️</div><div class="fb">'+bug()+'</div>'+(G.talk.equipped.length?'<div class="fsay" id="fsay">“'+esc(rnd(G.talk.equipped))+'”</div>':'')+'</div>'+
-    (G.talk.equipped.length?'':'<small class="muted">Đọc chuẩn câu ở tab <b>Nói › Trang bị</b> để Mochi biết nói, mỗi câu +1 xu/giờ.</small>')+
-    '<div class="row between" style="margin-top:6px"><div><div class="h" style="font-size:22px;color:var(--yellow)">🪙 <span id="afkCoins">0</span> <small style="font-size:12px;color:var(--muted)">· ✨ <span id="afkXp">0</span> XP</small></div><small class="muted" id="afkTime">đang tích…</small></div><button class="btn yellow sm" id="afkCollect">Thu hoạch</button></div>';
-  main.appendChild(afk);
-  function paintAfk(){const p=idlePending();const a=$('#afkCoins'),x=$('#afkXp'),t=$('#afkTime');if(!a)return;a.textContent=p.coins;x.textContent=p.xp;t.textContent=(p.capped?'⚠️ đầy túi — thu hoạch đi! ':'đã cày '+fmtDur(p.ms)+' ')+'· '+(p.bugs)+' bug';const h=$('#farmHit');if(h&&Math.random()<.35){h.classList.remove('go');void h.offsetWidth;h.classList.add('go');}}
-  paintAfk();mapTimer=setInterval(paintAfk,1000);
-  $('#afkCollect').onclick=()=>{const p=idlePending();if(p.coins<=0){toast('Chưa có gì để thu — chờ Mochi cày thêm nhé');return;}collectIdle();confetti();paintAfk();vMap();};
-  // ---- Daily: chest + quests ----
-  const dl=daily();const dc=el('div','card');
-  dc.innerHTML='<div class="row between"><div><div class="eyebrow">Hằng ngày</div><b class="h" style="font-size:16px">Rương đăng nhập · chuỗi '+(G.streak||0)+' ngày</b></div></div>';
-  const chest=el('button','btn '+(dl.chest?'ghost':'violet')+' block sm',dl.chest?'✅ Đã nhận hôm nay':'🎁 Mở rương ('+(50+(G.streak||0)*10)+' xu + 💡)');chest.style.marginTop='10px';chest.disabled=!!dl.chest;
-  chest.onclick=()=>{const d=daily();if(d.chest)return;d.chest=true;const c=50+(G.streak||0)*10;G.items.hint++;let extra='';if((G.streak||0)%3===0){G.items.potion++;extra=' + 🧪';}gainXp(20,c);saveG();confetti();sfx.win();toast('🎁 +'+c+' xu + 💡'+extra);vMap();};
-  dc.appendChild(chest);
-  const ql=el('div');ql.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px';
-  DQ.forEach(q=>{const v=Math.min(dl[q[0]]||0,q[2]);const done=v>=q[2];const cl=dl.claimed[q[0]];const r=el('div','dq'+(done?' done':''));
-    r.innerHTML='<span class="qi">'+q[4]+'</span><span class="grow"><b>'+q[1]+'</b><div class="bar mini"><i style="width:'+Math.round(v/q[2]*100)+'%"></i></div><small class="muted">'+v+'/'+q[2]+' · thưởng '+q[3]+' xu</small></span>';
-    const b=el('button','btn sm '+(cl?'ghost':done?'yellow':'ghost'),cl?'✓':done?'Nhận':'…');b.disabled=!done||cl;b.onclick=()=>{const d=daily();if(d.claimed[q[0]])return;d.claimed[q[0]]=1;gainXp(30,q[3]);saveG();sfx.win();toast('+'+q[3]+' xu');vMap();};r.appendChild(b);ql.appendChild(r);});
-  dc.appendChild(ql);main.appendChild(dc);
-  const c=el('div','card');
-  const ch=G.ch;const days=DAYS.filter(d=>d.phase===ch);
+  main.appendChild(hud());
+  // ---- Chơi tiếp ----
+  const d=dayInfo(G.cur),st=G.cleared[G.cur]||{};
+  const play=el('div','card play');
+  play.innerHTML='<div class="row between"><div><div class="eyebrow">Chơi tiếp · ngày '+G.cur+'</div><b class="h" style="font-size:18px;line-height:1.15">'+esc(d.title)+'</b></div><div class="mascot xs">'+mascot('wink')+'</div></div>';
+  const chips=el('div','qchips');
+  ['v','p','l','b'].forEach(k=>{const c=el('button','qchip'+(st[k]?' done':''));c.style.setProperty('--c',QI[k][2]);c.innerHTML='<span class="ic">'+QI[k][0]+'</span><span>'+QI[k][1]+'</span><small>'+(st[k]?'★'.repeat(st[k]):'—')+'</small>';c.onclick=()=>{k==='b'?bossStart(G.cur):battleStart(G.cur,k);};chips.appendChild(c);});
+  play.appendChild(chips);
+  play.appendChild(el('div','tipline','💬 '+esc(rnd(TIPS))));
+  main.appendChild(play);
+  // ---- AFK strip ----
+  const p0=idlePending();
+  const afk=el('div','strip afk');
+  afk.innerHTML='<div class="mini-farm">'+mascot('happy')+bug()+'</div><div class="grow"><b class="h" style="font-size:14px">AFK · +'+idleRate()+' xu/giờ</b><div class="mono" id="afkLine">🪙 <b id="afkCoins">'+p0.coins+'</b> · ✨ <span id="afkXp">'+p0.xp+'</span> XP · <span id="afkTime">'+fmtDur(p0.ms)+'</span></div></div>';
+  const col=el('button','btn yellow sm','Thu');col.id='afkCollect';col.onclick=e=>{e.stopPropagation();const p=idlePending();if(p.coins<=0){toast('Chưa có gì để thu — chờ Mochi cày thêm nhé');return;}collectIdle();confetti();vMap();};
+  afk.appendChild(col);afk.onclick=afkSheet;main.appendChild(afk);
+  function paintAfk(){const p=idlePending();const a=$('#afkCoins'),x=$('#afkXp'),t=$('#afkTime');if(!a)return;a.textContent=p.coins;x.textContent=p.xp;t.textContent=p.capped?'⚠️ đầy túi':fmtDur(p.ms);}
+  mapTimer=setInterval(paintAfk,1000);
+  // ---- Daily strip ----
+  const dl=daily();const qdone=DQ.filter(q=>(dl[q[0]]||0)>=q[2]).length,qclaim=DQ.filter(q=>dl.claimed[q[0]]).length;const hasNew=(!dl.chest)||(qdone>qclaim);
+  const ds=el('button','strip daily'+(hasNew?' new':''));
+  ds.innerHTML='<span class="qi">🎁</span><span class="grow"><b class="h" style="font-size:14px">Hằng ngày</b><div class="mono">'+(dl.chest?'rương đã mở':'<span style="color:var(--yellow)">rương chưa mở</span>')+' · nhiệm vụ '+qclaim+'/'+DQ.length+'</div></span><span class="sc">›</span>';
+  ds.onclick=dailySheet;main.appendChild(ds);
+  // ---- Bản đồ chặng ----
+  const c=el('div','card map');
+  const ch=G.ch;const days=DAYS.filter(x=>x.phase===ch);
   const head=el('div','chapter');
   const prev=el('button','nav','‹');prev.disabled=ch<=0;prev.onclick=()=>{G.ch=Math.max(0,ch-1);saveG();vMap();};
   const next=el('button','nav','›');next.disabled=ch>=PHASES.length-1;next.onclick=()=>{G.ch=Math.min(PHASES.length-1,ch+1);saveG();vMap();};
-  const t=el('div','grow','<div class="eyebrow">Chặng '+(ch+1)+' / '+PHASES.length+'</div><div class="h" style="font-size:19px;line-height:1.15">'+esc(PHASES[ch])+'</div>');t.style.textAlign='center';
+  const t=el('div','grow','<div class="eyebrow">Chặng '+(ch+1)+'/'+PHASES.length+'</div><div class="h" style="font-size:16px;line-height:1.15">'+esc(PHASES[ch])+'</div>');t.style.textAlign='center';
   head.appendChild(prev);head.appendChild(t);head.appendChild(next);c.appendChild(head);
   const path=el('div','path');
-  days.forEach(d=>{
-    const n=d.n;const st=G.cleared[n]||{};const done=dayCleared(n);
+  days.forEach(x=>{const n=x.n;const s2=G.cleared[n]||{};const done=dayCleared(n);
     const b=el('button','node'+(done?' done':n===G.cur?' cur':n<G.cur?' open':' lock'),String(n));
     if(n>G.cur)b.innerHTML+='<span class="lk">🔒</span>';
-    const stars=(st.v||0)+(st.p||0)+(st.l||0)+(st.b||0);if(stars)b.innerHTML+='<span class="st">'+'★'.repeat(Math.min(3,Math.ceil(stars/4)))+'</span>';
+    const stars=(s2.v||0)+(s2.p||0)+(s2.l||0)+(s2.b||0);if(stars)b.innerHTML+='<span class="st">'+'★'.repeat(Math.min(3,Math.ceil(stars/4)))+'</span>';
     b.onclick=()=>{if(n>G.cur){toast('🔒 Xong ngày '+G.cur+' để mở');return;}questSelect(n);};
     path.appendChild(b);
   });
-  c.appendChild(path);main.appendChild(c);
-  const jump=el('button','btn blue block','🎯 Tới ngày hiện tại · '+G.cur);jump.onclick=()=>{G.ch=dayInfo(G.cur).phase;saveG();vMap();setTimeout(()=>questSelect(G.cur),50);};main.appendChild(jump);
+  c.appendChild(path);
+  if(dayInfo(G.cur).phase!==ch){const j=el('button','btn ghost sm block','🎯 Về chặng hiện tại');j.style.marginTop='8px';j.onclick=()=>{G.ch=dayInfo(G.cur).phase;saveG();vMap();};c.appendChild(j);}
+  main.appendChild(c);
 }
-
+function afkSheet(){
+  openModal((m,close)=>{const p=idlePending();
+    m.innerHTML='<div class="eyebrow">AFK · Mochi tự cày</div><b class="h" style="font-size:18px">+'+idleRate()+' xu/giờ · tối đa '+Math.round(idleCapMs()/3600e3)+' giờ offline</b>'+
+      '<div class="farm"><div class="fm">'+mascot('happy')+'</div><div class="fx-hit go" id="farmHit">⚔️</div><div class="fb">'+bug()+'</div>'+(G.talk.equipped.length?'<div class="fsay">“'+esc(rnd(G.talk.equipped))+'”</div>':'')+'</div>'+
+      '<div class="row between" style="margin-top:10px"><div><div class="h" style="font-size:24px;color:var(--yellow)">🪙 '+p.coins+' <small style="font-size:12px;color:var(--muted)">· ✨ '+p.xp+' XP</small></div><small class="muted">'+(p.capped?'⚠️ đầy túi — thu hoạch đi!':'đã cày '+fmtDur(p.ms))+' · 🐛 '+(G.idle.bugs||0)+' bug tổng</small></div></div>'+
+      '<p class="muted" style="font-size:13px;margin-top:10px">Cày nhanh hơn: xong thêm ngày (+4/giờ), nâng cấp ở Shop (+12/giờ), trang bị câu ở tab Nói (+1/giờ mỗi câu).</p>';
+    const r=el('div','row');r.style.cssText='gap:10px;margin-top:12px';const k=el('button','btn ghost grow','Đóng');k.onclick=close;const c=el('button','btn yellow grow','Thu hoạch');c.disabled=p.coins<=0;c.onclick=()=>{close();collectIdle();confetti();vMap();};r.appendChild(k);r.appendChild(c);m.appendChild(r);});
+}
+function dailySheet(){
+  openModal((m,close)=>{const dl=daily();
+    m.innerHTML='<div class="eyebrow">Hằng ngày</div><b class="h" style="font-size:18px">Rương đăng nhập · chuỗi '+(G.streak||0)+' ngày</b>';
+    const chest=el('button','btn '+(dl.chest?'ghost':'violet')+' block',dl.chest?'✅ Đã nhận hôm nay':'🎁 Mở rương ('+(50+(G.streak||0)*10)+' xu + 💡)');chest.style.marginTop='10px';chest.disabled=!!dl.chest;
+    chest.onclick=()=>{const d=daily();if(d.chest)return;d.chest=true;const c=50+(G.streak||0)*10;G.items.hint++;let extra='';if((G.streak||0)%3===0){G.items.potion++;extra=' + 🧪';}gainXp(20,c);saveG();confetti();sfx.win();toast('🎁 +'+c+' xu + 💡'+extra);close();dailySheet();};
+    m.appendChild(chest);
+    const ql=el('div');ql.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px';
+    DQ.forEach(q=>{const v=Math.min(dl[q[0]]||0,q[2]);const done=v>=q[2];const cl=dl.claimed[q[0]];const r=el('div','dq'+(done?' done':''));
+      r.innerHTML='<span class="qi">'+q[4]+'</span><span class="grow"><b>'+q[1]+'</b><div class="bar mini"><i style="width:'+Math.round(v/q[2]*100)+'%"></i></div><small class="muted">'+v+'/'+q[2]+' · '+q[3]+' xu</small></span>';
+      const b=el('button','btn sm '+(cl?'ghost':done?'yellow':'ghost'),cl?'✓':done?'Nhận':'…');b.disabled=!done||cl;b.onclick=()=>{const d=daily();if(d.claimed[q[0]])return;d.claimed[q[0]]=1;gainXp(30,q[3]);saveG();sfx.win();toast('+'+q[3]+' xu');close();dailySheet();};r.appendChild(b);ql.appendChild(r);});
+    m.appendChild(ql);const k=el('button','btn ghost block sm','Đóng');k.style.marginTop='12px';k.onclick=()=>{close();vMap();};m.appendChild(k);});
+}
 /* ---------- QUEST SELECT ---------- */
 function questSelect(n){
   const d=dayInfo(n),st=G.cleared[n]||{};
@@ -265,21 +293,20 @@ function battleStart(n,type){
   if(!qs.length){toast('Chưa có dữ liệu cho quest này');return;}
   if(G.hp<=0){G.hp=Math.ceil(G.maxHp/2);}
   B={n,type,queue:qs.slice(),total:qs.length,monHp:qs.length*10,monMax:qs.length*10,right:0,wrong:0,combo:0,timer:null,t0:0,limit:(type==='l'?15:12)+(G.up.timer||0)*2,cur:null,locked:false,hinted:false};
-  G.combo=0;cur='battle';renderTabs();window.scrollTo(0,0);vBattle();nextQ();
+  document.body.classList.add('infight');G.combo=0;cur='battle';renderTabs();window.scrollTo(0,0);vBattle();nextQ();
 }
 function vBattle(){
   main.innerHTML='';const a=el('div','arena');
-  const top=el('div','card');top.style.padding='12px 14px';
-  top.innerHTML='<div class="row between"><div class="row" style="gap:8px"><span class="avatar" style="width:40px;height:40px;border-radius:12px">'+mascot('happy')+'</span><div class="grow" style="min-width:120px"><small style="font-family:var(--mono);font-size:10.5px;color:var(--faint)">HP <b id="php">'+G.hp+'</b>/'+G.maxHp+'</small><div class="bar hp" id="phpbar"><i style="width:'+Math.round(G.hp/G.maxHp*100)+'%"></i></div></div></div><button class="btn ghost sm" id="quitB">✕ Rút lui</button></div>';
-  a.appendChild(top);
-  const items=el('div','row');items.style.gap='8px';
-  const hb=el('button','btn violet sm grow','💡 Gợi ý ('+G.items.hint+')');hb.id='itHint';hb.disabled=G.items.hint<=0;
-  hb.onclick=()=>{if(!B||B.locked||B.hinted||G.items.hint<=0)return;const wrong=[...document.querySelectorAll('.opt:not([disabled])')].filter(o=>o.textContent!==B.cur.ans);if(!wrong.length)return;const w=rnd(wrong);w.disabled=true;w.style.opacity='.25';B.hinted=true;G.items.hint--;saveG();hb.textContent='💡 Gợi ý ('+G.items.hint+')';hb.disabled=true;sfx.hit();};
-  const pb=el('button','btn mint sm grow','🧪 Bình máu ('+G.items.potion+')');pb.id='itPotion';pb.disabled=G.items.potion<=0;
-  pb.onclick=()=>{if(!B||G.items.potion<=0||G.hp>=G.maxHp)return;G.items.potion--;G.hp=Math.min(G.maxHp,G.hp+50);saveG();pb.textContent='🧪 Bình máu ('+G.items.potion+')';pb.disabled=G.items.potion<=0;const ph=$('#php'),bar=$('#phpbar');if(ph)ph.textContent=G.hp;if(bar){bar.querySelector('i').style.width=Math.round(G.hp/G.maxHp*100)+'%';bar.classList.toggle('low',G.hp<=30);}const r=bar.getBoundingClientRect();fxText(r.left+40,r.top-10,'+50 HP','heal');sfx.ok();};
-  items.appendChild(hb);items.appendChild(pb);a.appendChild(items);
-  const mon=el('div','card');mon.style.background='linear-gradient(180deg,#2a2160,#1b1147)';
-  mon.innerHTML='<div class="combo" id="combo">COMBO x0</div><div class="monster" id="mon"><div class="mname">'+MON[B.type][0]+' · Ngày '+B.n+'</div><div class="art">'+bug()+'</div><div style="width:100%;padding:0 6px"><div class="bar mon" id="monbar"><i style="width:100%"></i><span id="montxt">'+B.monHp+' / '+B.monMax+'</span></div></div></div>';
+  const top=el('div','card btop');
+  top.innerHTML='<span class="avatar" style="width:38px;height:38px;border-radius:11px;flex:0 0 auto">'+mascot('happy')+'</span><div class="grow" style="min-width:80px"><small class="mono">HP <b id="php">'+G.hp+'</b>/'+G.maxHp+'</small><div class="bar hp mini" id="phpbar"><i style="width:'+Math.round(G.hp/G.maxHp*100)+'%"></i></div></div>';
+  const hb=el('button','ibtn','💡<b>'+G.items.hint+'</b>');hb.id='itHint';hb.disabled=G.items.hint<=0;hb.title='Gợi ý: loại 1 đáp án sai';
+  hb.onclick=()=>{if(!B||B.locked||B.hinted||G.items.hint<=0)return;const wrong=[...document.querySelectorAll('.opt:not([disabled])')].filter(o=>o.textContent!==B.cur.ans);if(!wrong.length)return;const w=rnd(wrong);w.disabled=true;w.style.opacity='.25';B.hinted=true;G.items.hint--;saveG();hb.innerHTML='💡<b>'+G.items.hint+'</b>';hb.disabled=true;sfx.hit();};
+  const pb=el('button','ibtn','🧪<b>'+G.items.potion+'</b>');pb.id='itPotion';pb.disabled=G.items.potion<=0;pb.title='Bình máu +50';
+  pb.onclick=()=>{if(!B||G.items.potion<=0||G.hp>=G.maxHp)return;G.items.potion--;G.hp=Math.min(G.maxHp,G.hp+50);saveG();pb.innerHTML='🧪<b>'+G.items.potion+'</b>';pb.disabled=G.items.potion<=0;const ph=$('#php'),bar=$('#phpbar');if(ph)ph.textContent=G.hp;if(bar){bar.querySelector('i').style.width=Math.round(G.hp/G.maxHp*100)+'%';bar.classList.toggle('low',G.hp<=30);}const r=bar.getBoundingClientRect();fxText(r.left+40,r.top-10,'+50 HP','heal');sfx.ok();};
+  const q=el('button','ibtn','✕');q.id='quitB';q.title='Rút lui';
+  top.appendChild(hb);top.appendChild(pb);top.appendChild(q);a.appendChild(top);
+  const mon=el('div','card moncard');
+  mon.innerHTML='<div class="monster" id="mon"><div class="art">'+bug()+'</div><div class="grow"><div class="row between"><div class="mname">'+MON[B.type][0]+' · Ngày '+B.n+'</div><span class="combo" id="combo">x0</span></div><div class="bar mon" id="monbar"><i style="width:100%"></i><span id="montxt">'+B.monHp+' / '+B.monMax+'</span></div></div></div>';
   a.appendChild(mon);
   a.appendChild(el('div','bar time','<i id="tbar" style="width:100%"></i>'));
   a.appendChild(el('div','',''));a.lastChild.id='qwrap';
@@ -311,12 +338,12 @@ function answer(o,btn){
     const dmg=10;B.monHp=Math.max(0,B.monHp-dmg);
     sfx.ok();monEl.classList.remove('hit');void monEl.offsetWidth;monEl.classList.add('hit');
     const r=monEl.getBoundingClientRect();fxText(r.left+r.width/2+(Math.random()*60-30),r.top+40,'-'+dmg+(B.combo>=3?' ✦':''));
-    const cb=$('#combo');cb.textContent='COMBO x'+B.combo;cb.classList.remove('big');void cb.offsetWidth;cb.classList.add('big');
+    const cb=$('#combo');cb.textContent='x'+B.combo;cb.classList.remove('big');void cb.offsetWidth;cb.classList.add('big');
     const xp=Math.round((10+Math.min(B.combo,10)*2)*(1+(G.up.combo||0)*.1));gainXp(xp,5);
     const dq=daily();dq.combo=Math.max(dq.combo||0,B.combo);
     fxText(r.left+r.width/2+60,r.top+70,'+'+xp+' XP','heal');
   }else{
-    if(btn)btn.classList.add('bad');B.wrong++;B.combo=0;G.combo=0;$('#combo').textContent='COMBO x0';
+    if(btn)btn.classList.add('bad');B.wrong++;B.combo=0;G.combo=0;$('#combo').textContent='x0';
     (B.wrongList=B.wrongList||[]).push(q);
     G.hp=Math.max(0,G.hp-10);sfx.bad();flashRed();main.classList.add('shaking');setTimeout(()=>main.classList.remove('shaking'),400);
     const ph=$('#php'),pb=$('#phpbar');if(ph)ph.textContent=G.hp;if(pb){pb.querySelector('i').style.width=Math.round(G.hp/G.maxHp*100)+'%';pb.classList.toggle('low',G.hp<=30);}
@@ -359,7 +386,7 @@ function typeText(elm,text,cb){let i=0;elm.innerHTML='';const c=el('span','cur')
 function bossStart(n){
   const d=dayInfo(n);const rounds=[DIALOGS[d.di]].concat(pickOthers(DIALOGS,d.di,2,x=>x.them));
   if(G.hp<=0)G.hp=Math.ceil(G.maxHp/2);
-  V={n,rounds,i:0,bossHp:100,right:0};cur='boss';renderTabs();window.scrollTo(0,0);vBoss();bossRound();
+  document.body.classList.add('infight');V={n,rounds,i:0,bossHp:100,right:0};cur='boss';renderTabs();window.scrollTo(0,0);vBoss();bossRound();
 }
 function vBoss(){
   main.innerHTML='';
@@ -393,7 +420,7 @@ function bossPick(o,btn){
   const tip=el('div','tip');tip.innerHTML='<b>'+(o.good?'✓ Chuẩn!':'✗ Chưa đúng')+'</b> '+esc(o.fb||'');$('#choices').appendChild(tip);
   saveG();
   if(G.hp<=0){setTimeout(()=>{V=null;defeatBoss();},800);return;}
-  const nb=el('button','btn yellow block','Tiếp ›');nb.style.marginTop='4px';nb.onclick=()=>{V.i++;bossRound();};$('#choices').appendChild(nb);
+  const nb=el('button','btn yellow block pin','Tiếp ›');nb.onclick=()=>{V.i++;bossRound();};$('#choices').appendChild(nb);
 }
 function defeatBoss(){openModal((m,close)=>{m.innerHTML='<div class="eyebrow" style="text-align:center;color:var(--red)">HẾT HP</div><div class="big" style="font-size:24px">Senpai thắng lần này…</div><div class="mascot-row" style="margin-top:14px"><div class="mascot">'+mascot('sad')+'</div><div class="bubble grow"><span class="who">Mochi</span>Đọc kỹ phản hồi rồi thử lại nhé. HP hồi 50%.</div></div>';G.hp=Math.ceil(G.maxHp/2);saveG();const b=el('button','btn block','Về bản đồ');b.style.marginTop='14px';b.onclick=()=>{close();go('map');};m.appendChild(b);});}
 function bossEnd(){
@@ -412,8 +439,11 @@ function bossEnd(){
 
 /* ---------- AI BOSS (free talk, visual novel) ---------- */
 function aiCfg(){const a=loadApp();return (a.ai&&a.ai.key&&a.ai.provider)?a.ai:null;}
-function aiConfigured(){return !!aiCfg();}
+let SAMPLE;async function claudeSp(){if(SAMPLE!==undefined)return SAMPLE;SAMPLE=null;if(window.claude&&window.claude.use){try{SAMPLE=await window.claude.use('sample');}catch(e){SAMPLE=null;}}return SAMPLE;}
+function inClaude(){return !!(window.claude&&window.claude.use);}
+function aiConfigured(){return inClaude()||!!aiCfg();}
 async function aiCall(system,msgs){
+  if(inClaude()){const sp=await claudeSp();if(sp){const r=await sp([{role:'user',content:system}].concat(msgs),{modelTier:'quick'});return (r&&r.text)||'';}}
   const c=aiCfg();if(!c)throw new Error('no-ai');
   if(c.provider==='gemini'){
     const model=c.model||'gemini-flash-lite-latest';
@@ -433,7 +463,7 @@ function aiRules(sc){const lvl=(loadApp().cfg||{}).level||'A2';return 'You are M
 const SCEN=['We are in a daily standup. Ask what I did yesterday, what I do today, and blockers.','I am reporting a blocker to you, my team lead. React and ask short follow-up questions.','You are reviewing my pull request. Give short feedback and ask why I made some choices.','We are about to deploy to production. Talk about the plan and the risks.'];
 function parseReply(t){const i=t.indexOf('FIX:');return i<0?{reply:t.trim(),fix:''}:{reply:t.slice(0,i).trim(),fix:t.slice(i+4).trim()};}
 function aiBossStart(n){
-  const sc=rnd(SCEN);V={n,ai:true,sc,turns:[],user:0,bossHp:60};cur='boss';renderTabs();window.scrollTo(0,0);
+  document.body.classList.add('infight');const sc=rnd(SCEN);V={n,ai:true,sc,turns:[],user:0,bossHp:60};cur='boss';renderTabs();window.scrollTo(0,0);
   main.innerHTML='';
   const head=el('div','card');head.style.padding='12px 14px';
   head.innerHTML='<div class="row between"><div><div class="eyebrow">BOSS AI · nói tự do</div><b class="h" style="font-size:17px">Minh-senpai</b></div><button class="btn ghost sm" id="quitV">✕ Rút lui</button></div>';
@@ -500,7 +530,7 @@ function addEquip(en){if(!G.talk.equipped.includes(en)){G.talk.equipped.push(en)
 
 /* ---- 2) Đọc theo nhịp (shadowing) ---- */
 let SH=null;
-function shadowStart(){SH={qs:pickSentences(8),i:0,sum:0,equipped:0};cur='talk';main.innerHTML='';talkHeader('ĐỌC THEO NHỊP','Câu '+1+'/8');shadowRound();}
+document.body.classList.add('infight');function shadowStart(){SH={qs:pickSentences(8),i:0,sum:0,equipped:0};cur='talk';main.innerHTML='';talkHeader('ĐỌC THEO NHỊP','Câu '+1+'/8');shadowRound();}
 function shadowRound(){
   if(!SH)return;if(SH.i>=SH.qs.length){shadowEnd();return;}
   const q=SH.qs[SH.i];main.innerHTML='';talkHeader('ĐỌC THEO NHỊP','Câu '+(SH.i+1)+'/'+SH.qs.length,'<div class="bar time" style="margin-top:10px"><i id="shbar" style="width:0%"></i></div>');
@@ -516,7 +546,7 @@ function shadowGrade(q,heard){
   stopSR();const m=matchWords(q.en,heard);SH.sum+=m.pct;const eq=m.pct>=80&&addEquip(q.en);if(eq)SH.equipped++;
   const xp=Math.round(m.pct/5);gainXp(xp,Math.round(m.pct/10));if(m.pct>=80)sfx.ok();else if(m.pct>=50)sfx.hit();else sfx.bad();
   const r=$('#shRes');r.innerHTML='<div class="card pop" style="margin-top:10px"><div class="row between"><b class="h" style="font-size:22px;color:'+(m.pct>=80?'var(--green)':m.pct>=50?'var(--yellow)':'var(--red)')+'">'+m.pct+'%</b><span class="kbd">+'+xp+' XP'+(eq?' · 🛡️ trang bị':'')+'</span></div><div class="wds">'+wordsHtml(m)+'</div><small class="muted">Bạn nói: “'+esc(heard)+'”</small></div>';
-  const nb=el('button','btn yellow block','Câu tiếp ›');nb.style.marginTop='10px';nb.onclick=()=>{SH.i++;shadowRound();};r.appendChild(nb);
+  const nb=el('button','btn yellow block pin','Câu tiếp ›');nb.onclick=()=>{SH.i++;shadowRound();};r.appendChild(nb);
   const dq=daily();dq.combo=Math.max(dq.combo||0,m.pct>=80?5:0);
 }
 function shadowEnd(){const avg=Math.round(SH.sum/SH.qs.length);const best=Math.max(G.talk.shadowBest||0,avg);const isBest=avg>(G.talk.shadowBest||0);G.talk.shadowBest=best;const stars=avg>=85?3:avg>=65?2:1;gainXp(60+stars*20,30+stars*10);G.wins++;daily().wins++;saveG();checkBadges();sfx.win();confetti();const eqn=SH.equipped;SH=null;
@@ -524,7 +554,7 @@ function shadowEnd(){const avg=Math.round(SH.sum/SH.qs.length);const best=Math.m
 
 /* ---- 4) Phản xạ 5 giây ---- */
 let RF=null;
-function reflexStart(){RF={qs:shuffle(DIALOGS).slice(0,8),i:0,score:0};cur='talk';reflexRound();}
+document.body.classList.add('infight');function reflexStart(){RF={qs:shuffle(DIALOGS).slice(0,8),i:0,score:0};cur='talk';reflexRound();}
 function reflexRound(){
   if(!RF)return;if(RF.i>=RF.qs.length){reflexEnd();return;}
   const d=RF.qs[RF.i];main.innerHTML='';talkHeader('PHẢN XẠ 5 GIÂY','Câu '+(RF.i+1)+'/'+RF.qs.length+' · '+RF.score+' điểm','<div class="bar time" style="margin-top:10px"><i id="rfbar" style="width:100%"></i></div>');
@@ -544,7 +574,7 @@ function reflexGrade(d,heard){
   if(sc>=7)sfx.ok();else if(sc>=4)sfx.hit();else sfx.bad();gainXp(sc*2,sc);
   const r=$('#rfRes');r.innerHTML='<div class="card pop"><div class="row between"><b class="h" style="font-size:22px;color:'+(sc>=7?'var(--green)':sc>=4?'var(--yellow)':'var(--red)')+'">+'+sc+' điểm</b><span class="kbd">'+(heard?'bạn nói':'im lặng')+'</span></div>'+(heard?'<small class="muted">“'+esc(heard)+'”</small>':'')+'<div class="tip" style="margin-top:8px"><b>Mẫu:</b> '+esc(good.t)+'<br><small>'+esc(good.fb||'')+'</small></div></div>';
   const st=$('#rfStat');if(st){st.classList.remove('rec');st.textContent=sc>=7?'Phản xạ tốt!':sc>=4?'Ổn, thêm từ khoá nữa nhé':'Nói gì đó cũng được — quan trọng là mở miệng!';}
-  const nb=el('button','btn yellow block','Câu tiếp ›');nb.style.marginTop='10px';nb.onclick=()=>{RF.i++;RF.graded=false;reflexRound();};r.appendChild(nb);
+  const nb=el('button','btn yellow block pin','Câu tiếp ›');nb.onclick=()=>{RF.i++;RF.graded=false;reflexRound();};r.appendChild(nb);
 }
 function reflexEnd(){const sc=RF.score,max=RF.qs.length*10;const isBest=sc>(G.talk.reflexBest||0);G.talk.reflexBest=Math.max(G.talk.reflexBest||0,sc);const stars=sc>=max*.8?3:sc>=max*.5?2:1;gainXp(50+stars*20,20+stars*10);G.wins++;daily().wins++;saveG();checkBadges();sfx.win();if(stars>1)confetti();RF=null;
   openModal((m,close)=>{m.innerHTML='<div class="eyebrow" style="text-align:center">KẾT QUẢ</div><div class="stars3">'+'★'.repeat(stars)+'<span style="opacity:.25">'+'★'.repeat(3-stars)+'</span></div><div class="big">'+sc+'<span style="font-size:18px;color:var(--muted)">/'+max+'</span></div>'+(isBest?'<div style="text-align:center;color:var(--yellow);font-family:var(--disp);font-weight:700">🏆 Kỷ lục mới!</div>':'')+'<div class="mascot-row" style="margin-top:12px"><div class="mascot">'+mascot(stars===3?'cheer':'think')+'</div><div class="bubble grow"><span class="who">Mochi</span>'+(stars===3?'Phản xạ như dev senior!':'Mẹo: trả lời ngắn nhưng có từ khoá của câu hỏi.')+'</div></div>';const r=el('div','row');r.style.cssText='gap:10px;margin-top:14px';const a=el('button','btn ghost grow','Chơi lại');a.onclick=()=>{close();reflexStart();};const k=el('button','btn yellow grow','Về Nói');k.onclick=()=>{close();go('talk');};r.appendChild(a);r.appendChild(k);m.appendChild(r);});}
@@ -552,7 +582,7 @@ function reflexEnd(){const sc=RF.score,max=RF.qs.length*10;const isBest=sc>(G.ta
 /* ---- 3) Chuyện văn phòng (story mode) ---- */
 let ST=null;
 const ENDINGS=[[85,'🌟 Được khen trước cả team',3],[60,'☕ Một ngày làm việc ổn',2],[0,'📝 Bị PM nhắc nhở nhẹ',1]];
-function storyStart(){const who=['minh','linh','an'];ST={scenes:shuffle(DIALOGS).slice(0,5).map((d,i)=>({d,who:who[i%3]})),i:0,rep:50};cur='talk';storyScene();}
+function storyStart(){const who=['minh','linh','an'];document.body.classList.add('infight');ST={scenes:shuffle(DIALOGS).slice(0,5).map((d,i)=>({d,who:who[i%3]})),i:0,rep:50};cur='talk';storyScene();}
 function storyScene(){
   if(!ST)return;if(ST.i>=ST.scenes.length){storyEnd();return;}
   const s=ST.scenes[ST.i],c=CAST[s.who];main.innerHTML='';
@@ -567,7 +597,7 @@ function storyPick(s,o,btn){
   else{btn.classList.add('bad');document.querySelectorAll('.choice').forEach(b=>{const g=s.d.opts.find(x=>x.good);if(g&&b.textContent===g.t)b.classList.add('good');});ST.rep=Math.max(0,ST.rep-12);sfx.bad();npcEl.innerHTML=npc(s.who,'angry');}
   const rb=$('#repbar');if(rb){rb.style.width=ST.rep+'%';rb.nextElementSibling.textContent=ST.rep;}
   speak(o.t);const tip=el('div','tip');tip.innerHTML='<b>'+(o.good?'✓':'✗')+'</b> '+esc(o.fb||'');$('#choices').appendChild(tip);
-  const nb=el('button','btn yellow block','Cảnh tiếp ›');nb.style.marginTop='4px';nb.onclick=()=>{ST.i++;storyScene();};$('#choices').appendChild(nb);
+  const nb=el('button','btn yellow block pin','Cảnh tiếp ›');nb.onclick=()=>{ST.i++;storyScene();};$('#choices').appendChild(nb);
 }
 function storyEnd(){const e=ENDINGS.find(x=>ST.rep>=x[0]);const stars=e[2];G.talk.endings[stars]=1;const rep=ST.rep;ST=null;gainXp(80+stars*30,40+stars*10);G.wins++;daily().wins++;if(stars===3){G.bossWins++;daily().boss++;}saveG();checkBadges();sfx.win();if(stars>1)confetti();
   openModal((m,close)=>{m.innerHTML='<div class="eyebrow" style="text-align:center">KẾT CỤC</div><div class="stars3">'+'★'.repeat(stars)+'<span style="opacity:.25">'+'★'.repeat(3-stars)+'</span></div><div class="big" style="font-size:22px">'+e[1]+'</div><p class="muted" style="text-align:center;margin-top:6px">Uy tín cuối ngày: '+rep+'/100 · đã mở '+Object.keys(G.talk.endings).length+'/3 kết cục</p><div class="mascot-row" style="margin-top:12px"><div class="mascot">'+mascot(stars===3?'cheer':stars===2?'happy':'sad')+'</div><div class="bubble grow"><span class="who">Mochi</span>'+(stars===3?'Cả team quý bạn rồi!':stars===2?'Ổn! Thử lại để lấy kết cục 3 sao.':'Đọc kỹ phản hồi mỗi cảnh nha, mai làm lại.')+'</div></div>';const r=el('div','row');r.style.cssText='gap:10px;margin-top:14px';const a=el('button','btn ghost grow','Ngày mới');a.onclick=()=>{close();storyStart();};const k=el('button','btn yellow grow','Về Nói');k.onclick=()=>{close();go('talk');};r.appendChild(a);r.appendChild(k);m.appendChild(r);});}
@@ -579,7 +609,7 @@ function parseBattle(t){const s=(t.match(/SCORE:\s*(\d+)/)||[])[1];const fi=t.in
 function talkBattleStart(){
   if(!aiConfigured()){openModal((m,close)=>{m.innerHTML='<div class="h" style="font-size:20px">Cần AI</div><div class="mascot-row" style="margin-top:12px"><div class="mascot">'+mascot('think')+'</div><div class="bubble grow"><span class="who">Mochi</span>Chế độ này cần AI chấm câu. Mở app › Giao tiếp AI › <b>Cài đặt AI</b> để nhập key (Gemini miễn phí), game sẽ dùng chung.</div></div>';const r=el('div','row');r.style.cssText='gap:10px;margin-top:14px';const a=el('button','btn ghost grow','Đóng');a.onclick=close;const k=el('button','btn grow','Mở app');k.onclick=openApp;r.appendChild(a);r.appendChild(k);m.appendChild(r);});return;}
   if(G.hp<=0)G.hp=Math.ceil(G.maxHp/2);
-  TB={sc:rnd(SCEN),turns:[],user:0,bossHp:300,combo:0,busy:false};cur='talk';main.innerHTML='';
+  document.body.classList.add('infight');TB={sc:rnd(SCEN),turns:[],user:0,bossHp:300,combo:0,busy:false};cur='talk';main.innerHTML='';
   talkHeader('ĐẤU THOẠI · AI','Minh-senpai · 6 lượt','<div class="row" style="gap:8px;margin-top:8px"><small style="font-family:var(--mono);font-size:10.5px;color:var(--faint)">HP</small><div class="bar hp grow" id="tbhp"><i style="width:'+Math.round(G.hp/G.maxHp*100)+'%"></i></div></div>');
   const vn=el('div','vn');vn.innerHTML='<div class="scene"><div class="bosshp"><div class="bar mon" id="tbboss"><i style="width:100%"></i><span>BOSS 300</span></div></div><div class="combo" style="top:36px" id="tbcombo">COMBO x0</div><div class="npc" id="npc">'+npc('minh')+'</div></div><div class="box"><span class="name">Minh-senpai</span><div class="txt" id="vtxt"><span class="muted">…</span></div></div>';main.appendChild(vn);
   const tips=el('div');tips.id='tips';tips.style.cssText='display:flex;flex-direction:column;gap:8px';main.appendChild(tips);
