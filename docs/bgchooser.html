@@ -1,0 +1,195 @@
+<title>Chọn nền động</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#f4f6f9;--surface:#fff;--surface2:#eef1f6;--ink:#14171c;--muted:#586170;--faint:#8b93a1;
+  --line:#e3e7ee;--accent:#1b4dff;--accent-ink:#1740d6;--accent-soft:#e8edff;--cyan:#14b8d4;--violet:#7b6cff;
+  --disp:'Bricolage Grotesque',system-ui,sans-serif;--sans:'Hanken Grotesk',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+:root:not([data-theme="light"]){ @media (prefers-color-scheme:dark){
+  --bg:#0c0e12;--surface:#15181f;--surface2:#101319;--ink:#eceef3;--muted:#98a0ad;--faint:#646c7a;
+  --line:#242932;--accent:#6f8cff;--accent-ink:#9db2ff;--accent-soft:#182138;--cyan:#3fd0e6;--violet:#9384ff;
+}}
+:root[data-theme="dark"]{
+  --bg:#0c0e12;--surface:#15181f;--surface2:#101319;--ink:#eceef3;--muted:#98a0ad;--faint:#646c7a;
+  --line:#242932;--accent:#6f8cff;--accent-ink:#9db2ff;--accent-soft:#182138;--cyan:#3fd0e6;--violet:#9384ff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);overflow:hidden}
+#stage{position:fixed;inset:0;z-index:0;overflow:hidden;background:var(--bg)}
+#stage canvas{display:block;width:100%;height:100%}
+.layer{position:absolute;inset:-16%;pointer-events:none}
+.ui{position:fixed;inset:0;z-index:2;pointer-events:none;display:flex;flex-direction:column}
+.top{pointer-events:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;
+  background:color-mix(in srgb,var(--bg) 72%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.brand{font-family:var(--disp);font-weight:800;font-size:16px;display:flex;align-items:center;gap:9px}
+.brand .d{width:26px;height:26px;border-radius:8px;background:linear-gradient(140deg,#4f7bff,#1234d8);box-shadow:0 4px 10px rgba(27,77,255,.3)}
+.tbtn{pointer-events:auto;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.picker{pointer-events:auto;display:flex;gap:9px;flex-wrap:wrap;padding:14px 20px;justify-content:center}
+.chip{pointer-events:auto;display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 15px;border-radius:11px;border:1px solid var(--line);
+  background:color-mix(in srgb,var(--surface) 82%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  color:var(--ink);font-family:var(--mono);font-size:12.5px;font-weight:600;cursor:pointer;transition:.18s;white-space:nowrap}
+.chip:hover{border-color:var(--accent)}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 8px 20px rgba(27,77,255,.28)}
+.chip .cur{font-size:10px;opacity:.8}
+.spacer{flex:1}
+.card{pointer-events:none;align-self:center;text-align:center;max-width:640px;margin:0 20px 8vh;padding:0 8px}
+.card .badge{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 13px;border-radius:999px;background:var(--accent);color:#fff;font-family:var(--mono);font-size:11.5px;font-weight:600;box-shadow:0 8px 22px rgba(27,77,255,.3)}
+.card h1{font-family:var(--disp);font-weight:800;font-size:clamp(28px,5vw,46px);letter-spacing:-.02em;line-height:1.06;margin:16px 0 0;text-wrap:balance}
+.card p{color:var(--muted);font-size:16px;margin:14px auto 0;max-width:46ch}
+.meta{pointer-events:auto;align-self:center;display:inline-flex;align-items:center;gap:12px;margin-bottom:26px;padding:10px 16px;border-radius:12px;
+  background:color-mix(in srgb,var(--surface) 86%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid var(--line)}
+.meta b{font-family:var(--disp);font-size:15px}
+.meta span{color:var(--muted);font-size:13px}
+.meta .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--faint)}
+@media(max-width:560px){.brand span{display:none}.card p{font-size:14.5px}}
+@media (prefers-reduced-motion:reduce){.layer{animation:none!important}}
+
+/* ---- Aurora Flow ---- */
+.aurora .layer{background-repeat:no-repeat}
+.aurora .a1{background:radial-gradient(46% 50% at 24% 30%,color-mix(in srgb,var(--accent) 30%,transparent),transparent 66%);animation:blobA 30s ease-in-out infinite}
+.aurora .a2{background:radial-gradient(44% 48% at 80% 68%,color-mix(in srgb,var(--cyan) 26%,transparent),transparent 68%);animation:blobB 38s ease-in-out infinite}
+.aurora .a3{background:radial-gradient(40% 44% at 60% 20%,color-mix(in srgb,var(--violet) 24%,transparent),transparent 70%);animation:blobA 46s ease-in-out infinite reverse}
+@keyframes blobA{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(5%,4%) scale(1.08)}50%{transform:translate(-3%,6%) scale(1.14)}75%{transform:translate(-6%,-3%) scale(1.05)}}
+@keyframes blobB{0%,100%{transform:translate(0,0) scale(1.05)}25%{transform:translate(-5%,-3%) scale(1)}50%{transform:translate(4%,-6%) scale(1.12)}75%{transform:translate(6%,4%) scale(1.04)}}
+
+/* ---- Silk waves ---- */
+.silk .s1{inset:-40%;background:
+   conic-gradient(from 120deg at 30% 40%, color-mix(in srgb,var(--accent) 30%,transparent), color-mix(in srgb,var(--violet) 26%,transparent), color-mix(in srgb,var(--cyan) 26%,transparent), color-mix(in srgb,var(--accent) 30%,transparent));
+   filter:blur(60px);animation:spin 40s linear infinite}
+.silk .s2{inset:-30%;background:radial-gradient(40% 40% at 70% 60%, color-mix(in srgb,var(--cyan) 24%,transparent), transparent 70%);animation:blobB 34s ease-in-out infinite;mix-blend-mode:screen}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---- Gooey blobs ---- */
+.gooey{filter:contrast(1)}
+.gooey .g{position:absolute;border-radius:50%;filter:blur(46px);opacity:.7}
+.gooey .g1{width:46vmax;height:46vmax;left:-6vmax;top:-8vmax;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 55%,transparent),transparent 65%);animation:g1 26s ease-in-out infinite}
+.gooey .g2{width:40vmax;height:40vmax;right:-6vmax;top:10vmax;background:radial-gradient(circle,color-mix(in srgb,var(--cyan) 48%,transparent),transparent 65%);animation:g2 32s ease-in-out infinite}
+.gooey .g3{width:38vmax;height:38vmax;left:20vmax;bottom:-12vmax;background:radial-gradient(circle,color-mix(in srgb,var(--violet) 48%,transparent),transparent 65%);animation:g3 30s ease-in-out infinite}
+@keyframes g1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(14%,10%) scale(1.15)}}
+@keyframes g2{0%,100%{transform:translate(0,0) scale(1.05)}50%{transform:translate(-12%,12%) scale(.92)}}
+@keyframes g3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(10%,-12%) scale(1.12)}}
+
+/* ---- Spotlight ---- */
+.spotlight .base{background:
+   radial-gradient(60% 60% at 20% 15%, color-mix(in srgb,var(--accent) 10%,transparent), transparent 60%),
+   radial-gradient(60% 60% at 85% 90%, color-mix(in srgb,var(--violet) 9%,transparent), transparent 60%)}
+.spotlight .spot{inset:0;background:radial-gradient(520px circle at var(--mx,50%) var(--my,45%), color-mix(in srgb,var(--accent) 34%,transparent), color-mix(in srgb,var(--cyan) 12%,transparent) 40%, transparent 70%);transition:background .05s linear}
+
+/* ---- Parallax orbs ---- */
+.parallax .po{position:absolute;border-radius:50%;filter:blur(30px);will-change:transform}
+.parallax .p1{width:30vmax;height:30vmax;left:8%;top:12%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 50%,transparent),transparent 66%)}
+.parallax .p2{width:24vmax;height:24vmax;right:10%;top:22%;background:radial-gradient(circle,color-mix(in srgb,var(--cyan) 46%,transparent),transparent 66%)}
+.parallax .p3{width:26vmax;height:26vmax;left:24%;bottom:6%;background:radial-gradient(circle,color-mix(in srgb,var(--violet) 46%,transparent),transparent 66%)}
+.parallax .p4{width:16vmax;height:16vmax;right:26%;bottom:16%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 40%,transparent),transparent 66%)}
+</style>
+
+<div id="stage"></div>
+<div class="ui">
+  <div class="top">
+    <div class="brand"><span class="d"></span><span>Chọn nền động · IT English</span></div>
+    <button class="tbtn" id="themeBtn" aria-label="Sáng/tối"></button>
+  </div>
+  <div class="picker" id="picker"></div>
+  <div class="spacer"></div>
+  <div class="card">
+    <span class="badge">TRỌNG TÂM · AI</span>
+    <h1>Trái tim của app là luyện nói với AI</h1>
+    <p>Xem chữ có dễ đọc trên nền này không. Di chuột quanh màn hình để cảm nhận các kiểu có tương tác con trỏ.</p>
+  </div>
+  <div class="meta" id="meta"><span class="dot"></span><b id="mName">—</b><span id="mDesc"></span><span class="hint" id="mCur"></span></div>
+</div>
+
+<script>
+(function(){
+  var stage=document.getElementById('stage');
+  var pointer={x:innerWidth/2,y:innerHeight/2}, lp={x:pointer.x,y:pointer.y};
+  addEventListener('pointermove',function(e){pointer.x=e.clientX;pointer.y=e.clientY;},{passive:true});
+  var rm=false;try{rm=matchMedia('(prefers-reduced-motion:reduce)').matches;}catch(e){}
+
+  function elc(cls){var d=document.createElement('div');d.className=cls;return d;}
+
+  // ---- style builders: return cleanup fn ----
+  function aurora(){stage.className='aurora';stage.innerHTML='';['a1','a2','a3'].forEach(function(c){stage.appendChild(elc('layer '+c));});return function(){};}
+  function silk(){stage.className='silk';stage.innerHTML='';stage.appendChild(elc('layer s1'));stage.appendChild(elc('layer s2'));return function(){};}
+  function gooey(){stage.className='gooey';stage.innerHTML='';['g1','g2','g3'].forEach(function(c){stage.appendChild(elc('g '+c));});return function(){};}
+
+  function spotlight(){
+    stage.className='spotlight';stage.innerHTML='';
+    stage.appendChild(elc('layer base'));var spot=elc('layer spot');spot.style.inset='0';stage.appendChild(spot);
+    var raf;function loop(){lp.x+=(pointer.x-lp.x)*.12;lp.y+=(pointer.y-lp.y)*.12;
+      spot.style.setProperty('--mx',lp.x+'px');spot.style.setProperty('--my',lp.y+'px');raf=requestAnimationFrame(loop);}
+    loop();return function(){cancelAnimationFrame(raf);};
+  }
+
+  function parallax(){
+    stage.className='parallax';stage.innerHTML='';
+    var defs=[['p1',.05],['p2',-.08],['p3',.11],['p4',-.14]];var orbs=[];
+    defs.forEach(function(d){var o=elc('po '+d[0]);o.dataset.depth=d[1];stage.appendChild(o);orbs.push(o);});
+    var raf;function loop(){lp.x+=(pointer.x-lp.x)*.08;lp.y+=(pointer.y-lp.y)*.08;
+      var cx=innerWidth/2, cy=innerHeight/2;
+      orbs.forEach(function(o){var dp=+o.dataset.depth;o.style.transform='translate('+((lp.x-cx)*dp)+'px,'+((lp.y-cy)*dp)+'px)';});
+      raf=requestAnimationFrame(loop);}
+    loop();return function(){cancelAnimationFrame(raf);};
+  }
+
+  function particles(){
+    stage.className='particles';stage.innerHTML='';
+    var cv=document.createElement('canvas');stage.appendChild(cv);var ctx=cv.getContext('2d');
+    var DPR=Math.min(2,window.devicePixelRatio||1),W,H,pts=[],raf;
+    function col(v){var s=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#1b4dff';return s;}
+    var accent;
+    function resize(){W=cv.width=innerWidth*DPR;H=cv.height=innerHeight*DPR;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px';
+      var n=Math.round(Math.min(120,innerWidth*innerHeight/12000));pts=[];for(var i=0;i<n;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25*DPR,vy:(Math.random()-.5)*.25*DPR});}
+    function hex2rgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(function(c){return c+c;}).join('');var n=parseInt(h,16);return [(n>>16)&255,(n>>8)&255,n&255];}
+    function draw(){accent=col();var rgb=hex2rgb(accent.length?accent:'#1b4dff');
+      ctx.clearRect(0,0,W,H);var mx=pointer.x*DPR,my=pointer.y*DPR,R=140*DPR;
+      for(var i=0;i<pts.length;i++){var p=pts[i];
+        var dx=p.x-mx,dy=p.y-my,d=Math.hypot(dx,dy);
+        if(d<R&&d>0){var f=(R-d)/R*1.4;p.vx+=dx/d*f*.06;p.vy+=dy/d*f*.06;}
+        p.vx*=.99;p.vy*=.99;p.x+=p.vx;p.y+=p.vy;
+        if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
+        p.x=Math.max(0,Math.min(W,p.x));p.y=Math.max(0,Math.min(H,p.y));
+      }
+      for(var i=0;i<pts.length;i++){for(var j=i+1;j<pts.length;j++){var a=pts[i],b=pts[j];var dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);
+        if(d<130*DPR){ctx.strokeStyle='rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+','+(0.16*(1-d/(130*DPR)))+')';ctx.lineWidth=1*DPR;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}}
+      ctx.fillStyle='rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+',.7)';
+      for(var i=0;i<pts.length;i++){ctx.beginPath();ctx.arc(pts[i].x,pts[i].y,1.8*DPR,0,7);ctx.fill();}
+      raf=requestAnimationFrame(draw);
+    }
+    resize();addEventListener('resize',resize);draw();
+    return function(){cancelAnimationFrame(raf);removeEventListener('resize',resize);};
+  }
+
+  var STYLES=[
+    {id:'aurora',name:'Aurora Flow',desc:'Quầng sáng mềm trôi uốn lượn',cur:'',fn:aurora},
+    {id:'spotlight',name:'Cursor Spotlight',desc:'Vầng sáng bám theo con trỏ',cur:'· theo con trỏ',fn:spotlight},
+    {id:'particles',name:'Particle Net',desc:'Hạt nối mạng, dạt theo con trỏ',cur:'· theo con trỏ',fn:particles},
+    {id:'parallax',name:'Parallax Orbs',desc:'Các quả cầu dịch theo con trỏ (chiều sâu)',cur:'· theo con trỏ',fn:parallax},
+    {id:'silk',name:'Gradient Silk',desc:'Dải màu xoay chảy như lụa',cur:'',fn:silk},
+    {id:'gooey',name:'Gooey Blobs',desc:'Khối mờ biến hình hữu cơ',cur:'',fn:gooey}
+  ];
+  var cleanup=function(){}, curId=null;
+  var picker=document.getElementById('picker');
+  var mName=document.getElementById('mName'),mDesc=document.getElementById('mDesc'),mCur=document.getElementById('mCur');
+  function select(s){
+    try{cleanup();}catch(e){}
+    cleanup=s.fn()||function(){};curId=s.id;
+    Array.prototype.forEach.call(picker.children,function(c){c.classList.toggle('on',c.dataset.id===s.id);});
+    mName.textContent=s.name;mDesc.textContent='— '+s.desc;mCur.textContent=s.cur;
+  }
+  STYLES.forEach(function(s,i){var b=document.createElement('button');b.className='chip';b.dataset.id=s.id;
+    b.innerHTML=(i+1)+'. '+s.name+(s.cur?'<span class="cur">•</span>':'');b.onclick=function(){select(s);};picker.appendChild(b);});
+  select(STYLES[0]);
+
+  // theme toggle
+  var sun='☀',moon='☾';var tb=document.getElementById('themeBtn');
+  function cur(){var t=document.documentElement.getAttribute('data-theme');if(t)return t;try{return matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';}catch(e){return 'light';}}
+  function paint(){tb.textContent=cur()==='dark'?sun:moon;}
+  try{var sv=localStorage.getItem('bgc-theme');if(sv)document.documentElement.setAttribute('data-theme',sv);}catch(e){}
+  paint();tb.onclick=function(){var n=cur()==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('bgc-theme',n);}catch(e){}paint();};
+})();
+</script>
