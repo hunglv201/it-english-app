@@ -300,7 +300,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.17.3", APP_BUILD="2026-09-13";
+const APP_VERSION="1.17.4", APP_BUILD="2026-09-13";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -502,7 +502,7 @@ function renderTabs(){
     n.appendChild(b);
   });
 }
-function go(k){apClear();closeModal();convoView=null;aiSaveMode=false;cur=TAB_OF[k]||k;renderTabs();window.scrollTo(0,0);tabRender(k)();}
+function go(k){apClear();closeModal();convoView=null;aiSaveMode=false;if(aiPlayingAll){aiPlayingAll=false;try{speechSynthesis.cancel();}catch(e){}}cur=TAB_OF[k]||k;renderTabs();window.scrollTo(0,0);tabRender(k)();}
 function vPractice(){
   main.innerHTML="";const v=el('div','view');
   v.appendChild(el('div',null,'<div class="eyebrow">Luyện tập</div><div style="font-size:24px;font-weight:800;font-family:var(--disp);letter-spacing:-.01em;margin-top:4px">Chọn kiểu luyện</div>'));
@@ -1951,8 +1951,9 @@ function aiRules(sc){
     +"Reply IN CHARACTER, usually in 1-2 short sentences ending with a question — unless the scenario explicitly tells you to summarize or write a longer passage, then follow the scenario. "
     +levelGuide()+" Your English must ALWAYS be grammatically correct and natural — you are the learner's model, never copy their mistakes. "
     +"Then give up to 3 tiny corrections of the user's last English message. "
-    +"Start a NEW line exactly with 'FIX:' then put EACH correction on its own line as: wrong => right ~ short Vietnamese note "
-    +"(example:\nFIX:\nI fix => I fixed ~ viec hom qua, qua khu\nwill working => will work). "
+    +"Start a NEW line exactly with 'FIX:' then put EACH correction on its own line as: wrong => right ~ short Vietnamese note. "
+    +"The Vietnamese note MUST use proper Vietnamese with full diacritics/accents (e.g. 'quá khứ', 'nên dùng'), never remove the accents. "
+    +"(example:\nFIX:\nI fix => I fixed ~ việc hôm qua, quá khứ\nwill working => will work ~ bỏ 'ing'). "
     +"If the user's English was already clear, write exactly 'FIX: OK' and nothing after. No markdown and no other text.";
 }
 // ---- Multi-provider AI (Hướng A: nhập key trong app, không backend) ----
@@ -2229,6 +2230,23 @@ async function genSampleConvo(n){
   }catch(e){toast('Lỗi AI, thử lại');}
   aiBusy=false;aiPending='';vTalkAI();
 }
+let aiPlayingAll=false;
+function playAllTurns(){ // đọc hết hội thoại một lượt (cả 2 phía)
+  if(!('speechSynthesis'in window)){toast('Trình duyệt không hỗ trợ đọc');return;}
+  var b=$("#aiPlayAll");
+  if(aiPlayingAll){aiPlayingAll=false;speechSynthesis.cancel();if(b){b.classList.remove('speaking');b.innerHTML=ICO.play+' Nghe hết';}return;}
+  var lines=aiTurns.map(function(m){return aiParse(m.content).reply;}).map(function(t){return String(t||'').replace(/<[^>]+>/g,'').trim();}).filter(Boolean);
+  if(!lines.length)return;
+  aiPlayingAll=true;speechSynthesis.cancel();
+  if(b){b.classList.add('speaking');b.innerHTML='⏸ Dừng';}
+  var i=0;
+  (function next(){
+    if(!aiPlayingAll||i>=lines.length){aiPlayingAll=false;var bb=$("#aiPlayAll");if(bb){bb.classList.remove('speaking');bb.innerHTML=ICO.play+' Nghe hết';}return;}
+    var u=new SpeechSynthesisUtterance(lines[i]);u.lang=voiceLang();u.rate=(store.cfg&&store.cfg.rate)||0.95;if(VOICE)u.voice=VOICE;
+    u.onend=function(){i++;next();};u.onerror=function(){i++;next();};
+    speechSynthesis.speak(u);
+  })();
+}
 async function aiSuggestScenarios(){
   const sp=await aiInit();if(!sp){toast('Chưa cấu hình AI — mở “Cài đặt AI” ở tab Giao tiếp');return;}
   const d=$("#aiDomain");const domain=d?d.value.trim():'';if(!domain){toast('Điền lĩnh vực trước đã');return;}
@@ -2325,7 +2343,15 @@ function vTalkAI(){
     main.appendChild(v);return;
   }
   const hd=el('div','row between wrap');hd.style.gap='8px';
-  hd.appendChild(el('span','chip ok',aiScObj().l));
+  const hleft=el('div','row');hleft.style.gap='8px';
+  hleft.appendChild(el('span','chip ok',aiScObj().l));
+  if(aiTurns.length){
+    const pa=el('button','btn ghost sm');pa.id='aiPlayAll';pa.style.flex='0 0 auto';
+    pa.innerHTML=aiPlayingAll?'⏸ Dừng':(ICO.play+' Nghe hết');
+    if(aiPlayingAll)pa.classList.add('speaking');
+    pa.onclick=function(){playAllTurns();};hleft.appendChild(pa);
+  }
+  hd.appendChild(hleft);
   const menuBtn=el('button','btn ghost sm');menuBtn.textContent='⋯ Tùy chọn';menuBtn.setAttribute('aria-label','Tùy chọn');
   menuBtn.onclick=function(){
     var items=[];
