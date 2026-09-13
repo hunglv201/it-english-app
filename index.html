@@ -285,7 +285,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.10.0", APP_BUILD="2026-09-13";
+const APP_VERSION="1.10.1", APP_BUILD="2026-09-13";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -634,8 +634,9 @@ function weekStrip(){
   var maxN=1;Object.keys(store.hist||{}).forEach(function(k){if(store.hist[k]>maxN)maxN=store.hist[k];});
   var days=[],weekLuot=0;
   for(var i=0;i<7;i++){var d=new Date(mon);d.setDate(mon.getDate()+i);var key=d.toISOString().slice(0,10);var n=(store.hist&&store.hist[key])||0;weekLuot+=n;days.push({key:key,n:n});}
-  var hd=el('div','row between');
-  hd.innerHTML='<span class="eyebrow">Tuần này · '+weekLuot+' lượt</span><span class="chip ok" style="height:26px;font-size:12px">🔥 Chuỗi '+curStreak()+' ngày</span>';
+  var hd=el('button');hd.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;background:none;border:none;color:inherit;padding:0;cursor:pointer';
+  hd.innerHTML='<span class="eyebrow">Tuần này · '+weekLuot+' lượt</span><span class="row" style="gap:8px"><span class="chip ok" style="height:26px;font-size:12px">🔥 Chuỗi '+curStreak()+' ngày</span><span style="display:inline-flex;color:var(--faint)">'+ICO.chev+'</span></span>';
+  hd.setAttribute('aria-label','Xem thống kê học tập');hd.onclick=vProgress;
   wrap.appendChild(hd);
   var grid=el('div');grid.style.cssText='display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px';
   days.forEach(function(dd,i){
@@ -881,7 +882,7 @@ function openDay(n){
       else{var miss=[];if(!touched.v)miss.push('Từ');if(!touched.p)miss.push('Câu');if(!touched.d)miss.push('Giao tiếp');if(!touched.l)miss.push('Nghe');cap.textContent='Nút sáng khi đủ 4 phần · còn: '+miss.join(', ');}
     }
   }
-  const back=el('button','btn ghost sm');back.style.alignSelf="flex-start";back.textContent="‹ Lộ trình";back.onclick=vHome;v.appendChild(back);
+  const back=el('button','btn ghost sm');back.style.alignSelf="flex-start";back.textContent="‹ Lộ trình";back.onclick=vRoadmap;v.appendChild(back);
   v.appendChild(el('div',null,`<div class="eyebrow">Ngày ${n} · Chặng ${day.phase+1}</div><div style="font-size:21px;font-weight:700;margin-top:2px">${day.title}</div>`));
   const vc=el('div','card');vc.appendChild(el('div','eyebrow','1 · Từ vựng hôm nay'));
   day.v.forEach(idx=>{const w=VOCAB[idx];const row=el('div','phrase');const tx=el('div','grow');
