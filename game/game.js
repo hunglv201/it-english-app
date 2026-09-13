@@ -189,11 +189,22 @@ function vMap(){
   // ---- AFK strip ----
   const p0=idlePending();
   const afk=el('div','strip afk');
-  afk.innerHTML='<div class="mini-farm">'+mascot('happy')+bug()+'</div><div class="grow"><b class="h" style="font-size:14px">AFK · +'+idleRate()+' xu/giờ</b><div class="mono" id="afkLine">🪙 <b id="afkCoins">'+p0.coins+'</b> · ✨ <span id="afkXp">'+p0.xp+'</span> XP · <span id="afkTime">'+fmtDur(p0.ms)+'</span></div></div>';
+  afk.innerHTML='<div class="am"><div class="am-mochi">'+mascot('happy')+'</div><div class="am-slash">⚔️</div><div class="am-bug" id="amBug">'+bug()+'<div class="bar mon am-hp"><i id="amHp" style="width:100%"></i></div></div><div class="am-fx" id="amFx"></div></div>'+
+    '<div class="grow" style="min-width:0"><b class="h" style="font-size:14px;white-space:nowrap">AFK <span style="color:var(--yellow)">+'+idleRate()+' xu/giờ</span></b><div class="mono" id="afkLine" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">🪙 <b id="afkCoins">'+p0.coins+'</b> · ✨ <span id="afkXp">'+p0.xp+'</span> XP · <span id="afkTime">'+fmtDur(p0.ms)+'</span></div><div class="mono" style="margin-top:2px">🐛 <span id="amKills">'+(G.idle.bugs||0)+'</span> bug đã hạ</div></div>';
   const col=el('button','btn yellow sm','Thu');col.id='afkCollect';col.onclick=e=>{e.stopPropagation();const p=idlePending();if(p.coins<=0){toast('Chưa có gì để thu — chờ Mochi cày thêm nhé');return;}collectIdle();confetti();vMap();};
   afk.appendChild(col);afk.onclick=afkSheet;main.appendChild(afk);
   function paintAfk(){const p=idlePending();const a=$('#afkCoins'),x=$('#afkXp'),t=$('#afkTime');if(!a)return;a.textContent=p.coins;x.textContent=p.xp;t.textContent=p.capped?'⚠️ đầy túi':fmtDur(p.ms);}
-  mapTimer=setInterval(paintAfk,1000);
+  // vòng lặp đánh nhau mini (chỉ hiệu ứng, xu tính theo thời gian thật)
+  let amHp=100,amTick=0;
+  function amCycle(){const am=afk.querySelector('.am'),bugEl=$('#amBug'),hp=$('#amHp'),fx=$('#amFx');if(!am||!bugEl)return;
+    am.classList.remove('go');void am.offsetWidth;am.classList.add('go');
+    setTimeout(()=>{if(!bugEl.isConnected)return;const dmg=25+Math.floor(Math.random()*20);amHp=Math.max(0,amHp-dmg);hp.style.width=amHp+'%';
+      const f=el('span','am-dmg','-'+dmg);f.style.left=(60+Math.random()*30)+'%';fx.appendChild(f);setTimeout(()=>f.remove(),800);
+      if(amHp<=0){bugEl.classList.add('dead');const c=el('span','am-dmg coin','+xu');c.style.left='70%';fx.appendChild(c);setTimeout(()=>c.remove(),900);
+        setTimeout(()=>{if(!bugEl.isConnected)return;amHp=100;hp.style.width='100%';bugEl.classList.remove('dead');bugEl.classList.add('spawn');setTimeout(()=>bugEl.classList.remove('spawn'),400);const k=$('#amKills');if(k)k.textContent=(+k.textContent||0)+1;},520);}
+    },420);}
+  paintAfk();amCycle();
+  mapTimer=setInterval(()=>{paintAfk();if(++amTick%2===0)amCycle();},1000);
   // ---- Daily strip ----
   const dl=daily();const qdone=DQ.filter(q=>(dl[q[0]]||0)>=q[2]).length,qclaim=DQ.filter(q=>dl.claimed[q[0]]).length;const hasNew=(!dl.chest)||(qdone>qclaim);
   const ds=el('button','strip daily'+(hasNew?' new':''));
@@ -445,18 +456,7 @@ function aiConfigured(){return inClaude()||!!aiCfg();}
 async function aiCall(system,msgs){
   if(inClaude()){const sp=await claudeSp();if(sp){const r=await sp([{role:'user',content:system}].concat(msgs),{modelTier:'quick'});return (r&&r.text)||'';}}
   const c=aiCfg();if(!c)throw new Error('no-ai');
-  if(c.provider==='gemini'){
-    const model=c.model||'gemini-flash-lite-latest';
-    const contents=[{role:'user',parts:[{text:system}]},{role:'model',parts:[{text:'OK.'}]}].concat(msgs.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]})));
-    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':c.key},body:JSON.stringify({contents,generationConfig:{maxOutputTokens:1024,temperature:.8}})});
-    if(!r.ok)throw new Error('gemini '+r.status);const j=await r.json();return ((j.candidates||[])[0]||{}).content?.parts?.map(p=>p.text||'').join('')||'';
-  }
-  if(c.provider==='claude'){
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':c.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:c.model||'claude-3-5-haiku-latest',max_tokens:1024,system,messages:msgs})});
-    if(!r.ok)throw new Error('claude '+r.status);const j=await r.json();return (j.content||[]).map(x=>x.text||'').join('');
-  }
-  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+c.key},body:JSON.stringify({model:c.model||'llama-3.1-8b-instant',messages:[{role:'system',content:system}].concat(msgs),temperature:.8})});
-  if(!r.ok)throw new Error('groq '+r.status);const j=await r.json();return ((j.choices||[])[0]||{}).message?.content||'';
+  return aiCallWith(c,system,msgs);
 }
 function parseJSON(t){try{const m=String(t).match(/\{[\s\S]*\}|\[[\s\S]*\]/);return m?JSON.parse(m[0]):null;}catch(e){return null;}}
 function aiRules(sc){const lvl=(loadApp().cfg||{}).level||'A2';return 'You are Minh, a friendly senior developer and English conversation partner for a Vietnamese junior developer (CEFR '+lvl+'). Roleplay this work scenario: '+sc+' Reply IN CHARACTER in 1-2 short simple sentences (about 20 words) ending with a question. Your English must be grammatically correct. Then, on a NEW line starting exactly with "FIX:", list up to 2 corrections of the user\'s last message as: wrong => right ~ short Vietnamese note (with full diacritics). If the user\'s English was fine, write exactly "FIX: OK".';}
@@ -607,7 +607,7 @@ let TB=null;
 function battleRules(sc){const lvl=(loadApp().cfg||{}).level||'A2';return 'You are Minh, a friendly senior developer, doing an English speaking battle with a Vietnamese junior developer (CEFR '+lvl+'). Scenario: '+sc+' Each turn: (1) reply IN CHARACTER in 1-2 short simple sentences ending with a question; (2) on a new line write exactly "SCORE: n" where n is 0-10 rating the user\'s LAST message for clarity, grammar and relevance (be fair, 7+ means good); (3) on a new line starting with "FIX:", up to 2 corrections as: wrong => right ~ short Vietnamese note (full diacritics), or exactly "FIX: OK". For the very first turn (no user message yet) write SCORE: 0 and FIX: OK.';}
 function parseBattle(t){const s=(t.match(/SCORE:\s*(\d+)/)||[])[1];const fi=t.indexOf('FIX:');const si=t.search(/SCORE:/);let reply=t;if(si>=0)reply=t.slice(0,si);else if(fi>=0)reply=t.slice(0,fi);return {reply:reply.trim(),score:s!=null?Math.max(0,Math.min(10,+s)):null,fix:fi>=0?t.slice(fi+4).trim():''};}
 function talkBattleStart(){
-  if(!aiConfigured()){openModal((m,close)=>{m.innerHTML='<div class="h" style="font-size:20px">Cần AI</div><div class="mascot-row" style="margin-top:12px"><div class="mascot">'+mascot('think')+'</div><div class="bubble grow"><span class="who">Mochi</span>Chế độ này cần AI chấm câu. Mở app › Giao tiếp AI › <b>Cài đặt AI</b> để nhập key (Gemini miễn phí), game sẽ dùng chung.</div></div>';const r=el('div','row');r.style.cssText='gap:10px;margin-top:14px';const a=el('button','btn ghost grow','Đóng');a.onclick=close;const k=el('button','btn grow','Mở app');k.onclick=openApp;r.appendChild(a);r.appendChild(k);m.appendChild(r);});return;}
+  if(!aiConfigured()){openModal((m,close)=>{m.innerHTML='<div class="h" style="font-size:20px">Cần AI</div><div class="mascot-row" style="margin-top:12px"><div class="mascot">'+mascot('think')+'</div><div class="bubble grow"><span class="who">Mochi</span>Chế độ này cần AI chấm câu. Nhập key (Gemini miễn phí) ngay tại đây — dùng chung với app IT English.</div></div>';const r=el('div','row');r.style.cssText='gap:10px;margin-top:14px';const a=el('button','btn ghost grow','Đóng');a.onclick=close;const k=el('button','btn grow','Nhập key');k.onclick=()=>{close();aiSetupSheet();};r.appendChild(a);r.appendChild(k);m.appendChild(r);});return;}
   if(G.hp<=0)G.hp=Math.ceil(G.maxHp/2);
   document.body.classList.add('infight');TB={sc:rnd(SCEN),turns:[],user:0,bossHp:300,combo:0,busy:false};cur='talk';main.innerHTML='';
   talkHeader('ĐẤU THOẠI · AI','Minh-senpai · 6 lượt','<div class="row" style="gap:8px;margin-top:8px"><small style="font-family:var(--mono);font-size:10.5px;color:var(--faint)">HP</small><div class="bar hp grow" id="tbhp"><i style="width:'+Math.round(G.hp/G.maxHp*100)+'%"></i></div></div>');
@@ -663,6 +663,41 @@ function vShop(){
     r.appendChild(b);list.appendChild(r);});
   main.appendChild(list);
 }
+
+/* ---------- AI key setup (dùng chung với app) ---------- */
+const PROV={gemini:['Gemini (Google) · miễn phí','gemini-flash-lite-latest','https://aistudio.google.com/apikey'],claude:['Claude (Anthropic)','claude-3-5-haiku-latest','https://console.anthropic.com/settings/keys'],groq:['Groq · miễn phí','llama-3.1-8b-instant','https://console.groq.com/keys']};
+function aiSetupSheet(){
+  openModal((m,close)=>{
+    const a=loadApp();const cur0=a.ai||{};let prov=cur0.provider||'gemini';
+    m.innerHTML='<div class="eyebrow">Boss AI</div><b class="h" style="font-size:18px">Cài đặt AI</b>'+(inClaude()?'<p class="tip" style="margin-top:8px">Đang chạy trong Claude — AI được dùng sẵn, không cần key. Nhập key chỉ khi muốn dùng bên ngoài.</p>':'<p class="muted" style="font-size:13px;margin-top:6px">Key lưu trên máy bạn, dùng chung với app IT English.</p>');
+    const seg=el('div','seg');Object.keys(PROV).forEach(k=>{const b=el('button','segb'+(k===prov?' on':''),PROV[k][0].split(' ·')[0]);b.onclick=()=>{prov=k;seg.querySelectorAll('.segb').forEach(x=>x.classList.toggle('on',x===b));mi.placeholder='mặc định: '+PROV[k][1];lk.href=PROV[k][2];lk.textContent='Lấy key '+PROV[k][0].split(' ·')[0]+' ›';};seg.appendChild(b);});
+    m.appendChild(seg);
+    const ki=el('input','input');ki.type='password';ki.placeholder='Dán API key vào đây';ki.value=cur0.key||'';ki.autocomplete='off';ki.style.marginTop='10px';m.appendChild(ki);
+    const eye=el('button','btn ghost sm','👁 Hiện key');eye.style.marginTop='6px';eye.onclick=()=>{ki.type=ki.type==='password'?'text':'password';eye.textContent=ki.type==='password'?'👁 Hiện key':'🙈 Ẩn key';};m.appendChild(eye);
+    const mi=el('input','input');mi.placeholder='mặc định: '+PROV[prov][1];mi.value=cur0.model||'';mi.autocomplete='off';mi.style.marginTop='8px';m.appendChild(mi);
+    const lk=el('a','muted');lk.href=PROV[prov][2];lk.target='_blank';lk.rel='noopener';lk.textContent='Lấy key '+PROV[prov][0].split(' ·')[0]+' ›';lk.style.cssText='display:block;margin-top:8px;font-size:13px;color:var(--blue)';m.appendChild(lk);
+    const st=el('div','tip');st.style.marginTop='10px';st.style.display='none';m.appendChild(st);
+    const r=el('div','row');r.style.cssText='gap:10px;margin-top:12px';
+    const del=el('button','btn ghost grow','Xoá key');del.onclick=()=>{const b=loadApp();b.ai={provider:'',key:'',model:''};saveApp(b);SAMPLE=undefined;toast('Đã xoá key');close();vProfile();};
+    const ok=el('button','btn yellow grow','Kiểm tra & lưu');
+    ok.onclick=async()=>{const key=ki.value.trim();if(!key){toast('Dán key trước đã');return;}ok.disabled=true;ok.textContent='Đang kiểm tra…';st.style.display='block';st.textContent='⏳ Gọi thử '+PROV[prov][0].split(' ·')[0]+'…';
+      const b=loadApp();b.ai={provider:prov,key,model:mi.value.trim()||''};saveApp(b);
+      try{const t=await aiCallWith(b.ai,'Reply with exactly: OK',[{role:'user',content:'ping'}]);if(!t)throw new Error('empty');st.textContent='✅ Hoạt động! Đã lưu — Boss AI & Đấu thoại đã mở.';sfx.ok();setTimeout(()=>{close();vProfile();},900);}
+      catch(e){st.textContent='❌ Không gọi được: '+(e.message||'lỗi')+'. Kiểm tra lại key/model.';ok.disabled=false;ok.textContent='Kiểm tra & lưu';}};
+    r.appendChild(del);r.appendChild(ok);m.appendChild(r);
+    setTimeout(()=>ki.focus(),80);
+  });
+}
+async function aiCallWith(c,system,msgs){
+  if(c.provider==='gemini'){const model=c.model||'gemini-flash-lite-latest';const contents=[{role:'user',parts:[{text:system}]},{role:'model',parts:[{text:'OK.'}]}].concat(msgs.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]})));
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':c.key},body:JSON.stringify({contents,generationConfig:{maxOutputTokens:1024,temperature:.8}})});
+    if(!r.ok)throw new Error('Gemini '+r.status);const j=await r.json();return ((j.candidates||[])[0]||{}).content?.parts?.map(p=>p.text||'').join('')||'';}
+  if(c.provider==='claude'){const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':c.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:c.model||'claude-3-5-haiku-latest',max_tokens:1024,system,messages:msgs})});
+    if(!r.ok)throw new Error('Claude '+r.status);const j=await r.json();return (j.content||[]).map(x=>x.text||'').join('');}
+  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+c.key},body:JSON.stringify({model:c.model||'llama-3.1-8b-instant',messages:[{role:'system',content:system}].concat(msgs),temperature:.8})});
+  if(!r.ok)throw new Error('Groq '+r.status);const j=await r.json();return ((j.choices||[])[0]||{}).message?.content||'';
+}
+
 /* ---------- PROFILE (mobile-first) ---------- */
 const RANKS=[[1,'Tập sự'],[3,'Junior Dev'],[6,'Mid Dev'],[10,'Senior Dev'],[15,'Tech Lead'],[20,'Kiến trúc sư']];
 function rankName(){let r=RANKS[0][1];RANKS.forEach(x=>{if(G.lv>=x[0])r=x[1];});return r;}
@@ -684,7 +719,7 @@ function vProfile(){
   const ai=aiConfigured();
   main.appendChild(group('Tài khoản',[
     setRow('✏️','Tên nhân vật',esc(G.name),()=>openModal((m,close)=>{m.innerHTML='<div class="h" style="font-size:20px">Đổi tên</div>';const i=el('input','input');i.value=G.name;i.maxLength=16;i.style.marginTop='12px';m.appendChild(i);const r=el('div','row');r.style.cssText='gap:10px;margin-top:12px';const c=el('button','btn ghost grow','Huỷ');c.onclick=close;const ok=el('button','btn grow','Lưu');ok.onclick=()=>{G.name=i.value.trim()||'Dev';saveG();close();toast('Đã đổi tên');vProfile();};r.appendChild(c);r.appendChild(ok);m.appendChild(r);setTimeout(()=>i.focus(),50);})),
-    setRow('🤖','Boss AI',ai?'<b style="color:var(--green)">sẵn sàng</b>':'chưa có key',ai?null:openApp)
+    setRow('🤖','Boss AI',inClaude()?'<b style="color:var(--green)">Claude sẵn có</b>':(aiCfg()?'<b style="color:var(--green)">'+(PROV[aiCfg().provider]||[aiCfg().provider])[0].split(' ·')[0]+'</b>':'chưa có key'),aiSetupSheet)
   ]));
   main.appendChild(group('Cài đặt',[
     toggleRow('🔊','Âm thanh',G.sound!==false,v=>{G.sound=v;saveG();vProfile();}),
