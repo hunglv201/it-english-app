@@ -1,5 +1,5 @@
 /* IT English — service worker (offline app shell) */
-const CACHE = 'it-english-v1.6.0';
+const CACHE = 'it-english-v1.7.0';
 const ASSETS = [
   './', 'index.html', 'data.gen.js', 'phrases.gen.js',
   'manifest.webmanifest', 'icon-192.png', 'icon-512.png'

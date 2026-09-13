@@ -191,10 +191,10 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .si:last-child{border-bottom:none}
 .si b{font-weight:700;font-size:15px}
 .si small{color:var(--muted);font-size:12.5px}
-.phrase{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}
+.phrase{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
 .phrase:last-child{border-bottom:none}
-.phrase .en{font-size:16px;line-height:1.45;font-weight:600}
-.phrase .vi{color:var(--muted);font-size:14px;margin-top:4px}
+.phrase .en{font-size:15.5px;line-height:1.4;font-weight:600}
+.phrase .vi{color:var(--muted);font-size:13.5px;margin-top:2px}
 .phrase .note{color:var(--amber);font-size:12.5px;margin-top:5px}
 
 .bubble{max-width:88%;padding:12px 15px;border-radius:14px;font-size:15px;line-height:1.45}
@@ -271,7 +271,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.6.0", APP_BUILD="2026-09-13";
+const APP_VERSION="1.7.0", APP_BUILD="2026-09-13";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -589,46 +589,115 @@ function markToday(key){
 }
 function vHome(){
   main.innerHTML="";const v=el('div','view');
-  const t=new Date().toISOString().slice(0,10);
+  const t=todayStr();
   if(!store.today||store.today.date!==t)store.today={date:t,done:{}};
-  const tasks=homeTasks();
-  const dc=tasks.filter(function(x){return store.today.done[x.key];}).length;
-  const allDone=dc===tasks.length;
-  var goal=Math.min(store.cfg.dailyGoal||3,tasks.length),gmet=dc>=goal;
-  const hero=el('div');hero.style.cssText='padding:10px 2px 2px';
-  const hrow=el('div','row');hrow.style.cssText='gap:16px;align-items:center';
-  hrow.appendChild(ringNode(goal?dc/goal:0,String(Math.min(dc,goal))+'<span style="font-size:11px;color:var(--muted)">/'+goal+'</span>','việc'));
-  const htx=el('div','grow');
-  htx.innerHTML='<div class="eyebrow">Hôm nay</div>'
-    +'<div style="font-size:21px;font-weight:800;font-family:var(--disp);letter-spacing:-.02em;line-height:1.2;margin:3px 0 4px">'+(gmet?'Đạt mục tiêu 🎉':(allDone?'Xong 4 việc 🎉':'Học một chút mỗi ngày'))+'</div>'
-    +'<div class="muted" style="font-size:13px">🔥 chuỗi '+(curStreak())+' ngày</div>';
-  hrow.appendChild(htx);hero.appendChild(hrow);
-  const mh=miniHeat(14);mh.onclick=vProgress;mh.style.cursor='pointer';mh.title='Xem lịch đầy đủ';hero.appendChild(mh);
-  v.appendChild(hero);
-  const card=el('div','card');card.style.gap='0';
-  tasks.forEach(function(x){
-    const done=!!store.today.done[x.key];
-    const row=el('button','si');row.style.padding='15px 4px';row.setAttribute('aria-label',x.title+(done?' (đã xong)':''));
-    const tick='<span style="width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;background:'+(done?'var(--accent)':'var(--surface2)')+';color:'+(done?'#fff':'var(--faint)')+'">'+(done?ICO.check:'')+'</span>';
-    row.innerHTML='<span class="row" style="gap:12px">'+tick+'<span style="text-align:left"><b style="font-size:15px'+(done?';text-decoration:line-through;color:var(--faint)':'')+'">'+x.title+'</b><br><small>'+x.sub+' · '+x.time+'</small></span></span>'
-      +'<span style="color:var(--faint);display:inline-flex">'+ICO.chev+'</span>';
-    row.onclick=x.act;card.appendChild(row);
-  });
+  const tasks=homeTasks(), done=store.today.done;
+  const dc=tasks.filter(function(x){return done[x.key];}).length, total=tasks.length;
+  const allDone=dc===total;
+  const remaining=tasks.filter(function(x){return !done[x.key];});
+  const remMin=remaining.reduce(function(s,x){return s+(x.min||0);},0);
+  const nextT=nextUndoneTask();
+
+  // 1) Lời chào
+  const head=el('div');head.style.cssText='padding:8px 2px 0';
+  head.innerHTML='<div class="eyebrow">'+todayLabel()+'</div>'
+    +'<div style="font-size:24px;font-weight:800;font-family:var(--disp);letter-spacing:-.02em;line-height:1.15;margin-top:5px">'+greetingText()+' 👋</div>';
+  v.appendChild(head);
+
+  // 2) 3 ô thống kê
+  const stats=el('div');stats.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:10px';
+  stats.appendChild(homeStat('🔥 '+curStreak(),'ngày streak'));
+  stats.appendChild(homeStat(String(learnedCount()),'từ đã thuộc'));
+  stats.appendChild(homeStat(String(Object.keys(store.days.done||{}).length),'ngày lộ trình'));
+  v.appendChild(stats);
+
+  // 3) Thẻ "Hôm nay" — tiếp tục
+  const rc=store.days.cur||1, rday=DAYS[rc-1], rp=rday.phase;
+  const card=el('div','card');card.style.gap='14px';
+  const crow=el('div','row');crow.style.cssText='gap:16px;align-items:center';
+  crow.appendChild(ringNode(total?dc/total:0,String(dc),'/'+total));
+  const ctx=el('div','grow');
+  ctx.innerHTML='<div class="eyebrow">Hôm nay</div>'
+    +'<div style="font-size:19px;font-weight:800;font-family:var(--disp);letter-spacing:-.01em;line-height:1.2;margin:3px 0 4px">'+(allDone?'Xong việc hôm nay 🎉':('Còn '+remaining.length+' việc · '+remMin+' phút'))+'</div>'
+    +'<div class="muted" style="font-size:12.5px;line-height:1.35">Ngày '+rc+' · Chặng '+(rp+1)+' · '+D.phaseTitles[rp]+'</div>';
+  crow.appendChild(ctx);card.appendChild(crow);
+  const cbtn=el('button','btn accent block');
+  if(nextT){cbtn.innerHTML=ICO.play+' Tiếp tục · '+nextT.short;cbtn.onclick=nextT.act;}
+  else{cbtn.className='btn ghost block';cbtn.textContent='Xem lại lộ trình ›';cbtn.onclick=vRoadmap;}
+  card.appendChild(cbtn);
   v.appendChild(card);
-  const rl=el('button','btn ghost block');rl.textContent='Lộ trình '+DAYS.length+' ngày theo chủ đề ›';rl.onclick=vRoadmap;v.appendChild(rl);
-  const pg=el('button','btn ghost block');pg.textContent='Tiến độ & thống kê ›';pg.onclick=vProgress;v.appendChild(pg);
+
+  // 4) Danh sách 4 việc hôm nay (việc hiện tại được làm nổi bật)
+  const list=el('div','card');list.style.cssText='gap:0;padding:6px 10px';
+  const lastIdx=tasks.length-1;
+  tasks.forEach(function(x,i){
+    const dn=!!done[x.key], isNext=nextT&&x.key===nextT.key;
+    const row=el('button');row.setAttribute('aria-label',x.title+(dn?' (đã xong)':''));
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;color:inherit;padding:13px 8px;background:'+(isNext?'var(--accent-soft)':'none')
+      +';border:none;border-radius:'+(isNext?'12px':'0')+';margin:'+(isNext?'4px 0':'0')
+      +(!isNext&&i!==lastIdx?';border-bottom:1px solid var(--line)':'');
+    const ico=dn
+      ? '<span style="width:30px;height:30px;border-radius:999px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;background:var(--accent);color:#fff">'+ICO.check+'</span>'
+      : (isNext
+        ? '<span style="width:30px;height:30px;border-radius:999px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;background:var(--accent);color:#fff">'+ICO.play+'</span>'
+        : '<span style="width:30px;height:30px;border-radius:999px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;background:var(--surface2);color:var(--faint);font-family:var(--mono);font-size:12px;font-weight:700">'+x.min+"′</span>");
+    row.innerHTML='<span class="row" style="gap:12px">'+ico
+      +'<span><b style="font-size:15px;'+(dn?'text-decoration:line-through;color:var(--faint)':'')+'">'+x.title+'</b><br><small style="color:var(--muted);font-size:12.5px">'+x.sub+' · '+x.min+' phút</small></span></span>'
+      +(dn?'<span style="color:var(--accent);display:inline-flex">'+ICO.check+'</span>':(isNext?'<span class="chip on" style="height:30px">Bắt đầu</span>':'<span style="color:var(--faint);display:inline-flex">'+ICO.chev+'</span>'));
+    row.onclick=x.act;list.appendChild(row);
+  });
+  v.appendChild(list);
+
+  // 5) Lộ trình — chặng hiện tại
+  const pstart=rp*10+1;
+  const pdone=Object.keys(store.days.done||{}).filter(function(n){return +n>=pstart&&+n<pstart+10;}).length;
+  const rmc=el('button','card');rmc.style.cssText='gap:12px;text-align:left;width:100%;color:inherit;cursor:pointer';
+  rmc.innerHTML='<div class="row between"><div class="eyebrow">Lộ trình '+DAYS.length+' ngày</div><span style="color:var(--faint);display:inline-flex">'+ICO.chev+'</span></div>'
+    +'<div style="font-size:15px;font-weight:700;line-height:1.35">Ngày '+rc+': '+rday.title+'</div>';
+  const pills=el('div');pills.style.cssText='display:flex;gap:5px';
+  for(var pi=0;pi<10;pi++){var dnum=pstart+pi, pdn=!!(store.days.done||{})[dnum], isCur=dnum===rc;
+    var pill=el('div');pill.style.cssText='flex:1;height:7px;border-radius:4px;border:1px solid var(--line2);background:'+(pdn?'var(--accent)':(isCur?'var(--accent-ink)':'var(--surface2)'));pills.appendChild(pill);}
+  rmc.appendChild(pills);
+  rmc.appendChild(el('div','muted','<span style="font-size:12.5px">'+pdone+'/10 ngày trong Chặng '+(rp+1)+' · '+D.phaseTitles[rp]+'</span>'));
+  rmc.onclick=vRoadmap;v.appendChild(rmc);
+
+  // 6) Hoạt động 14 ngày
+  const act=el('div','card');act.style.gap='8px';
+  const arow=el('div','row between');arow.innerHTML='<div class="eyebrow">Hoạt động 14 ngày</div>';
+  const stx=el('button','btn ghost sm');stx.textContent='Thống kê ›';stx.onclick=vProgress;arow.appendChild(stx);
+  act.appendChild(arow);
+  act.appendChild(miniHeat(14));
+  act.appendChild(el('div','muted','<span style="font-size:11.5px">Chạm vào ô để xem số lượt học mỗi ngày</span>'));
+  v.appendChild(act);
+
+  // 7) Từ hay sai
+  const weak=weakWords();
+  if(weak.length){
+    const wc=el('div','card');wc.style.gap='12px';
+    wc.appendChild(el('div','eyebrow','Từ hay sai · '+weak.length));
+    const chips=el('div','row wrap');chips.style.gap='7px';
+    weak.slice(0,8).forEach(function(w){var c=el('span','chip');c.textContent=w.t;chips.appendChild(c);});
+    wc.appendChild(chips);
+    const wb=el('button','btn accent block');wb.textContent='Ôn ngay '+Math.min(weak.length,15)+' từ';
+    wb.onclick=function(){vMode='card';vTopic='weak';go('vocab');};
+    wc.appendChild(wb);
+    v.appendChild(wc);
+  }
   main.appendChild(v);
 }
 function vnDate(key){var d=new Date(key+'T00:00:00');var wd=['CN','T2','T3','T4','T5','T6','T7'][d.getDay()];return wd+' '+d.getDate()+'/'+(d.getMonth()+1);}
 function homeTasks(){
   var dueN=due().length;
   return [
-    {key:'vocab',ic:ICO.vocab,title:(dueN>0?('Ôn '+Math.min(dueN,15)+' từ vựng'):'Học 5 từ mới'),sub:'Từ vựng · thẻ lật',time:'~2 phút',act:function(){vMode='card';vTopic='all';go('vocab');}},
-    {key:'listen',ic:ICO.ear,title:'1 bài nghe chép chính tả',sub:'Nghe',time:'~1 phút',act:function(){lMode='dictation';go('listen');}},
-    {key:'talk',ic:ICO.talk,title:'Trò chuyện AI 1 tình huống',sub:'Giao tiếp',time:'~3 phút',act:function(){go('talk');}},
-    {key:'phrases',ic:ICO.list,title:'Luyện 10 câu ngẫu nhiên',sub:'Câu thường dùng',time:'~2 phút',act:function(){startRandom(10);}}
+    {key:'vocab',title:(dueN>0?('Ôn '+Math.min(dueN,15)+' từ vựng'):'Học 5 từ mới'),sub:'Từ vựng',short:'Ôn từ vựng',min:2,act:function(){vMode='card';vTopic='all';go('vocab');}},
+    {key:'listen',title:'1 bài nghe chép chính tả',sub:'Nghe',short:'Nghe chép',min:1,act:function(){lMode='dictation';go('listen');}},
+    {key:'talk',title:'Trò chuyện AI 1 tình huống',sub:'Giao tiếp',short:'Trò chuyện AI',min:3,act:function(){go('talk');}},
+    {key:'phrases',title:'Luyện 10 câu ngẫu nhiên',sub:'Câu thường dùng',short:'Luyện câu',min:2,act:function(){startRandom(10);}}
   ];
 }
+function greetingText(){var h=new Date().getHours();return h<11?'Chào buổi sáng':h<13?'Chào buổi trưa':h<18?'Chào buổi chiều':'Chào buổi tối';}
+function todayLabel(){var d=new Date();var wd=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'][d.getDay()];return wd+' · '+('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2);}
+function homeStat(big,label){var t=el('div','card');t.style.cssText='padding:14px 12px;gap:3px;align-items:flex-start';t.innerHTML='<div style="font-size:22px;font-weight:800;font-family:var(--disp);color:var(--accent);line-height:1">'+big+'</div><div class="muted" style="font-size:11.5px;line-height:1.2">'+label+'</div>';return t;}
 function nextUndoneTask(){var t=homeTasks();var d=(store.today&&store.today.date===todayStr())?store.today.done:{};for(var i=0;i<t.length;i++){if(!d[t[i].key])return t[i];}return null;}
 function nextTaskBtn(){
   var n=nextUndoneTask();var b=el('button','btn accent block');
@@ -1994,11 +2063,11 @@ function copyText(t,btn){
 function phraseRow(en,vi,gname){
   const row=el('div','phrase');
   const tx=el('div','grow');
-  tx.innerHTML=`<div class="en">${en}</div><div class="vi">${vi}</div>${gname?`<div class="note" style="color:var(--faint)">${gname}</div>`:''}`;
-  const btns=el('div');btns.style.cssText="display:flex;flex-direction:column;gap:6px;flex:0 0 auto";
-  btns.appendChild(playBtn(en));
+  tx.innerHTML=`<div class="en">${en}</div><div class="vi">${vi}${gname?` · <span style="color:var(--faint)">${gname}</span>`:''}</div>`;
+  const btns=el('div');btns.style.cssText="display:flex;gap:6px;flex:0 0 auto;align-items:center";
+  const pb=playBtn(en);pb.style.cssText="width:38px;height:38px";btns.appendChild(pb);
   const cp=el('button','play');cp.innerHTML=ICO.copy;cp.setAttribute('aria-label','Copy');
-  cp.style.cssText="width:40px;height:40px;color:var(--muted)";cp.onclick=()=>copyText(en,cp);
+  cp.style.cssText="width:38px;height:38px;color:var(--muted)";cp.onclick=()=>copyText(en,cp);
   btns.appendChild(cp);
   row.appendChild(tx);row.appendChild(btns);
   return row;
