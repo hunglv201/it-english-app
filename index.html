@@ -271,7 +271,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.8.0", APP_BUILD="2026-09-13";
+const APP_VERSION="1.9.0", APP_BUILD="2026-09-13";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -1461,9 +1461,10 @@ function aiRules(sc){
   return "You are an English conversation partner for a Vietnamese software developer whose English is BASIC. "
     +"Roleplay this work scenario: "+sc+" "
     +"Reply IN CHARACTER in 1-2 short simple English sentences (about 20 words max) and end with a question. "
-    +"Then on a NEW line starting exactly with 'FIX:' give ONE tiny correction of the user's last English message in Vietnamese "
-    +"(example: FIX: \"is fail\" nen la \"failed\"). If the user's English was already clear, write exactly 'FIX: OK'. "
-    +"No markdown and no other text.";
+    +"Then give up to 3 tiny corrections of the user's last English message. "
+    +"Start a NEW line exactly with 'FIX:' then put EACH correction on its own line as: wrong => right ~ short Vietnamese note "
+    +"(example:\nFIX:\nI fix => I fixed ~ viec hom qua, qua khu\nwill working => will work). "
+    +"If the user's English was already clear, write exactly 'FIX: OK' and nothing after. No markdown and no other text.";
 }
 // ---- Multi-provider AI (Hướng A: nhập key trong app, không backend) ----
 const AI_PROVIDERS={
@@ -1651,11 +1652,41 @@ async function aiLoadModelsAndPickCheapest(){
 }
 function aiParse(t){const i=t.indexOf('FIX:');if(i<0)return {reply:t.trim(),fix:''};return {reply:t.slice(0,i).trim(),fix:t.slice(i+4).trim()};}
 function fixEnglish(fix){var m=String(fix).match(/["“”']([^"“”']+)["“”']/g);if(!m)return '';return m.map(function(s){return s.replace(/["“”']/g,'').trim();}).filter(function(s){return /[a-zA-Z]/.test(s);}).join('. ');}
+function unq(s){return String(s).replace(/^["“”'\s]+|["“”'\s]+$/g,'').trim();}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fixItems(fix){
+  var s=String(fix||'').replace(/\r/g,'').trim();
+  if(!s||/^ok\b/i.test(s.replace(/^[^A-Za-z]+/,'')))return [];
+  var out=[];
+  s.split('\n').forEach(function(raw){
+    var line=raw.trim().replace(/^[-*•–\d.)\s]+/,'');
+    if(!line)return;
+    var note='';var t=line.split('~');if(t.length>1){note=unq(t.slice(1).join('~'));line=t[0].trim();}
+    var p=line.split(/\s*(?:=>|→|->)\s*/);
+    if(p.length>=2){out.push({wrong:unq(p[0]),right:unq(p.slice(1).join(' → ')),note:note});}
+    else{var eng=fixEnglish(line);if(eng)out.push({wrong:'',right:eng,note:note});else out.push({wrong:'',right:'',note:note||unq(line)});}
+  });
+  return out.filter(function(x){return x.right||x.wrong||x.note;});
+}
+function fixEnglishFrom(items,fix){var r=items.map(function(x){return x.right;}).filter(Boolean);return r.length?r.join('. '):fixEnglish(fix);}
 function fixCard(fix){
-  var fc=el('div');fc.style.cssText='display:flex;gap:8px;align-items:center;background:var(--amber-soft);border-radius:12px;padding:9px 12px;margin:2px 6px 0';
-  var tx=el('div','grow');tx.style.cssText='font-size:13px;color:var(--amber);line-height:1.4';tx.innerHTML='<b>✎ Sửa:</b> '+fix;fc.appendChild(tx);
-  var en=fixEnglish(fix);
-  if(en){var pb=el('button','play');pb.style.cssText='width:34px;height:34px;flex:0 0 auto;color:var(--amber);border-color:transparent;background:transparent';pb.innerHTML=ICO.play;pb.setAttribute('aria-label','Nghe câu đúng');pb.onclick=function(){speak(en,pb);};fc.appendChild(pb);}
+  var items=fixItems(fix);
+  var fc=el('div');fc.style.cssText='background:var(--amber-soft);border-radius:12px;padding:11px 13px;margin:2px 6px 0;display:flex;flex-direction:column;gap:7px';
+  var hd=el('div','row between');hd.style.gap='10px';
+  hd.innerHTML='<span style="font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--amber)">✎ Sửa lỗi'+(items.length>1?(' · '+items.length):'')+'</span>';
+  var en=fixEnglishFrom(items,fix);
+  if(en){var pb=el('button');pb.style.cssText='display:inline-flex;align-items:center;gap:5px;background:transparent;border:none;color:var(--amber);font-weight:700;font-size:12.5px;padding:2px 0;flex:0 0 auto';pb.innerHTML=ICO.play+' Nghe câu đúng';pb.setAttribute('aria-label','Nghe câu đúng');pb.onclick=function(){speak(en,pb);};hd.appendChild(pb);}
+  fc.appendChild(hd);
+  if(items.length){
+    items.forEach(function(it){
+      var line=el('div');line.style.cssText='font-size:13.5px;line-height:1.5;color:var(--amber)';
+      var html='';
+      if(it.wrong)html+='<s style="opacity:.7">'+esc(it.wrong)+'</s> → ';
+      if(it.right)html+='<b>'+esc(it.right)+'</b>';
+      if(it.note)html+=(it.right||it.wrong?' ':'')+'<span style="opacity:.8">('+esc(it.note)+')</span>';
+      line.innerHTML=html;fc.appendChild(line);
+    });
+  }else{var l=el('div');l.style.cssText='font-size:13.5px;line-height:1.5;color:var(--amber)';l.textContent=fix;fc.appendChild(l);}
   return fc;
 }
 function aiScObj(){
