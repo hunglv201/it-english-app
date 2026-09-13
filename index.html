@@ -300,7 +300,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.17.1", APP_BUILD="2026-09-13";
+const APP_VERSION="1.17.2", APP_BUILD="2026-09-13";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -837,7 +837,10 @@ function openSettings(){
       var dfl=store.cfg.remind||((store.stats&&store.stats.lastHour!=null)?(('0'+store.stats.lastHour).slice(-2)+':00'):'20:00');
       var row=el('div','row between');row.appendChild(el('span','muted','Giờ nhắc'));
       var ti=el('input');ti.type='time';ti.value=dfl;ti.className='input';ti.style.cssText='width:130px;height:44px';
-      ti.onchange=function(){store.cfg.remind=ti.value;save(store);if(ti.value&&Notification.permission==='default'){Notification.requestPermission().then(function(){openSettings();});}else openSettings();};
+      ti.onchange=function(){store.cfg.remind=ti.value;save(store);
+        if(ti.value&&('Notification'in window)&&Notification.permission==='default'){
+          try{var p=Notification.requestPermission(function(){openSettings();});if(p&&p.then)p.then(function(){openSettings();},function(){openSettings();});}catch(e){openSettings();}
+        }else openSettings();};
       row.appendChild(ti);sub.appendChild(row);
       var off=el('button','btn ghost sm');off.style.alignSelf='flex-start';off.textContent='Tắt nhắc';off.onclick=function(){store.cfg.remind='';save(store);openSettings();};sub.appendChild(off);
       var note='Nhắc tối đa 2 lần/ngày, khi tới giờ mà còn việc chưa xong, kèm việc còn lại.';
