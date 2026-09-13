@@ -1027,8 +1027,8 @@ function aiRules(sc){
 }
 // ---- Multi-provider AI (Hướng A: nhập key trong app, không backend) ----
 const AI_PROVIDERS={
-  gemini:{label:'Google Gemini',model:'gemini-2.0-flash',keyHint:'AIza…',keyUrl:'https://aistudio.google.com/apikey',note:'Free tier rộng, gọi thẳng từ trình duyệt.',
-    models:[['gemini-2.0-flash','Gemini 2.0 Flash — nhanh, free'],['gemini-1.5-flash','Gemini 1.5 Flash — nhẹ, free'],['gemini-1.5-pro','Gemini 1.5 Pro — mạnh hơn']]},
+  gemini:{label:'Google Gemini',model:'gemini-flash-latest',keyHint:'AIza…',keyUrl:'https://aistudio.google.com/apikey',note:'Free tier, gọi thẳng từ trình duyệt.',
+    models:[['gemini-flash-latest','Flash mới nhất (khuyên dùng)'],['gemini-2.5-flash','Gemini 2.5 Flash — ổn định'],['gemini-2.5-flash-lite','Flash Lite — hạn mức cao hơn'],['gemini-2.0-flash','Gemini 2.0 Flash (cũ)']]},
   claude:{label:'Claude (Anthropic)',model:'claude-3-5-haiku-latest',keyHint:'sk-ant-…',keyUrl:'https://console.anthropic.com/settings/keys',note:'Chất lượng sửa lỗi tốt, tính phí theo dùng.',
     models:[['claude-3-5-haiku-latest','Claude Haiku — rẻ, nhanh'],['claude-3-5-sonnet-latest','Claude Sonnet — chất lượng cao']]},
   groq:{label:'Groq',model:'llama-3.3-70b-versatile',keyHint:'gsk_…',keyUrl:'https://console.groq.com/keys',note:'Free, nhanh (model Llama).',
@@ -1061,8 +1061,8 @@ async function providerChat(cfg,input,opts){
     const body={contents:turns.map(function(m){return {role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]};}),
       generationConfig:{temperature:0.7,maxOutputTokens:400}};
     if(system)body.systemInstruction={parts:[{text:system}]};
-    const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(cfg.key),
-      {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+    const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',
+      {method:'POST',headers:{'content-type':'application/json','x-goog-api-key':cfg.key},body:JSON.stringify(body)});
     if(!res.ok)throw new Error('gemini '+res.status);
     const j=await res.json();
     text=((((j.candidates||[])[0]||{}).content||{}).parts||[]).map(function(p){return p.text||'';}).join('');
