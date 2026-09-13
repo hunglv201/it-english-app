@@ -1079,6 +1079,42 @@ G("Học hỏi & phản hồi cá nhân", [
  ("Feedback is a gift.","Góp ý là món quà."),
 ])
 
+
+G(u"Đọc ký hiệu & code", [
+ (u"Underscore: user_name is 'user underscore name'.", u"Gạch dưới: user_name đọc 'user underscore name'."),
+ (u"Dash: my-app is 'my dash app'.", u"Gạch nối: my-app đọc 'my dash app'."),
+ (u"Dot: index.js is 'index dot js'.", u"Dấu chấm: index.js đọc 'index dot js'."),
+ (u"Slash: src/app is 'src slash app'.", u"Gạch chéo: src/app đọc 'src slash app'."),
+ (u"Backslash is read 'backslash' in Windows paths.", u"Gạch chéo ngược đọc 'backslash'."),
+ (u"Colon: key: value is 'key colon value'.", u"Hai chấm: key: value."),
+ (u"Semicolon ends a statement, read 'semicolon'.", u"Chấm phẩy kết thúc câu lệnh."),
+ (u"Double colon: std::cout is 'std colon colon cout'.", u"Hai dấu hai chấm ::."),
+ (u"Parentheses: run() is 'run open paren close paren'.", u"Ngoặc tròn ()."),
+ (u"Square brackets: arr[0] is 'arr bracket zero'.", u"Ngoặc vuông []."),
+ (u"Curly braces: {} are 'open brace, close brace'.", u"Ngoặc nhọn {}."),
+ (u"Angle brackets: <div> is 'less-than div greater-than'.", u"Ngoặc nhọn <>."),
+ (u"Arrow: a -> b is 'a arrow b'.", u"Mũi tên -> đọc 'arrow'."),
+ (u"Fat arrow: () => {} is 'fat arrow'.", u"Mũi tên => đọc 'fat arrow'."),
+ (u"At sign: @user is 'at user'.", u"Dấu @ đọc 'at'."),
+ (u"Hash: #tag is 'hash tag' or 'pound'.", u"Dấu # đọc 'hash'."),
+ (u"Dollar sign: $var is 'dollar var'.", u"Dấu $ đọc 'dollar'."),
+ (u"Double ampersand: a && b is 'a and and b'.", u"&& đọc 'and and'."),
+ (u"Double pipe: a || b is 'a or or b'.", u"|| đọc 'or or'."),
+ (u"Asterisk: * is 'star' or 'asterisk'.", u"Dấu * đọc 'star'."),
+ (u"Tilde: ~ is read 'tilde'.", u"Dấu ~ đọc 'tilde'."),
+ (u"Caret: ^ is read 'caret'.", u"Dấu ^ đọc 'caret'."),
+ (u"Percent: % is 'percent' or 'modulo'.", u"Dấu % đọc 'percent'."),
+ (u"Optional chaining: a?.b is 'a optional chaining b'.", u"a?.b đọc 'optional chaining'."),
+ (u"Triple equals: === is 'triple equals'.", u"=== đọc 'triple equals'."),
+ (u"Not equal: != is read 'not equal'.", u"!= đọc 'not equal'."),
+ (u"The path is src/utils/date.js.", u"Đường dẫn: src/utils/date.js."),
+ (u"Go up one level: ../shared/config.", u"Lên một cấp: ../shared/config."),
+ (u"We are on version 2.1.0, say 'two point one point zero'.", u"Bản 2.1.0."),
+ (u"Upgrade to v3, say 'version three'.", u"Nâng lên v3."),
+ (u"Node 18.16.0 is 'node eighteen point sixteen point zero'.", u"Node 18.16.0."),
+ (u"Read the commit hash a1b2c3 character by character.", u"Đọc mã commit theo từng ký tự."),
+])
+
 # ---- build ----
 import json
 data=[{"name":n,"items":[{"en":e,"vi":v} for e,v in ps]} for n,ps in GROUPS]

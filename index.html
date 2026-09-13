@@ -300,7 +300,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.16.0", APP_BUILD="2026-09-13";
+const APP_VERSION="1.17.0", APP_BUILD="2026-09-13";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -489,8 +489,8 @@ function attachSwipe(node,onLeft,onRight){
 const TABS=[["home","Hôm nay",ICO.home],["roadmap","Lộ trình",ICO.route],["practice","Luyện",ICO.dumbbell],["me","Tôi",ICO.user]];
 let cur="home";
 // Mỗi màn thuộc về một tab (để làm sáng đúng tab); tab bar đóng vai trò "về gốc"
-const TAB_OF={home:'home',roadmap:'roadmap',practice:'practice',vocab:'practice',phrase:'practice',listen:'practice',talk:'practice',rewrite:'practice',me:'me',progress:'me',history:'me',settings:'me'};
-function tabRender(k){return {home:vHome,roadmap:vRoadmap,practice:vPractice,vocab:vVocab,phrase:vPhrase,listen:vListen,talk:vTalk,rewrite:vRewrite,me:vMe,progress:vProgress,history:vHistory,settings:openSettings}[k]||vHome;}
+const TAB_OF={home:'home',roadmap:'roadmap',practice:'practice',vocab:'practice',phrase:'practice',listen:'practice',talk:'practice',rewrite:'practice',reading:'practice',me:'me',progress:'me',history:'me',settings:'me'};
+function tabRender(k){return {home:vHome,roadmap:vRoadmap,practice:vPractice,vocab:vVocab,phrase:vPhrase,listen:vListen,talk:vTalk,rewrite:vRewrite,reading:vReading,me:vMe,progress:vProgress,history:vHistory,settings:openSettings}[k]||vHome;}
 function renderTabs(){
   const n=$("#tabs");n.innerHTML="";
   TABS.forEach(([k,label,ic])=>{
@@ -523,6 +523,9 @@ function vPractice(){
   var rw=el('button','card');rw.style.cssText='flex-direction:row;align-items:center;gap:12px;text-align:left;cursor:pointer';
   rw.innerHTML='<span class="pt-ic" style="width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto">✍️</span><span class="grow"><b style="font-size:16px;font-weight:700">Viết tin nhắn công việc</b><br><small class="muted" style="font-size:12px">AI sửa giọng: lịch sự / ngắn gọn</small></span><span style="color:var(--faint);display:inline-flex">'+ICO.chev+'</span>';
   rw.onclick=function(){go('rewrite');};v.appendChild(rw);
+  var rd=el('button','card');rd.style.cssText='flex-direction:row;align-items:center;gap:12px;text-align:left;cursor:pointer';
+  rd.innerHTML='<span class="pt-ic" style="width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto">📖</span><span class="grow"><b style="font-size:16px;font-weight:700">Đọc log / lỗi 30 giây</b><br><small class="muted" style="font-size:12px">Stack trace · README · PR + 2 câu hỏi</small></span><span style="color:var(--faint);display:inline-flex">'+ICO.chev+'</span>';
+  rd.onclick=readingStart;v.appendChild(rd);
   main.appendChild(v);
 }
 let rwOut=null,rwBusy=false,rwPrev='';
@@ -554,6 +557,63 @@ async function rwGo(){
     rwOut=(r&&(r.polite||r.concise))?r:null;if(!rwOut)toast('Chưa viết được, thử lại');}
   catch(e){toast('Lỗi AI, thử lại');}
   rwBusy=false;vRewrite();
+}
+// E11: đọc log/lỗi/tài liệu 30 giây + 2 câu hỏi
+const READING=[
+ {t:'Stack trace',text:'TypeError: Cannot read property "id" of undefined\n    at getUser (app.js:42)\n    at handleRequest (server.js:88)',q:[
+   {q:'Which file and line does the error start at?',o:['server.js:88','app.js:42','id:undefined'],a:1},
+   {q:'What is undefined?',o:['the file app.js','the object whose "id" is read','the server'],a:1}]},
+ {t:'README · Setup',text:'## Getting started\nRun `npm install`, then `npm run dev`.\nThe app starts on http://localhost:3000.',q:[
+   {q:'Which command starts the dev server?',o:['npm install','npm run dev','localhost:3000'],a:1},
+   {q:'What port does the app use?',o:['3000','8080','install'],a:0}]},
+ {t:'PR comment',text:'Looks good overall! Could you extract this logic into a helper and add a unit test before we merge? Thanks.',q:[
+   {q:'What does the reviewer ask for before merging?',o:['nothing, it is approved','a helper + a unit test','a new pull request'],a:1},
+   {q:'What is the reviewer\'s tone?',o:['angry','friendly and constructive','confused'],a:1}]},
+ {t:'Error log',text:'[ERROR] 2026-09-13 10:22 Database connection timeout after 30000ms\n[WARN] retrying (2/3)...',q:[
+   {q:'What failed?',o:['the database connection','the login page','the cache'],a:0},
+   {q:'How many retries are allowed in total?',o:['2','3','30000'],a:1}]},
+ {t:'Git message',text:'fix(auth): prevent null token from crashing login\n\nThe token was not checked before use. Added a guard.',q:[
+   {q:'What area does this commit fix?',o:['auth (login)','the database','the UI theme'],a:0},
+   {q:'What was the root cause?',o:['a slow network','a null token used without a check','a wrong password'],a:1}]},
+ {t:'Config',text:'# .env\nPORT=8080\nDB_HOST=localhost\nLOG_LEVEL=debug',q:[
+   {q:'Which port is configured?',o:['3000','8080','debug'],a:1},
+   {q:'What is the log level?',o:['debug','error','localhost'],a:0}]}
+];
+let rdI=0, rdAns={};
+function readingStart(){rdI=0;rdAns={};cur='practice';renderTabs();window.scrollTo(0,0);vReading();}
+function vReading(){
+  main.innerHTML='';var v=el('div','view');
+  var back=el('button','btn ghost sm');back.style.alignSelf='flex-start';back.textContent='‹ Luyện';back.onclick=function(){go('practice');};v.appendChild(back);
+  if(rdI>=READING.length){
+    var correct=0,tot=0;READING.forEach(function(it,ii){it.q.forEach(function(q,qi){tot++;if(rdAns[ii+'-'+qi]===q.a)correct++;});});
+    bumpActivity();
+    var dc=el('div','card');dc.style.cssText='text-align:center;gap:14px;padding:36px 18px';
+    dc.innerHTML='<div style="font-size:40px">📖</div><div style="font-size:21px;font-weight:800;font-family:var(--disp)">'+correct+'/'+tot+' câu đúng</div><div class="muted">Đọc hiểu log/lỗi/tài liệu.</div>';
+    var rb=el('button','btn accent block');rb.textContent='Làm lại';rb.onclick=readingStart;dc.appendChild(rb);
+    var hb=el('button','btn ghost block');hb.textContent='Về Luyện';hb.onclick=function(){go('practice');};dc.appendChild(hb);
+    v.appendChild(dc);main.appendChild(v);return;
+  }
+  var it=READING[rdI];
+  var hd=el('div','row between');hd.appendChild(el('span','eyebrow','Đọc hiểu · '+(rdI+1)+'/'+READING.length));v.appendChild(hd);
+  var bar=el('div','bar');bar.innerHTML='<i style="width:'+Math.round(rdI/READING.length*100)+'%"></i>';v.appendChild(bar);
+  var pc=el('div','card');pc.appendChild(el('div','eyebrow',it.t));
+  var pre=el('pre');pre.style.cssText='font-family:var(--mono);font-size:12.5px;line-height:1.65;white-space:pre-wrap;word-break:break-word;margin:0;color:var(--ink);background:var(--surface2);border-radius:10px;padding:12px 14px;overflow-x:auto';pre.textContent=it.text;pc.appendChild(pre);
+  var pb=el('button','btn ghost sm');pb.style.alignSelf='flex-start';pb.innerHTML=ICO.play+' Nghe';pb.onclick=function(){speak(it.text.replace(/\n/g,'. '),pb);};pc.appendChild(pb);
+  v.appendChild(pc);
+  it.q.forEach(function(q,qi){
+    var key=rdI+'-'+qi, ans=rdAns[key];
+    var qc=el('div','card');qc.appendChild(el('div',null,'<b style="font-size:14.5px;line-height:1.4">'+esc(q.q)+'</b>'));
+    q.o.forEach(function(o,oi){
+      var b=el('button','opt');b.style.minHeight='48px';var lab=el('span');lab.textContent=o;b.appendChild(lab);
+      if(ans!=null){b.disabled=true;if(oi===q.a){b.classList.add('good');b.insertAdjacentHTML('beforeend','<span style="display:inline-flex;color:var(--accent)">'+ICO.check+'</span>');}else if(oi===ans){b.classList.add('bad');b.insertAdjacentHTML('beforeend','<span style="display:inline-flex;color:var(--danger)">'+ICO.x+'</span>');}}
+      else b.onclick=(function(kk,oo){return function(){rdAns[kk]=oo;vReading();};})(key,oi);
+      qc.appendChild(b);
+    });
+    v.appendChild(qc);
+  });
+  var both=it.q.every(function(q,qi){return rdAns[rdI+'-'+qi]!=null;});
+  if(both){var nx=el('button','btn accent block');nx.textContent=(rdI<READING.length-1?'Bài tiếp ›':'Xem kết quả');nx.onclick=function(){rdI++;vReading();};v.appendChild(pinBar(nx));}
+  main.appendChild(v);
 }
 function vMe(){
   main.innerHTML="";const v=el('div','view');
@@ -1949,12 +2009,14 @@ async function providerChat(cfg,input,opts){
     }
     function gText(j){return ((((j.candidates||[])[0]||{}).content||{}).parts||[]).map(function(p){return p.text||'';}).join('').trim();}
     function gFinish(j){return (((j.candidates||[])[0]||{}).finishReason)||'';}
-    let res=await withRetry(function(){return callG(gmodel,2048,true);});
+    // Chỉ model "thinking" (2.5/3.x, flash-latest) mới nhận thinkingConfig; lite/2.0 gửi vào sẽ 400 → tránh request lỗi thừa
+    var gThink=(/2\.5|3\.\d|flash-latest|pro-latest/i.test(gmodel)) && !/lite|2\.0|1\.5/i.test(gmodel);
+    let res=await withRetry(function(){return callG(gmodel,2048,gThink);});
     if(res.status===404 && gmodel!=='gemini-flash-latest'){
       var res404=await withRetry(function(){return callG('gemini-flash-latest',2048,true);});
       if(res404.ok){try{store.ai.model='gemini-flash-latest';save(store);aiReset();}catch(e){}res=res404;gmodel='gemini-flash-latest';}
     }
-    if(res.status===400){var res400=await withRetry(function(){return callG(gmodel,8192,false);});if(res400.ok)res=res400;} // model không cho thinkingBudget:0
+    if(res.status===400 && gThink){var res400=await withRetry(function(){return callG(gmodel,8192,false);});if(res400.ok)res=res400;} // model không cho thinkingBudget:0
     if(!res.ok)throw new Error('gemini '+res.status);
     var j=await res.json();
     text=gText(j);
