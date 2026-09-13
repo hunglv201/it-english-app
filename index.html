@@ -221,7 +221,9 @@ if(!store.srs)store.srs={};
 if(!store.stats)store.stats={done:0,lastDay:null,streak:1};
 if(!store.days)store.days={done:{},cur:1};
 if(!store.ai)store.ai={provider:'',key:'',model:''};
-if(!store.cfg)store.cfg={autoSpeak:true,secCard:5,secPhrase:6,secListen:5};
+if(!store.cfg)store.cfg={};
+(function(dflt){for(var k in dflt){if(store.cfg[k]===undefined)store.cfg[k]=dflt[k];}})(
+  {autoSpeak:true,secCard:5,secPhrase:6,secListen:5,rate:0.95,vRepeat:1,vReadEx:true,pRepeat:1,lRepeat:2});
 // streak calc
 (function(){
   const today=new Date().toISOString().slice(0,10);
@@ -269,9 +271,15 @@ function speak(text,btn){
   if(!('speechSynthesis'in window)){toast("Trình duyệt không hỗ trợ đọc");return;}
   speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text.replace(/<[^>]+>/g,''));
-  u.lang="en-US";u.rate=0.95;if(VOICE)u.voice=VOICE;
+  u.lang="en-US";u.rate=(store.cfg&&store.cfg.rate)||0.95;if(VOICE)u.voice=VOICE;
   if(btn){btn.classList.add('speaking');u.onend=u.onerror=()=>btn.classList.remove('speaking');}
   speechSynthesis.speak(u);
+}
+function sayN(text,times){
+  if(!('speechSynthesis'in window))return;
+  speechSynthesis.cancel();
+  const clean=String(text).replace(/<[^>]+>/g,'');const n=Math.max(1,times||1);
+  for(let i=0;i<n;i++){const u=new SpeechSynthesisUtterance(clean);u.lang="en-US";u.rate=(store.cfg&&store.cfg.rate)||0.95;if(VOICE)u.voice=VOICE;speechSynthesis.speak(u);}
 }
 
 // ---------- helpers ----------
@@ -337,9 +345,9 @@ function apVocabStart(){apOn=true;apScreen='vocab';apVocabStep();}
 function apVocabStep(){
   if(!apOn||apScreen!=='vocab')return;
   if(vidx>=vqueue.length){apClear();drawCard();return;}
-  vshow=false;drawCard();if(store.cfg.autoSpeak)speak(vqueue[vidx].t);
+  vshow=false;drawCard();if(store.cfg.autoSpeak)sayN(vqueue[vidx].t,store.cfg.vRepeat);
   apWait(Math.max(2,store.cfg.secCard*0.5),function(){
-    vshow=true;drawCard();if(store.cfg.autoSpeak)speak(String(vqueue[vidx].ex).replace(/<[^>]+>/g,''));
+    vshow=true;drawCard();if(store.cfg.autoSpeak){if(store.cfg.vReadEx)sayN(vqueue[vidx].ex,1);else sayN(vqueue[vidx].t,1);}
     apWait(store.cfg.secCard,function(){vidx++;vshow=false;apVocabStep();});
   });
 }
@@ -347,7 +355,7 @@ function apRandomStart(){apOn=true;apScreen='phrase';apRandomStep();}
 function apRandomStep(){
   if(!apOn||apScreen!=='phrase')return;
   if(rnIdx>=rnQueue.length){apClear();drawRandom();return;}
-  rnShow=false;drawRandom();if(store.cfg.autoSpeak)speak(rnQueue[rnIdx].en);
+  rnShow=false;drawRandom();if(store.cfg.autoSpeak)sayN(rnQueue[rnIdx].en,store.cfg.pRepeat);
   apWait(Math.max(2,store.cfg.secPhrase*0.5),function(){
     rnShow=true;drawRandom();
     apWait(store.cfg.secPhrase,function(){rnIdx++;rnShow=false;store.stats.done=(store.stats.done||0)+1;save(store);apRandomStep();});
@@ -356,40 +364,68 @@ function apRandomStep(){
 function apListenStart(){apOn=true;apScreen='listen';lChecked=false;lHeard='';apListenStep();}
 function apListenStep(){
   if(!apOn||apScreen!=='listen')return;
-  vListen();if(store.cfg.autoSpeak)speak(lSentence());
+  vListen();if(store.cfg.autoSpeak)sayN(lSentence(),store.cfg.lRepeat);
   apWait(store.cfg.secListen,function(){lIdx=(lIdx+1)%DICTATION.length;lChecked=false;lHeard='';apListenStep();});
 }
 
 // ---------- Cấu hình (Settings) ----------
-function stepper(label,val,min,max,onch){
-  const wrap=el('div');wrap.style.cssText='display:flex;flex-direction:column;gap:6px';
+function stepG(label,val,min,max,unit,onch){
+  const wrap=el('div');wrap.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:12px';
   wrap.appendChild(el('div','muted',label));
-  const row=el('div','row');row.style.gap='10px';
-  const minus=el('button','btn ghost');minus.style.cssText='width:44px;height:44px;padding:0;font-size:20px';minus.textContent='−';
-  const num=el('div');num.style.cssText='font-family:var(--mono);font-size:18px;font-weight:600;min-width:56px;text-align:center';num.textContent=val+'s';
-  const plus=el('button','btn ghost');plus.style.cssText='width:44px;height:44px;padding:0;font-size:20px';plus.textContent='+';
-  minus.onclick=function(){val=Math.max(min,val-1);num.textContent=val+'s';onch(val);};
-  plus.onclick=function(){val=Math.min(max,val+1);num.textContent=val+'s';onch(val);};
+  const row=el('div','row');row.style.gap='8px';
+  const minus=el('button','btn ghost');minus.style.cssText='width:40px;height:40px;padding:0;font-size:20px';minus.textContent='−';
+  const num=el('div');num.style.cssText='font-family:var(--mono);font-size:16px;font-weight:600;min-width:52px;text-align:center';num.textContent=val+unit;
+  const plus=el('button','btn ghost');plus.style.cssText='width:40px;height:40px;padding:0;font-size:20px';plus.textContent='+';
+  minus.onclick=function(){val=Math.max(min,val-1);num.textContent=val+unit;onch(val);};
+  plus.onclick=function(){val=Math.min(max,val+1);num.textContent=val+unit;onch(val);};
   row.appendChild(minus);row.appendChild(num);row.appendChild(plus);wrap.appendChild(row);
   return wrap;
+}
+function stepper(label,val,min,max,onch){return stepG(label,val,min,max,'s',onch);}
+function toggleRow(label,val,onch){
+  const row=el('div','row between');
+  row.appendChild(el('span','muted',label));
+  const btn=el('button',(val?'chip on':'chip'),val?'Bật':'Tắt');
+  btn.onclick=function(){onch(!val);};row.appendChild(btn);return row;
 }
 function openSettings(){
   apClear();cur='settings';renderTabs();window.scrollTo(0,0);main.innerHTML='';
   const v=el('div','view');
   v.appendChild(el('div',null,'<div class="eyebrow">Cấu hình</div><div style="font-size:24px;font-weight:800;letter-spacing:-.01em;font-family:var(--disp);margin-top:4px">Cài đặt</div>'));
 
-  // Autoplay timings
-  const ac=el('div','card');ac.appendChild(el('div','eyebrow','Tự động chạy'));
-  ac.appendChild(el('div','muted','Thời gian mỗi bước khi bật “Tự động” trong Từ vựng, Câu, Nghe — để học rảnh tay, không cần bấm.'));
-  ac.appendChild(stepper('Từ vựng — mỗi thẻ',store.cfg.secCard,2,20,function(x){store.cfg.secCard=x;save(store);}));
-  ac.appendChild(stepper('Câu — mỗi câu',store.cfg.secPhrase,2,20,function(x){store.cfg.secPhrase=x;save(store);}));
-  ac.appendChild(stepper('Nghe — mỗi câu',store.cfg.secListen,2,20,function(x){store.cfg.secListen=x;save(store);}));
-  const asRow=el('div','row between');asRow.style.marginTop='4px';
-  asRow.appendChild(el('span','muted','Tự động đọc tiếng Anh'));
-  const asBtn=el('button',(store.cfg.autoSpeak?'chip on':'chip'),store.cfg.autoSpeak?'Bật':'Tắt');
-  asBtn.onclick=function(){store.cfg.autoSpeak=!store.cfg.autoSpeak;save(store);openSettings();};
-  asRow.appendChild(asBtn);ac.appendChild(asRow);
-  v.appendChild(ac);
+  // --- Tự động chạy: chung ---
+  const gc=el('div','card');gc.appendChild(el('div','eyebrow','Tự động chạy · chung'));
+  gc.appendChild(el('div','muted','Bật “Tự động” trong Từ vựng, Câu, Nghe để app tự đọc và tự chuyển — học rảnh tay.'));
+  gc.appendChild(toggleRow('Tự động đọc tiếng Anh',store.cfg.autoSpeak,function(x){store.cfg.autoSpeak=x;save(store);openSettings();}));
+  // tốc độ đọc
+  const spRow=el('div','row between');spRow.appendChild(el('span','muted','Tốc độ đọc'));
+  const spSeg=el('div','seg');spSeg.style.maxWidth='210px';
+  [['0.75','Chậm'],['0.95','Vừa'],['1.15','Nhanh']].forEach(function(m){
+    const on=Math.abs((store.cfg.rate||0.95)-parseFloat(m[0]))<0.06;
+    const bb=el('button',(on?'on':''),m[1]);bb.onclick=function(){store.cfg.rate=parseFloat(m[0]);save(store);speak('This is the reading speed.');openSettings();};
+    spSeg.appendChild(bb);
+  });
+  spRow.appendChild(spSeg);gc.appendChild(spRow);
+  v.appendChild(gc);
+
+  // --- Từ vựng ---
+  const vc0=el('div','card');vc0.appendChild(el('div','eyebrow','Tự động · Từ vựng'));
+  vc0.appendChild(stepG('Thời gian mỗi thẻ',store.cfg.secCard,2,20,'s',function(x){store.cfg.secCard=x;save(store);}));
+  vc0.appendChild(stepG('Đọc từ mấy lần',store.cfg.vRepeat,1,3,'×',function(x){store.cfg.vRepeat=x;save(store);}));
+  vc0.appendChild(toggleRow('Đọc câu ví dụ khi lật',store.cfg.vReadEx,function(x){store.cfg.vReadEx=x;save(store);openSettings();}));
+  v.appendChild(vc0);
+
+  // --- Câu ---
+  const pc0=el('div','card');pc0.appendChild(el('div','eyebrow','Tự động · Câu'));
+  pc0.appendChild(stepG('Thời gian mỗi câu',store.cfg.secPhrase,2,20,'s',function(x){store.cfg.secPhrase=x;save(store);}));
+  pc0.appendChild(stepG('Đọc câu mấy lần',store.cfg.pRepeat,1,3,'×',function(x){store.cfg.pRepeat=x;save(store);}));
+  v.appendChild(pc0);
+
+  // --- Nghe ---
+  const lc0=el('div','card');lc0.appendChild(el('div','eyebrow','Tự động · Nghe'));
+  lc0.appendChild(stepG('Thời gian mỗi câu',store.cfg.secListen,2,20,'s',function(x){store.cfg.secListen=x;save(store);}));
+  lc0.appendChild(stepG('Đọc câu mấy lần',store.cfg.lRepeat,1,3,'×',function(x){store.cfg.lRepeat=x;save(store);}));
+  v.appendChild(lc0);
 
   // Theme
   const tc=el('div','card');tc.appendChild(el('div','eyebrow','Giao diện'));
