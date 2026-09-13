@@ -1,0 +1,54 @@
+{
+ "artboards": [
+  {
+   "file": "Main.dc.html",
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 1010,
+   "title": "A · Học tiếp"
+  },
+  {
+   "file": "OptionB.dc.html",
+   "x": 480,
+   "y": 0,
+   "w": 390,
+   "h": 1290,
+   "title": "B · Bảng tổng quan"
+  },
+  {
+   "file": "OptionC.dc.html",
+   "x": 960,
+   "y": 0,
+   "w": 390,
+   "h": 1090,
+   "title": "C · Theo lộ trình"
+  }
+ ],
+ "annotations": [
+  {
+   "id": "note-a",
+   "x": 0,
+   "y": -150,
+   "w": 390,
+   "text": "A · Học tiếp — Một việc tiếp theo là trung tâm.\nƯu: rõ phải bấm gì, gọn, ít cuộn. Nhược: ít số liệu, người thích thống kê phải bấm thêm."
+  },
+  {
+   "id": "note-b",
+   "x": 480,
+   "y": -150,
+   "w": 390,
+   "text": "B · Bảng tổng quan — Nhiều thông tin: 3 ô số, hôm nay, lộ trình, hoạt động, từ hay sai.\nƯu: đúng ý 'home có đủ thông tin'. Nhược: dài nhất, phải cuộn 1,5 màn."
+  },
+  {
+   "id": "note-c",
+   "x": 960,
+   "y": -150,
+   "w": 390,
+   "text": "C · Theo lộ trình — Ngày đang học là trung tâm, 4 việc là phần ôn bổ trợ.\nƯu: gắn Hôm nay với Lộ trình (sửa mục A4). Nhược: đổi cách hiểu 'bài hôm nay', cần sửa logic nhiều hơn."
+  }
+ ],
+ "launch": {
+  "view": "canvas"
+ }
+}
