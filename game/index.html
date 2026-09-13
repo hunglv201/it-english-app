@@ -343,7 +343,16 @@ button.srow:active{background:var(--panel2)}
 .tips{display:flex;flex-direction:column;gap:6px}
 .tips .tip{font-size:13px;padding:8px 10px}
 .tip-more{align-self:flex-end;background:none;border:none;color:var(--blue);font-weight:800;font-size:12.5px;padding:2px 4px}
-.talkbar{position:sticky;bottom:calc(8px + env(safe-area-inset-bottom));margin-top:auto;display:flex;gap:8px;align-items:center;padding:8px;border-radius:22px;background:var(--panel);border:3px solid var(--stroke);box-shadow:0 5px 0 var(--stroke),0 12px 30px #000a;z-index:6}
+.botbar{position:sticky;bottom:calc(8px + env(safe-area-inset-bottom));margin-top:auto;z-index:6;display:flex;flex-direction:column;gap:8px}
+.botbar>.btn{box-shadow:0 5px 0 var(--stroke),0 12px 30px #000a}
+.botbar .choices{gap:8px}
+.botbar .choice{padding:10px 12px;font-size:14px;box-shadow:0 4px 0 var(--stroke),0 10px 24px #000a}
+.botbar .tip{font-size:13px;padding:8px 10px}
+.chatlay .fill{flex:1}
+.qcard.fill{display:flex;flex-direction:column;justify-content:center}
+.shres{margin-top:10px;padding-top:10px;border-top:2px dashed #ddd6ff}
+.vn.fill .scene{min-height:150px}
+.talkbar{display:flex;gap:8px;align-items:center;padding:8px;border-radius:22px;background:var(--panel);border:3px solid var(--stroke);box-shadow:0 5px 0 var(--stroke),0 12px 30px #000a;z-index:6}
 .talkbar .input{min-height:46px;border-width:2px;font-size:15px;border-radius:16px}
 .tb-mic,.tb-send{width:48px;height:46px;border-radius:50%;border:3px solid var(--stroke);box-shadow:0 3px 0 var(--stroke);font-size:20px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;padding:0}
 .tb-mic{background:linear-gradient(180deg,var(--blue),var(--blue2));color:#fff}
