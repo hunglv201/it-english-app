@@ -300,7 +300,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.17.0", APP_BUILD="2026-09-13";
+const APP_VERSION="1.17.1", APP_BUILD="2026-09-13";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -2804,7 +2804,19 @@ document.addEventListener('visibilitychange',function(){if(!document.hidden)chec
     var h=location.hostname||'';
     var isClaude=/claude\.ai$|claude\.site$|anthropic/.test(h);
     if('serviceWorker' in navigator && location.protocol==='https:' && !isClaude){
-      window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});
+      // Tự cập nhật: khi service worker mới nắm quyền thì tải lại 1 lần (chỉ khi đã có bản cũ, tránh reload lần cài đầu)
+      var hadController=!!navigator.serviceWorker.controller, reloaded=false;
+      navigator.serviceWorker.addEventListener('controllerchange',function(){
+        if(!hadController||reloaded)return;reloaded=true;location.reload();
+      });
+      window.addEventListener('load',function(){
+        navigator.serviceWorker.register('sw.js').then(function(reg){
+          try{reg.update();}catch(e){}
+          // Kiểm tra bản mới định kỳ + mỗi lần quay lại tab
+          setInterval(function(){try{reg.update();}catch(e){}},60000);
+          document.addEventListener('visibilitychange',function(){if(!document.hidden){try{reg.update();}catch(e){}}});
+        }).catch(function(){});
+      });
     }
   }catch(e){}
 })();
