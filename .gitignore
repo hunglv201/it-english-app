@@ -15,3 +15,8 @@ index.html.bak
 # PWA icons (giữ lại)
 !icon-192.png
 !icon-512.png
+
+# Secrets — KHÔNG commit
+.env
+.env.local
+*.env
