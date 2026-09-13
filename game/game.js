@@ -126,7 +126,7 @@ function paintCoins(){$('#coinN').textContent=G.coins;}
 /* ---------- router ---------- */
 let cur='map';
 const TABS=[['map','🗺️','Bản đồ'],['shop','🛒','Shop'],['profile','👤','Hồ sơ'],['app','📱','App']];
-function renderTabs(){const n=$('#tabs');n.innerHTML='';TABS.forEach(t=>{const b=el('button','tab'+(cur===t[0]?' on':''),'<span>'+t[1]+'</span>'+t[2]);b.onclick=()=>{if(t[0]==='app'){location.href='../';return;}go(t[0]);};n.appendChild(b);});}
+function renderTabs(){const n=$('#tabs');n.innerHTML='';TABS.forEach(t=>{const b=el('button','tab'+(cur===t[0]?' on':''),'<span>'+t[1]+'</span>'+t[2]);b.onclick=()=>{if(t[0]==='app'){const APP='https://hunglv201.github.io/it-english-app/';if(/github\.io$/.test(location.hostname))location.href=APP;else window.open(APP,'_blank','noopener');return;}go(t[0]);};n.appendChild(b);});}
 let mapTimer=null;
 function go(k){cur=k;renderTabs();window.scrollTo(0,0);if(mapTimer){clearInterval(mapTimer);mapTimer=null;}({map:vMap,shop:vShop,profile:vProfile})[k]();}
 function playerCard(){
