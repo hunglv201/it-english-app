@@ -158,15 +158,20 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 @keyframes pulse{50%{transform:scale(1.08)}}
 
 .tabs{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;
-  background:var(--surface);border-top:1px solid var(--line);
-  display:flex;padding:9px 6px calc(11px + env(safe-area-inset-bottom));z-index:20}
-.tab{flex:1;background:none;border:none;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:5px;
-  color:var(--faint);font-size:10.5px;font-weight:600;border-radius:12px}
+  background:color-mix(in srgb, var(--surface) 90%, transparent);
+  -webkit-backdrop-filter:saturate(1.5) blur(16px);backdrop-filter:saturate(1.5) blur(16px);
+  border:1px solid var(--line);border-bottom:none;border-radius:26px 26px 0 0;
+  box-shadow:0 -10px 30px rgba(0,0,0,.09);
+  display:flex;padding:9px 10px calc(9px + env(safe-area-inset-bottom));z-index:20}
+.tab{flex:1;background:none;border:none;padding:4px 2px;display:flex;flex-direction:column;align-items:center;gap:4px;
+  color:var(--faint);font-size:11px;font-weight:600;border-radius:14px;-webkit-tap-highlight-color:transparent}
 .tab.on{color:var(--accent)}
 .tab.on b{font-weight:700}
-.tab-ic{display:flex;align-items:center;justify-content:center;width:48px;height:28px;border-radius:999px;transition:background .16s}
-.tab.on .tab-ic{background:var(--accent-soft)}
-.tab svg{width:21px;height:21px}
+.tab-ic{display:flex;align-items:center;justify-content:center;width:46px;height:36px;border-radius:18px;transition:background .22s cubic-bezier(.2,.8,.2,1),transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s ease}
+.tab.on .tab-ic{background:var(--accent-soft);transform:translateY(-2px);box-shadow:0 6px 16px color-mix(in srgb, var(--accent) 26%, transparent)}
+.tab:active .tab-ic{transform:scale(.88)}
+.tab svg{width:23px;height:23px}
+.pt-ic svg{width:24px;height:24px}
 
 .bar{height:8px;border-radius:5px;background:var(--line);overflow:hidden}
 .bar>i{display:block;height:100%;border-radius:5px;background:var(--accent);transition:width .5s cubic-bezier(.2,.8,.2,1)}
@@ -286,7 +291,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.11.0", APP_BUILD="2026-09-13";
+const APP_VERSION="1.13.0", APP_BUILD="2026-09-13";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -383,8 +388,9 @@ function voiceLang(){return (store.cfg&&store.cfg.voiceLang&&store.cfg.voiceLang
 function pickVoice(){
   const vs=speechSynthesis.getVoices();
   var pref=(store.cfg&&store.cfg.voiceLang)||'auto';
-  var re=pref==='en-GB'?/en-GB/i:/en-US/i;
-  VOICE=vs.find(v=>re.test(v.lang)&&/google|natural|samantha|daniel|libby|sonia|arthur/i.test(v.name))
+  var lang=(pref&&pref!=='auto')?pref:'en-US';
+  var re=new RegExp(lang.replace('-','[-_]?'),'i');
+  VOICE=vs.find(v=>re.test(v.lang)&&/google|natural|samantha|daniel|libby|sonia|arthur|rishi|veena|karen|catherine|moira|tessa/i.test(v.name))
       ||vs.find(v=>re.test(v.lang))
       ||vs.find(v=>/^en/i.test(v.lang))||null;
 }
@@ -434,6 +440,9 @@ const ICO={
   copy:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5h10"/></svg>',
   check:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4 10-11"/></svg>',
   x:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  route:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.5"/></svg>',
+  dumbbell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11M4 9l-1.5 1.5a2 2 0 0 0 0 2.8L4 15M20 9l1.5 1.5a2 2 0 0 1 0 2.8L20 15M7 5.5L5.5 7M18.5 17L17 18.5"/></svg>',
+  user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"/></svg>',
   mic2:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>',
   send:'<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 20l18-8L3 4v6l12 2-12 2z"/></svg>',
   micbig:'<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>',
@@ -468,20 +477,77 @@ function attachSwipe(node,onLeft,onRight){
 }
 
 // ---------- views ----------
-const TABS=[["home","Hôm nay",ICO.home],["phrase","Câu",ICO.list],["vocab","Từ vựng",ICO.vocab],["talk","Giao tiếp",ICO.talk],["listen","Nghe",ICO.ear]];
+const TABS=[["home","Hôm nay",ICO.home],["roadmap","Lộ trình",ICO.route],["practice","Luyện",ICO.dumbbell],["me","Tôi",ICO.user]];
 let cur="home";
-
+// Mỗi màn thuộc về một tab (để làm sáng đúng tab); tab bar đóng vai trò "về gốc"
+const TAB_OF={home:'home',roadmap:'roadmap',practice:'practice',vocab:'practice',phrase:'practice',listen:'practice',talk:'practice',me:'me',progress:'me',history:'me',settings:'me'};
+function tabRender(k){return {home:vHome,roadmap:vRoadmap,practice:vPractice,vocab:vVocab,phrase:vPhrase,listen:vListen,talk:vTalk,me:vMe,progress:vProgress,history:vHistory,settings:openSettings}[k]||vHome;}
 function renderTabs(){
   const n=$("#tabs");n.innerHTML="";
   TABS.forEach(([k,label,ic])=>{
-    const b=el('button',"tab"+(k===cur?" on":""));
+    const on=(k===cur);
+    const b=el('button',"tab"+(on?" on":""));
     b.innerHTML='<span class="tab-ic">'+ic+'</span><b>'+label+'</b>';
-    b.setAttribute('aria-label',label);if(k===cur)b.setAttribute('aria-current','page');
+    b.setAttribute('aria-label',label);if(on)b.setAttribute('aria-current','page');
     b.onclick=()=>go(k);
     n.appendChild(b);
   });
 }
-function go(k){apClear();closeModal();convoView=null;aiSaveMode=false;cur=k;renderTabs();window.scrollTo(0,0);({home:vHome,vocab:vVocab,talk:vTalk,listen:vListen,phrase:vPhrase}[k])();}
+function go(k){apClear();closeModal();convoView=null;aiSaveMode=false;cur=TAB_OF[k]||k;renderTabs();window.scrollTo(0,0);tabRender(k)();}
+function vPractice(){
+  main.innerHTML="";const v=el('div','view');
+  v.appendChild(el('div',null,'<div class="eyebrow">Luyện tập</div><div style="font-size:24px;font-weight:800;font-family:var(--disp);letter-spacing:-.01em;margin-top:4px">Chọn kiểu luyện</div>'));
+  var items=[
+    ['Từ vựng','Thẻ lật · kiểm tra · SRS',ICO.vocab,function(){vMode='card';vTopic='all';go('vocab');}],
+    ['Câu thường dùng','1000 câu · đọc theo mic',ICO.list,function(){go('phrase');}],
+    ['Nghe','Chép chính tả · nhại theo',ICO.ear,function(){go('listen');}],
+    ['Giao tiếp AI','Trò chuyện · sửa lỗi',ICO.talk,function(){go('talk');}]
+  ];
+  var grid=el('div');grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:12px';
+  items.forEach(function(it){
+    var c=el('button','card');c.style.cssText='align-items:flex-start;gap:12px;text-align:left;cursor:pointer;min-height:132px;justify-content:space-between';
+    c.innerHTML='<span class="pt-ic" style="width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:inline-flex;align-items:center;justify-content:center">'+it[2]+'</span>'
+      +'<span><b style="font-size:16px;font-weight:700;letter-spacing:-.01em">'+it[0]+'</b><br><small class="muted" style="font-size:12px;line-height:1.35">'+it[1]+'</small></span>';
+    c.onclick=it[3];grid.appendChild(c);
+  });
+  v.appendChild(grid);main.appendChild(v);
+}
+function vMe(){
+  main.innerHTML="";const v=el('div','view');
+  v.appendChild(el('div',null,'<div class="eyebrow">Của tôi</div><div style="font-size:24px;font-weight:800;font-family:var(--disp);letter-spacing:-.01em;margin-top:4px">Tôi</div>'));
+  var weak=weakWords().length, mine=(store.myVocab||[]).length, conv=(store.convos||[]).length;
+  v.appendChild(iosGroup('Tiến trình',[
+    iosRow('Thống kê học tập','🔥 '+curStreak(),function(){go('progress');}),
+    iosRow('Từ hay sai',weak?String(weak):'0',function(){vMode='card';vTopic='weak';go('vocab');})
+  ]));
+  v.appendChild(iosGroup('Nội dung của tôi',[
+    iosRow('Từ của tôi',mine?String(mine):'0',function(){vMode='list';vTopic='mine';go('vocab');}),
+    iosRow('Lịch sử hội thoại',conv?String(conv):'0',function(){go('history');})
+  ]));
+  v.appendChild(iosGroup('Xuất dữ liệu (Anki / CSV)',[
+    iosRow('Từ của tôi → CSV',mine?String(mine):'0',function(){exportCSV('it-english-cua-toi.csv',(store.myVocab||[]));}),
+    iosRow('Từ hay sai → CSV',weak?String(weak):'0',function(){exportCSV('it-english-hay-sai.csv',weakWords());})
+  ]));
+  v.appendChild(iosGroup('Ứng dụng',[
+    iosRow('Cấu hình','',function(){openSettings();})
+  ]));
+  main.appendChild(v);
+}
+function vHistory(){
+  main.innerHTML="";const v=el('div','view');
+  const back=el('button','btn ghost sm');back.style.alignSelf='flex-start';back.textContent='‹ Tôi';back.onclick=function(){go('me');};v.appendChild(back);
+  v.appendChild(el('div',null,'<div class="eyebrow">Giao tiếp</div><div style="font-size:22px;font-weight:800;font-family:var(--disp);letter-spacing:-.01em;margin-top:4px">Lịch sử hội thoại</div>'));
+  var cs=store.convos||[];
+  if(!cs.length){v.appendChild(el('div','card','<div class="muted" style="text-align:center;padding:22px 8px">Chưa có hội thoại đã lưu.<br>Vào Luyện → Giao tiếp AI, trò chuyện rồi bấm “Lưu hội thoại”.</div>'));main.appendChild(v);return;}
+  var card=el('div','card');card.style.cssText='gap:0;padding:6px 12px';
+  cs.forEach(function(c){
+    var row=el('button','si');
+    var badge=(c.score!=null)?('<span class="chip'+(c.score>=70?' ok':'')+'" style="height:26px">'+c.score+'đ</span>'):'';
+    row.innerHTML='<span style="text-align:left"><b style="font-size:15px">'+c.name+'</b><br><small class="muted" style="font-size:12px">'+c.date+(c.fixCount!=null?(' · '+c.fixCount+' lỗi được sửa'):'')+'</small></span><span class="row" style="gap:8px">'+badge+'<span style="color:var(--faint);display:inline-flex">'+ICO.chev+'</span></span>';
+    row.onclick=(function(id){return function(){openConvo(id);};})(c.id);card.appendChild(row);
+  });
+  v.appendChild(card);main.appendChild(v);
+}
 
 // ---------- Autoplay engine (tự động chạy) ----------
 let apOn=false, apTimer=null, apScreen=null;
@@ -576,13 +642,13 @@ function iosExpand(key,label,value,build){
   return frag;
 }
 function speedLabel(){var r=store.cfg.rate||0.95;return r<0.85?'Chậm':(r>1.05?'Nhanh':'Vừa');}
-function voiceLabel(){return {auto:'Tự động','en-US':'Anh-Mỹ','en-GB':'Anh-Anh'}[store.cfg.voiceLang||'auto'];}
+function voiceLabel(){return {auto:'Tự động','en-US':'Anh-Mỹ','en-GB':'Anh-Anh','en-AU':'Anh-Úc','en-IN':'Anh-Ấn'}[store.cfg.voiceLang||'auto'];}
 function themeLabel(){return {light:'Sáng',dark:'Tối',system:'Theo hệ thống'}[store.theme||'system'];}
 function providerLabel(){var inClaude=!!(window.claude&&window.claude.use);var p=store.ai&&store.ai.provider;if(p&&AI_PROVIDERS[p])return AI_PROVIDERS[p].label;return inClaude?'Claude (trong app)':'Chưa cấu hình';}
 function openSettings(){
-  apClear();cur='settings';renderTabs();window.scrollTo(0,0);main.innerHTML='';
+  apClear();cur='me';renderTabs();window.scrollTo(0,0);main.innerHTML='';
   const v=el('div','view');
-  const back=el('button','btn ghost sm');back.style.alignSelf='flex-start';back.textContent='‹ Hôm nay';back.onclick=function(){go('home');};v.appendChild(back);
+  const back=el('button','btn ghost sm');back.style.alignSelf='flex-start';back.textContent='‹ Tôi';back.onclick=function(){go('me');};v.appendChild(back);
   v.appendChild(el('div',null,'<div class="eyebrow">Cấu hình</div><div style="font-size:24px;font-weight:800;letter-spacing:-.01em;font-family:var(--disp);margin-top:4px">Cài đặt</div>'));
 
   // Nhóm 1: ĐỌC & TỰ ĐỘNG
@@ -591,8 +657,9 @@ function openSettings(){
     iosExpand('sp','Tốc độ · giọng đọc',speedLabel()+' · '+voiceLabel(),function(sub){
       sub.appendChild(el('div','ios-lab','Tốc độ đọc'));
       var spSeg=el('div','seg');[['0.75','Chậm'],['0.95','Vừa'],['1.15','Nhanh']].forEach(function(m){var on=Math.abs((store.cfg.rate||0.95)-parseFloat(m[0]))<0.06;var bb=el('button',(on?'on':''),m[1]);bb.onclick=function(){store.cfg.rate=parseFloat(m[0]);save(store);speak('This is the reading speed.');openSettings();};spSeg.appendChild(bb);});sub.appendChild(spSeg);
-      sub.appendChild(el('div','ios-lab','Giọng đọc'));
-      var vseg=el('div','seg');[['auto','Tự động'],['en-US','Anh-Mỹ'],['en-GB','Anh-Anh']].forEach(function(m){var on=(store.cfg.voiceLang||'auto')===m[0];var bb=el('button',(on?'on':''),m[1]);bb.onclick=function(){store.cfg.voiceLang=m[0];save(store);pickVoice();speak('This is the selected voice.');openSettings();};vseg.appendChild(bb);});sub.appendChild(vseg);
+      sub.appendChild(el('div','ios-lab','Giọng đọc (tuỳ máy có sẵn)'));
+      var vwrap=el('div');vwrap.style.cssText='display:flex;flex-wrap:wrap;gap:7px';
+      [['auto','Tự động'],['en-US','Anh-Mỹ'],['en-GB','Anh-Anh'],['en-AU','Anh-Úc'],['en-IN','Anh-Ấn']].forEach(function(m){var on=(store.cfg.voiceLang||'auto')===m[0];var bb=el('button','chip'+(on?' on':''),m[1]);bb.onclick=function(){store.cfg.voiceLang=m[0];save(store);pickVoice();speak('This is the selected voice.');openSettings();};vwrap.appendChild(bb);});sub.appendChild(vwrap);
     }),
     iosExpand('tm','Thời gian tự chạy mỗi thẻ / câu',store.cfg.secCard+'s · '+store.cfg.secPhrase+'s · '+store.cfg.secListen+'s',function(sub){
       sub.appendChild(el('div','ios-lab','Từ vựng'));
@@ -674,6 +741,7 @@ function markToday(key){
   var was=store.today.done[key];store.today.done[key]=true;
   if(!was)advanceStreak(); // D3: xong 1 việc mới giữ/ tăng streak
   save(store);
+  if(!was)completeDayIfAll(); // A4: đủ 4 việc ⇒ xong ngày lộ trình
 }
 function markListen(pct){ // A1: chỉ tích Nghe khi ≥3 câu hoặc 1 câu ≥60% từ đúng
   const t=todayStr();if(!store.today||store.today.date!==t)store.today={date:t,done:{}};
@@ -689,7 +757,7 @@ function weekStrip(){
   for(var i=0;i<7;i++){var d=new Date(mon);d.setDate(mon.getDate()+i);var key=d.toISOString().slice(0,10);var n=(store.hist&&store.hist[key])||0;weekLuot+=n;days.push({key:key,n:n});}
   var hd=el('button');hd.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;background:none;border:none;color:inherit;padding:0;cursor:pointer';
   hd.innerHTML='<span class="eyebrow">Tuần này · '+weekLuot+' lượt</span><span class="row" style="gap:8px"><span class="chip ok" style="height:26px;font-size:12px">🔥 Chuỗi '+curStreak()+' ngày</span><span style="display:inline-flex;color:var(--faint)">'+ICO.chev+'</span></span>';
-  hd.setAttribute('aria-label','Xem thống kê học tập');hd.onclick=vProgress;
+  hd.setAttribute('aria-label','Xem thống kê học tập');hd.onclick=function(){go('progress');};
   wrap.appendChild(hd);
   var grid=el('div');grid.style.cssText='display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px';
   days.forEach(function(dd,i){
@@ -784,14 +852,25 @@ function vHome(){
   main.appendChild(v);
 }
 function vnDate(key){var d=new Date(key+'T00:00:00');var wd=['CN','T2','T3','T4','T5','T6','T7'][d.getDay()];return wd+' '+d.getDate()+'/'+(d.getMonth()+1);}
-function homeTasks(){
-  var dueN=due().length;
+function homeTasks(){ // A4: nội dung lấy từ ngày lộ trình hiện tại
+  var rn=store.days.cur||1, rday=DAYS[rn-1]||{};
+  var nWords=(rday.v||[]).length||5;
   return [
-    {key:'vocab',title:(dueN>0?('Ôn '+Math.min(dueN,15)+' từ vựng'):'Học 5 từ mới'),sub:'Từ vựng',short:'Ôn từ vựng',min:2,act:function(){vMode='card';vTopic='all';go('vocab');}},
-    {key:'listen',title:'1 bài nghe chép chính tả',sub:'Nghe',short:'Nghe chép',min:1,act:function(){lMode='dictation';go('listen');}},
-    {key:'talk',title:'Trò chuyện AI 1 tình huống',sub:'Giao tiếp',short:'Trò chuyện AI',min:3,act:function(){go('talk');}},
-    {key:'phrases',title:'Luyện 10 câu ngẫu nhiên',sub:'Câu thường dùng',short:'Luyện câu',min:2,act:function(){startRandom(10);}}
+    {key:'vocab',title:'Ôn '+nWords+' từ ngày '+rn,sub:'Từ vựng',short:'từ vựng',min:2,act:function(){vMode='card';vTopic='today';go('vocab');}},
+    {key:'listen',title:'1 bài nghe chép chính tả',sub:'Nghe',short:'nghe chép',min:1,act:function(){lMode='dictation';if(rday.li!=null){lIdx=rday.li;}lChecked=false;lHeard='';go('listen');}},
+    {key:'talk',title:'Trò chuyện AI 1 tình huống',sub:'Giao tiếp',short:'trò chuyện AI',min:3,act:function(){go('talk');}},
+    {key:'phrases',title:'Luyện 10 câu thường dùng',sub:'Câu thường dùng',short:'luyện câu',min:2,act:function(){cur='practice';renderTabs();startRandom(10);}}
   ];
+}
+function completeDayIfAll(){ // A4: xong đủ 4 việc hôm nay ⇒ đánh dấu ngày lộ trình + sang ngày kế
+  var t=todayStr();if(!store.today||store.today.date!==t)return;
+  var keys=['vocab','listen','talk','phrases'];
+  if(!keys.every(function(k){return store.today.done[k];}))return;
+  var n=store.days.cur||1;
+  if(store.days.done[n])return;
+  store.days.done[n]=true;if(store.days.cur===n&&n<DAYS.length)store.days.cur=n+1;
+  store.stats.done=(store.stats.done||0)+1;save(store);
+  toast('🎉 Xong ngày '+n+'! Mở khoá ngày '+(n<DAYS.length?(n+1):n),'ok');
 }
 function greetingText(){var h=new Date().getHours();return h<11?'Chào buổi sáng':h<13?'Chào buổi trưa':h<18?'Chào buổi chiều':'Chào buổi tối';}
 function todayLabel(){var d=new Date();var wd=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'][d.getDay()];return wd+' · '+('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2);}
@@ -818,9 +897,9 @@ function statTile(n,label){
   t.innerHTML='<div class="n">'+n+'</div><div class="l">'+label+'</div>';return t;
 }
 function vProgress(){
-  apClear();cur='progress';renderTabs();window.scrollTo(0,0);main.innerHTML='';
+  apClear();cur='me';renderTabs();window.scrollTo(0,0);main.innerHTML='';
   const v=el('div','view');
-  const back=el('button','btn ghost sm');back.style.alignSelf='flex-start';back.textContent='‹ Hôm nay';back.onclick=function(){go('home');};v.appendChild(back);
+  const back=el('button','btn ghost sm');back.style.alignSelf='flex-start';back.textContent='‹ Tôi';back.onclick=function(){go('me');};v.appendChild(back);
   v.appendChild(el('div',null,'<div class="eyebrow">Tiến độ</div><div style="font-size:24px;font-weight:800;font-family:var(--disp);letter-spacing:-.01em;margin-top:4px">Thống kê học tập</div>'));
   const learned=learnedCount(), totalV=allVocab().length;
   const daysDone=Object.keys(store.days.done||{}).length;
@@ -888,7 +967,6 @@ function vProgress(){
 }
 function vRoadmap(){
   main.innerHTML="";const v=el('div','view');
-  const rb=el('button','btn ghost sm');rb.style.alignSelf='flex-start';rb.textContent='‹ Hôm nay';rb.onclick=vHome;v.appendChild(rb);
   const cur=store.days.cur||1, day=DAYS[cur-1], cp=day.phase;
   const doneN=Object.keys(store.days.done||{}).length;
   const hero=el('div');hero.style.cssText='display:flex;flex-direction:column;gap:12px;padding:8px 2px 2px';
@@ -913,7 +991,7 @@ function vRoadmap(){
     head.innerHTML='<span><b>Chặng '+(i+1)+' · '+t+'</b><br><small>Ngày '+start+'–'+(start+9)+'</small></span>'
       +'<span class="row" style="gap:10px"><span class="chip'+(dc===10?' ok':'')+'" style="height:26px">'+dc+'/10</span>'
       +'<span style="transform:rotate('+(openPhase===i?'90':'0')+'deg);display:inline-flex;color:var(--faint);transition:.15s">'+ICO.chev+'</span></span>';
-    head.onclick=function(){openPhase=(openPhase===i?-1:i);vHome();};
+    head.onclick=function(){openPhase=(openPhase===i?-1:i);vRoadmap();};
     acc.appendChild(head);
     if(openPhase===i){const g=dayGrid(i,cur);g.style.padding='8px 2px 14px';acc.appendChild(g);}
   });
@@ -935,7 +1013,7 @@ function openDay(n){
       else{var miss=[];if(!touched.v)miss.push('Từ');if(!touched.p)miss.push('Câu');if(!touched.d)miss.push('Giao tiếp');if(!touched.l)miss.push('Nghe');cap.textContent='Nút sáng khi đủ 4 phần · còn: '+miss.join(', ');}
     }
   }
-  const back=el('button','btn ghost sm');back.style.alignSelf="flex-start";back.textContent="‹ Lộ trình";back.onclick=vRoadmap;v.appendChild(back);
+  const back=el('button','btn ghost sm');back.style.alignSelf="flex-start";back.textContent="‹ Lộ trình";back.onclick=function(){go('roadmap');};v.appendChild(back);
   v.appendChild(el('div',null,`<div class="eyebrow">Ngày ${n} · Chặng ${day.phase+1}</div><div style="font-size:21px;font-weight:700;margin-top:2px">${day.title}</div>`));
   const vc=el('div','card');vc.appendChild(el('div','eyebrow','1 · Từ vựng hôm nay'));
   day.v.forEach(idx=>{const w=VOCAB[idx];const row=el('div','phrase');const tx=el('div','grow');
@@ -1010,8 +1088,16 @@ function openDay(n){
 let vMode='card', vTopic='all';
 let vqueue=[],vidx=0,vshow=false;
 const V_SESSION=15;
+function todayVocabPool(){ // A4: từ của ngày lộ trình hiện tại + từ SRS tới hạn
+  var n=store.days.cur||1, day=DAYS[n-1]||{};
+  var words=(day.v||[]).map(function(i){return VOCAB[i];}).filter(Boolean);
+  var have={};words.forEach(function(w){have[w.t]=1;});
+  due().forEach(function(w){if(!have[w.t]){have[w.t]=1;words.push(w);}});
+  return words.length?words.slice(0,15):allVocab().slice(0,5);
+}
 function vTopicPool(){
   if(vTopic==='all')return allVocab();
+  if(vTopic==='today')return todayVocabPool();
   if(vTopic==='mine')return (store.myVocab||[]).slice();
   if(vTopic==='weak')return weakWords();
   return VOCAB.slice(vTopic*10,vTopic*10+10);
@@ -1465,7 +1551,7 @@ function openConvo(id){convoView=id;vConvo();}
 function vConvo(){
   var c=store.convos.filter(function(x){return x.id===convoView;})[0];
   main.innerHTML="";const v=el('div','stack');
-  const back=el('button','btn ghost sm');back.style.alignSelf='flex-start';back.textContent='‹ Hội thoại đã lưu';back.onclick=function(){convoStop();convoView=null;aiScenario=null;vTalkAI();};v.appendChild(back);
+  const back=el('button','btn ghost sm');back.style.alignSelf='flex-start';back.textContent='‹ Lịch sử hội thoại';back.onclick=function(){convoStop();convoView=null;go('history');};v.appendChild(back);
   if(!c){v.appendChild(el('div','empty','Không tìm thấy hội thoại.'));main.appendChild(v);return;}
   v.appendChild(el('div',null,'<div class="eyebrow">Hội thoại đã lưu · '+c.date+'</div><div style="font-size:21px;font-weight:800;font-family:var(--disp);margin-top:3px">'+c.name+'</div><div class="muted" style="margin-top:2px">Tình huống: '+(c.scLabel||'')+'</div>'));
   const log=el('div');log.style.cssText='display:flex;flex-direction:column;gap:12px';
@@ -1984,7 +2070,7 @@ function vTalkAI(){
     hb.appendChild(el('div',null,'<div style="font-size:15px;line-height:1.4">'+aiHint+'</div>'));
     var hrow=el('div','row');hrow.style.gap='8px';
     var pl=el('button','btn ghost sm');pl.innerHTML=ICO.play+' Nghe';pl.onclick=function(){speak(aiHint,pl);};hrow.appendChild(pl);
-    var cp=el('button','btn ghost sm');cp.textContent='Chép vào ô';cp.onclick=function(){var i=$("#aiInput");if(i){i.value=aiHint;i.focus();}aiHint='';vTalkAI();};hrow.appendChild(cp);
+    var cp=el('button','btn ghost sm');cp.textContent='Dùng câu này';cp.onclick=function(){var i=$("#aiInput");if(i){i.value=aiHint;i.focus();i.setSelectionRange(i.value.length,i.value.length);}aiHint='';hb.remove();};hrow.appendChild(cp);
     var dm=el('button','btn ghost sm');dm.textContent='Ẩn';dm.onclick=function(){aiHint='';vTalkAI();};hrow.appendChild(dm);
     hb.appendChild(hrow);v.appendChild(hb);
   }
@@ -2238,6 +2324,20 @@ function copyText(t,btn){
   const ok=()=>{if(btn){const o=btn.innerHTML;btn.innerHTML=ICO.check;setTimeout(()=>btn.innerHTML=o,900);}toast("Đã copy");};
   const fb=()=>{const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok();}catch(_){}ta.remove();};
   try{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,fb);else fb();}catch(e){fb();}
+}
+function exportCSV(filename,rows){ // E15: xuất Anki/CSV (term,meaning,example)
+  rows=(rows||[]).filter(Boolean);
+  if(!rows.length){toast('Chưa có từ nào để xuất');return;}
+  var csv='term,meaning,example\n'+rows.map(function(r){
+    return [r.t||'',r.vi||'',String(r.ex||'').replace(/<[^>]+>/g,'')].map(function(s){return '"'+String(s).replace(/"/g,'""')+'"';}).join(',');
+  }).join('\n');
+  var isClaude=/claude\.ai$|claude\.site$|anthropic/.test(location.hostname||'');
+  if(isClaude){copyText(csv);toast('Đã copy CSV vào clipboard (tải file chạy khi mở ngoài Claude)');return;}
+  try{
+    var blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url);},1000);toast('Đã xuất '+rows.length+' từ ('+filename+')','ok');
+  }catch(e){copyText(csv);toast('Trình duyệt chặn tải — đã copy CSV vào clipboard');}
 }
 function phraseRow(en,vi,gname){
   const row=el('div','phrase');
