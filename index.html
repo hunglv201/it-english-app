@@ -215,6 +215,9 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .bubble.them{background:var(--surface2);border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
 .bubble.you{background:var(--accent);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
 .who{font-size:11.5px;color:var(--faint);margin:0 6px 5px;font-family:var(--mono)}
+[data-turn].reading{scroll-margin:90px}
+[data-turn].reading .bubble{box-shadow:0 0 0 2px var(--accent);transition:box-shadow .2s}
+[data-turn].reading .who{color:var(--accent);font-weight:700}
 .opt{width:100%;min-height:56px;text-align:left;padding:14px 16px;border-radius:12px;border:1px solid var(--line);
   background:var(--surface);color:var(--ink);font-size:15px;line-height:1.4;display:flex;align-items:center;justify-content:space-between;gap:10px}
 /* Thanh hành động ghim trên tab bar (tầm ngón cái) — dùng chung cho Kiểm tra, Nghe, Ngày, Thẻ lật */
@@ -300,7 +303,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.17.4", APP_BUILD="2026-09-13";
+const APP_VERSION="1.17.5", APP_BUILD="2026-09-13";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -2231,21 +2234,36 @@ async function genSampleConvo(n){
   aiBusy=false;aiPending='';vTalkAI();
 }
 let aiPlayingAll=false;
-function playAllTurns(){ // đọc hết hội thoại một lượt (cả 2 phía)
+function playAllTurns(){ // đọc hết hội thoại một lượt (cả 2 phía), tách rõ vai
   if(!('speechSynthesis'in window)){toast('Trình duyệt không hỗ trợ đọc');return;}
   var b=$("#aiPlayAll");
-  if(aiPlayingAll){aiPlayingAll=false;speechSynthesis.cancel();if(b){b.classList.remove('speaking');b.innerHTML=ICO.play+' Nghe hết';}return;}
-  var lines=aiTurns.map(function(m){return aiParse(m.content).reply;}).map(function(t){return String(t||'').replace(/<[^>]+>/g,'').trim();}).filter(Boolean);
-  if(!lines.length)return;
+  if(aiPlayingAll){aiPlayingAll=false;speechSynthesis.cancel();hlTurn(-1);if(b){b.classList.remove('speaking');b.innerHTML=ICO.play+' Nghe hết';}return;}
+  var seq=[];
+  aiTurns.forEach(function(m){
+    var t=String(aiParse(m.content).reply||'').replace(/<[^>]+>/g,'').trim();
+    if(t)seq.push({me:m.role==='user',text:t});
+  });
+  if(!seq.length)return;
   aiPlayingAll=true;speechSynthesis.cancel();
   if(b){b.classList.add('speaking');b.innerHTML='⏸ Dừng';}
   var i=0;
+  function stop(){aiPlayingAll=false;hlTurn(-1);var bb=$("#aiPlayAll");if(bb){bb.classList.remove('speaking');bb.innerHTML=ICO.play+' Nghe hết';}}
+  function mk(txt,me,isTag){var u=new SpeechSynthesisUtterance(txt);u.lang=voiceLang();u.rate=isTag?1:((store.cfg&&store.cfg.rate)||0.95);u.pitch=me?1.25:0.8;if(VOICE)u.voice=VOICE;return u;}
   (function next(){
-    if(!aiPlayingAll||i>=lines.length){aiPlayingAll=false;var bb=$("#aiPlayAll");if(bb){bb.classList.remove('speaking');bb.innerHTML=ICO.play+' Nghe hết';}return;}
-    var u=new SpeechSynthesisUtterance(lines[i]);u.lang=voiceLang();u.rate=(store.cfg&&store.cfg.rate)||0.95;if(VOICE)u.voice=VOICE;
-    u.onend=function(){i++;next();};u.onerror=function(){i++;next();};
-    speechSynthesis.speak(u);
+    if(!aiPlayingAll||i>=seq.length){stop();return;}
+    var turn=seq[i];hlTurn(i);
+    var tag=mk(turn.me?'You.':'Colleague.',turn.me,true);   // xướng vai trước
+    var line=mk(turn.text,turn.me,false);
+    tag.onend=function(){if(aiPlayingAll)speechSynthesis.speak(line);};
+    tag.onerror=function(){if(aiPlayingAll)speechSynthesis.speak(line);};
+    line.onend=function(){i++;if(aiPlayingAll)setTimeout(next,420);};   // nghỉ giữa 2 lượt
+    line.onerror=function(){i++;if(aiPlayingAll)setTimeout(next,420);};
+    speechSynthesis.speak(tag);
   })();
+}
+// tô sáng lượt đang đọc trong bản ghi hội thoại
+function hlTurn(idx){
+  try{var ns=document.querySelectorAll('[data-turn]');for(var k=0;k<ns.length;k++){var on=+ns[k].getAttribute('data-turn')===idx;ns[k].classList.toggle('reading',on);if(on)try{ns[k].scrollIntoView({behavior:'smooth',block:'center'});}catch(e){}}}catch(e){}
 }
 async function aiSuggestScenarios(){
   const sp=await aiInit();if(!sp){toast('Chưa cấu hình AI — mở “Cài đặt AI” ở tab Giao tiếp');return;}
@@ -2364,10 +2382,13 @@ function vTalkAI(){
   hd.appendChild(menuBtn);
   v.appendChild(hd);
   const log=el('div');log.style.cssText='display:flex;flex-direction:column;gap:12px';
+  var pIdx=0;
   aiTurns.forEach(function(m){
+    var _st=String(aiParse(m.content).reply||'').replace(/<[^>]+>/g,'').trim();
+    var _ti=_st?(pIdx++):-1;
     if(m.role==='assistant'){
       const p=aiParse(m.content);
-      const wrap=el('div');wrap.style.cssText='display:flex;flex-direction:column;gap:5px';
+      const wrap=el('div');wrap.style.cssText='display:flex;flex-direction:column;gap:5px';if(_ti>=0)wrap.setAttribute('data-turn',_ti);
       wrap.appendChild(el('div','who','Đồng nghiệp'));
       const brow=el('div','row');brow.style.gap='8px';brow.appendChild(el('div','bubble them',p.reply));brow.appendChild(playBtn(p.reply));
       const sv=el('button','play');const on=isSaved(p.reply);sv.style.cssText='width:40px;height:40px;color:'+(on?'var(--accent)':'var(--faint)');sv.innerHTML=on?ICO.bookmarkOn:ICO.bookmark;sv.setAttribute('aria-label','Lưu câu');
@@ -2377,7 +2398,7 @@ function vTalkAI(){
       if(p.fix&&p.fix.replace(/[.s]/g,'')!=='OK'){wrap.appendChild(fixCard(p.fix));}
       log.appendChild(wrap);
     }else{
-      const wrap=el('div');wrap.style.cssText='display:flex;flex-direction:column;gap:5px;align-items:flex-end';
+      const wrap=el('div');wrap.style.cssText='display:flex;flex-direction:column;gap:5px;align-items:flex-end';if(_ti>=0)wrap.setAttribute('data-turn',_ti);
       const w=el('div','who','Bạn');w.style.marginRight='6px';wrap.appendChild(w);
       const yrow=el('div','row');yrow.style.cssText='gap:8px;align-items:flex-end;justify-content:flex-end';
       const sv2=el('button','play');const on2=isSaved(m.content);sv2.style.cssText='width:40px;height:40px;color:'+(on2?'var(--accent)':'var(--faint)');sv2.innerHTML=on2?ICO.bookmarkOn:ICO.bookmark;sv2.setAttribute('aria-label','Lưu câu của bạn');
