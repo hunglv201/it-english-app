@@ -137,17 +137,31 @@ section{padding-block:clamp(48px,7vw,90px)}
 .titem p{margin-top:6px;color:var(--muted);font-size:14px;line-height:1.55}
 
 /* CTA + footer */
-.cta{margin:clamp(40px,6vw,72px) 0 0}
-.cta-in{background:linear-gradient(145deg,#1b4dff,#1233c9);color:#fff;border-radius:26px;padding:clamp(34px,5vw,58px);text-align:center;position:relative;overflow:hidden;box-shadow:0 24px 60px rgba(27,77,255,.32)}
-.cta-in::after{content:"";position:absolute;inset:0;background:radial-gradient(80% 120% at 80% 0%,rgba(255,255,255,.18),transparent 60%)}
-.cta-in>*{position:relative;z-index:1}
-.cta-in h2{font-size:clamp(26px,4vw,42px);font-weight:800;color:#fff}
-.cta-in p{margin-top:12px;color:rgba(255,255,255,.85);font-size:16.5px;max-width:46ch;margin-inline:auto}
-.cta-in .btn{margin-top:26px;background:#fff;color:var(--accent-ink);box-shadow:0 12px 30px rgba(0,0,0,.2)}
-.cta-in .btn:hover{filter:brightness(.98)}
-footer{padding:36px 0 60px;color:var(--faint);font-family:var(--mono);font-size:12.5px}
-.foot-in{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;justify-content:space-between}
-.foot-in a{color:var(--accent-ink);text-decoration:none}
+/* CTA — thẻ kính nổi trên nền động */
+.cta2{position:relative;max-width:720px;margin:0 auto;text-align:center;isolation:isolate;overflow:hidden;
+  padding:clamp(36px,5vw,58px) clamp(22px,4vw,52px);border-radius:32px;
+  background:color-mix(in srgb,var(--surface) 66%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);
+  border:1px solid var(--line);box-shadow:var(--shadow)}
+.cta2::before{content:"";position:absolute;inset:0;z-index:-1;
+  background:radial-gradient(130% 90% at 50% -12%, color-mix(in srgb,var(--accent) 18%,transparent), transparent 58%)}
+.cta2-logo{width:66px;height:66px;border-radius:18px;margin:0 auto 20px;position:relative;overflow:hidden;flex:0 0 auto;
+  background:linear-gradient(140deg,#4f7bff,#1234d8);display:flex;align-items:center;justify-content:center;
+  box-shadow:0 14px 30px rgba(27,77,255,.42);animation:ctaPulse 3.2s ease-in-out infinite}
+.cta2-logo::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 30% 12%,rgba(255,255,255,.42),transparent 55%)}
+.cta2-logo svg{width:38px;height:38px;position:relative;z-index:1}
+@keyframes ctaPulse{0%,100%{transform:translateY(0);box-shadow:0 14px 30px rgba(27,77,255,.42)}50%{transform:translateY(-5px);box-shadow:0 22px 46px rgba(27,77,255,.5)}}
+.cta2-eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:14px}
+.cta2 h2{font-family:var(--disp);font-weight:800;font-size:clamp(30px,4.6vw,50px);letter-spacing:-.02em;line-height:1.04;margin:0;text-wrap:balance}
+.cta2 .hl2{background:linear-gradient(100deg,var(--accent) 0%,var(--accent) 38%,color-mix(in srgb,var(--accent) 42%,#fff) 50%,var(--accent) 62%,var(--accent) 100%);background-size:230% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:shine 4.5s linear infinite}
+.cta2 p{color:var(--muted);font-size:clamp(15.5px,1.6vw,17.5px);margin:16px auto 0;max-width:46ch}
+.cta2-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px}
+.btn.lg{height:56px;padding:0 26px;font-size:16px;border-radius:14px}
+.cta2-chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+.cta2-chips span{display:inline-flex;align-items:center;font-family:var(--mono);font-size:11.5px;font-weight:500;color:var(--muted);
+  background:color-mix(in srgb,var(--surface2) 65%,transparent);border:1px solid var(--line);border-radius:999px;padding:6px 12px}
+.cta2-chips span::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);margin-right:7px}
+.cta2-foot{margin-top:30px;padding-top:20px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--faint);line-height:1.6}
+.cta2-foot a{color:var(--accent-ink);text-decoration:none}
 
 @media(max-width:780px){
   .hero-grid{grid-template-columns:1fr;gap:34px}
@@ -453,22 +467,20 @@ html{scroll-behavior:smooth}
 
 <!-- ===== CTA ===== -->
 <div class="wrap cta-slide">
-  <div class="cta">
-    <div class="cta-in">
-      <h2>Bắt đầu nói. Để AI lo phần sửa.</h2>
-      <p>Mở app, chọn một tình huống, và nói câu tiếng Anh đầu tiên của bạn hôm nay.</p>
-      <a class="btn" href="https://hunglv201.github.io/it-english-app/" target="_blank" rel="noopener">Mở IT English ›</a>
+  <div class="cta2">
+    <div class="cta2-logo"><svg viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M60 26H36a6 6 0 0 0-6 6v36a6 6 0 0 0 6 6h24" stroke="#fff" stroke-width="8.5"/><path d="M36 50h16" stroke="#9db8ff" stroke-width="8.5"/><path d="M70 40l8 10-8 10" stroke="#9db8ff" stroke-width="7.5"/></svg></div>
+    <div class="cta2-eyebrow"><span style="color:var(--faint)">$</span> sẵn sàng luyện nói?</div>
+    <h2>Bắt đầu nói.<br><span class="hl2">Để AI lo phần sửa.</span></h2>
+    <p>Mở app, chọn một tình huống và nói câu tiếng Anh đầu tiên của bạn — AI sẽ sửa cho bạn ngay từng câu.</p>
+    <div class="cta2-btns">
+      <a class="btn primary lg" href="https://hunglv201.github.io/it-english-app/" target="_blank" rel="noopener">Mở IT English ›</a>
+      <a class="btn ghost lg" href="#ai">Xem lại tính năng AI</a>
     </div>
+    <div class="cta2-chips">
+      <span>Lộ trình 370 ngày</span><span>1.000+ câu</span><span>Sửa lỗi tức thì</span><span>Offline · miễn phí</span>
+    </div>
+    <div class="cta2-foot">IT English · phòng tập nói tiếng Anh cho dev<br>v1.17.6 · <a href="https://hunglv201.github.io/it-english-app/" target="_blank" rel="noopener">hunglv201.github.io/it-english-app</a></div>
   </div>
-</div>
-
-<div class="wrap">
-  <footer>
-    <div class="foot-in">
-      <span>IT English · phòng tập nói tiếng Anh cho dev</span>
-      <span>v1.17.6 · <a href="https://hunglv201.github.io/it-english-app/" target="_blank" rel="noopener">hunglv201.github.io/it-english-app</a></span>
-    </div>
-  </footer>
 </div>
 
 <script>
@@ -557,13 +569,13 @@ html{scroll-behavior:smooth}
       });
     }
     // tiêu đề mỗi section chạy chữ vào khi cuộn tới (giống hero)
-    Array.prototype.forEach.call(document.querySelectorAll('.shead h2, .cta-in h2'),function(h){cascade(h,0,42,false);h.setAttribute('data-cascade','');io.observe(h);});
+    Array.prototype.forEach.call(document.querySelectorAll('.shead h2'),function(h){cascade(h,0,42,false);h.setAttribute('data-cascade','');io.observe(h);});
     reveal('.shead',0);
     reveal('.feat-body > *',70);
     reveal('.feat-media',0);
     reveal('.pcard',80);
     reveal('.titem',55);
-    reveal('.cta-in',0);
+    reveal('.cta2',0);
   }
 })();
 </script>
