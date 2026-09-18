@@ -5,6 +5,10 @@ dành cho người trình độ cơ bản. Chạy hoàn toàn trong trình duy�
 không cần tài khoản.
 
 **Live demo:** https://hunglv201.github.io/it-english-app/
+· 🎮 **Game:** https://hunglv201.github.io/it-english-app/game/
+· 📖 **Trang giới thiệu:** https://hunglv201.github.io/it-english-app/gioi-thieu.html
+
+> Đang dùng Claude/Cowork để phát triển? Đọc [`CLAUDE.md`](./CLAUDE.md) — ngữ cảnh dự án, pipeline deploy, quy ước.
 
 ---
 
@@ -85,14 +89,32 @@ python3 -m http.server 8000
 
 ## Trò chuyện AI
 
-Phần **Giao tiếp → Trò chuyện AI** hiện gọi Claude qua `window.claude.use('sample')`,
-chỉ hoạt động khi app chạy **bên trong claude.ai**. Khi mở ngoài (GitHub Pages, `file://`,
-host tĩnh khác) phần này tự hiển thị thông báo *"Cần mở app trong Claude"*; các tính năng
-còn lại vẫn chạy đầy đủ.
+Phần **Giao tiếp** (và Boss AI / Đấu thoại trong game) gọi AI theo thứ tự:
 
-**Kế hoạch (sau):** thay bằng Claude API dùng API key riêng. Không đặt key trực tiếp trong
-`index.html` (lộ key) — cần một backend/proxy nhỏ giữ key và chuyển tiếp yêu cầu. Xem mục
-*Tích hợp Claude API* trong [`ARCHITECTURE.md`](./ARCHITECTURE.md).
+1. Mở **bên trong claude.ai** (Artifact) → dùng Claude sẵn có qua `window.claude.use('sample')`, không cần key.
+2. Mở ngoài (GitHub Pages, localhost) → dùng **API key của bạn** (Gemini / Claude / Groq), gọi thẳng từ trình duyệt.
+   Key lưu `localStorage`, dùng chung giữa app và game. Chưa có key thì app hiện hướng dẫn nhập.
+
+> Key nằm phía client nên chỉ nên dùng key cá nhân (free tier). Kế hoạch sau: backend/proxy giữ key — xem `ARCHITECTURE.md`.
+
+---
+
+## 🎮 IT English Quest (game)
+
+Bản game anime dùng **chung dữ liệu và AI key** với app, thiết kế **mobile-first** (vừa 1 màn iPhone SE, không cuộn):
+
+- **Bản đồ** — mỗi ngày lộ trình là một màn: 3 con Bug (từ vựng · ngữ pháp · nghe) + 1 Boss (visual novel). Trả lời đúng gây sát thương + combo, sai mất HP.
+- **AFK / Mochi tự cày** — vắng mặt vẫn tích xu & XP (tối đa 8h, nâng cấp được), có sân đánh animation và Mochi "nói" những câu bạn đã luyện.
+- **Nói** — 5 chế độ luyện nói: Đấu thoại AI (AI chấm thành sát thương), Đọc theo nhịp (mic chấm từng từ), Chuyện văn phòng (VN 5 cảnh · 3 kết cục), Phản xạ 5 giây, Trang bị cho Mochi.
+- **Hằng ngày / Shop / Huy hiệu / Hồ sơ** — rương ngày, nhiệm vụ, nâng cấp, vật phẩm, thống kê, cài AI key ngay trong game.
+
+Mở từ app (Luyện tập → *IT English Quest*) hoặc trực tiếp `/game/`.
+
+---
+
+## 📖 Trang giới thiệu
+
+`gioi-thieu.html` — landing page fullpage (mỗi lần cuộn = 1 trang), nền particle chạy theo con trỏ, chữ chạy, 17 ảnh chụp màn hình có chú thích, tập trung giới thiệu tính năng AI. Tự chứa (ảnh inline), deploy cùng Pages.
 
 ---
 
@@ -119,8 +141,14 @@ it-english-app/
 ├── gen_data.py         # Script sinh data.gen.js
 ├── phases_extra.py     # 27 chặng chủ đề mở rộng (nguồn cho gen_data.py)
 ├── phrases_data.py     # Script sinh phrases.gen.js
+├── sw.js, manifest.webmanifest, icon-*.png   # PWA
+├── gioi-thieu.html     # Trang giới thiệu (showcase)
+├── game/               # IT English Quest: index.html (theme) + game.js (logic) + bản sao *.gen.js
+├── docs/               # showcase bản artifact, video demo, review
+├── push.sh             # push bằng token trong .env (không commit .env)
 ├── README.md
-└── ARCHITECTURE.md     # Tài liệu kiến trúc / cấu trúc code
+├── ARCHITECTURE.md     # Kiến trúc / cấu trúc code của app
+└── CLAUDE.md           # Ngữ cảnh dự án cho phiên Claude/Cowork mới
 ```
 
 ---
