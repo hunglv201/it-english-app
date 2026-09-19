@@ -97,6 +97,9 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 
 ## 8. Lịch sử tóm tắt (mới → cũ)
 
+- 09/2026 (v1.18.1): app — màn "chào mừng trở lại" khi vắng >24h (tóm tắt thời gian vắng,
+  trạng thái streak, nút "Học nhanh 2 phút giữ streak"), thẻ "Mochi đang giữ N xu" ở trang
+  Hôm nay đọc từ localStorage game để kéo người dùng sang chơi Game.
 - 09/2026: game hoàn thiện mobile-first (map 1 màn, Nói/Shop/Hồ sơ gọn, màn chơi kiểu chat, AFK giãn + Mochi nói câu đã học, sheet có ✕, chuyển cảnh mượt).
 - Game: tab Nói (Đấu thoại AI, Đọc theo nhịp, Chuyện văn phòng VN, Phản xạ 5s, Trang bị Mochi), AFK idle, Shop, nhập AI key trong game.
 - Game khởi tạo: RPG map + quiz battle + boss VN; app v1.18.0 thêm nút "🎮 IT English Quest".
@@ -108,9 +111,10 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 Sắp theo impact/độ khó (xem thảo luận đầy đủ trong lịch sử hội thoại 2026-09-19):
 
 **Giữ chân người học**
-- Web Push nhắc học hằng ngày (dùng Notification API + `sw.js` đã có; lưu ý Periodic Background Sync hạn chế trên iOS).
-- Màn "chào mừng trở lại" ở app chính khi vắng >24h — tóm tắt ngày vắng, streak sắp mất, nút "học nhanh 2 phút giữ streak" (giống cơ chế `offlineWelcome()` bên game).
-- Đưa số liệu AFK/Mochi (xu tích được) hiển thị ngay ở trang Hôm nay của app để kéo người dùng sang game.
+- Web Push nhắc học hằng ngày — đã có `checkReminder()` (Notification API + `sw.js`) nhưng chỉ chạy
+  khi app đang mở trong tab; còn thiếu bản dùng Periodic Background Sync / server push để nhắc cả khi
+  app đóng (hạn chế trên iOS, cân nhắc có đáng làm không).
+- [XONG v1.18.1] Màn "chào mừng trở lại" khi vắng >24h + thẻ Mochi/xu ở trang Hôm nay.
 
 **Học hiệu quả hơn**
 - Mở rộng SRS (SM-2 rút gọn hiện chỉ áp dụng cho `vocab`) sang **câu thường dùng** và **mẫu hội thoại hay sai** — hiện "Hay sai" chỉ tính từ vựng.
