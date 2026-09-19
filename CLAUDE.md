@@ -105,6 +105,28 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 
 ## 9. Ý tưởng còn mở (chưa làm)
 
+Sắp theo impact/độ khó (xem thảo luận đầy đủ trong lịch sử hội thoại 2026-09-19):
+
+**Giữ chân người học**
+- Web Push nhắc học hằng ngày (dùng Notification API + `sw.js` đã có; lưu ý Periodic Background Sync hạn chế trên iOS).
+- Màn "chào mừng trở lại" ở app chính khi vắng >24h — tóm tắt ngày vắng, streak sắp mất, nút "học nhanh 2 phút giữ streak" (giống cơ chế `offlineWelcome()` bên game).
+- Đưa số liệu AFK/Mochi (xu tích được) hiển thị ngay ở trang Hôm nay của app để kéo người dùng sang game.
+
+**Học hiệu quả hơn**
+- Mở rộng SRS (SM-2 rút gọn hiện chỉ áp dụng cho `vocab`) sang **câu thường dùng** và **mẫu hội thoại hay sai** — hiện "Hay sai" chỉ tính từ vựng.
+- Chấm shadowing/dictation bằng AI thay vì chỉ so khớp chuỗi (gửi transcript SR cho AI chấm ngữ điệu, chỉ rõ từ phát âm sai kiểu gì).
+
+**Nội dung**
+- Onboarding: cho dán JD/mô tả công việc **một lần**, AI phân tích và ưu tiên lại thứ tự 370 ngày theo mức liên quan (mạnh hơn tính năng "AI rút từ" hiện chỉ thêm từ rời rạc vào "Của tôi").
+- Thêm dialogues theo ngành cụ thể (QA, DevOps, BA…) — hiện dialogues khá generic "dev nói chuyện với dev".
+
+**Game**
+- Boss/quái trong game ưu tiên câu hỏi từ đúng những từ người dùng SRS đánh giá "hay sai", thay vì random toàn pool — biến game thành công cụ ôn tập có mục đích.
+- Thêm boss/nhân vật, nhiều kết cục hơn cho Chuyện văn phòng; bảng xếp hạng.
+
+**Kỹ thuật / vận hành**
+- Kiểm tra `sw.js` tự update đúng cache khi bump version (tránh PWA kẹt bản cũ).
+- Cập nhật `icon-192.png`/`icon-512.png` cho khớp theme mới (favicon SVG đã đổi nhưng icon PWA thì chưa chắc).
+- **Xuất/Nhập tiến độ** (JSON từ localStorage) — rủi ro thực tế vì không có backend, đổi máy/xoá cache là mất sạch tiến độ 370 ngày.
 - Backend/proxy giữ API key (thay vì key phía client).
 - Đồng bộ tiến độ đa thiết bị (hiện chỉ localStorage).
-- Thêm boss/nhân vật, nhiều kết cục hơn cho Chuyện văn phòng; bảng xếp hạng.
