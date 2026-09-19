@@ -305,7 +305,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.18.0", APP_BUILD="2026-09-13";
+const APP_VERSION="1.18.1", APP_BUILD="2026-09-19";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -335,6 +335,8 @@ function remainingTasksText(){
   var min=rem.reduce(function(s,x){return s+(x.min||0);},0);
   return 'Còn '+rem.length+' việc · '+min+' phút · chuỗi '+curStreak()+' ngày';
 }
+function fmtDurVN(ms){var h=Math.floor(ms/3600e3),m=Math.floor(ms%3600e3/60e3);if(h>=24){var d=Math.floor(h/24);return d+' ngày'+(h%24?' '+(h%24)+' giờ':'');}return h?h+' giờ '+m+' phút':m+' phút';}
+function gameSave(){try{return JSON.parse(localStorage.getItem('it-english-game-v1'))}catch(e){return null;}}
 function checkReminder(){ // E1/C3: nhắc học best-effort (chạy khi mở app)
   try{
     if(!store.cfg.remind||!('Notification'in window)||Notification.permission!=='granted')return;
@@ -349,6 +351,27 @@ function checkReminder(){ // E1/C3: nhắc học best-effort (chạy khi mở ap
     var body={body:msg,tag:'it-english-remind',icon:'icon-192.png'};
     if(navigator.serviceWorker&&navigator.serviceWorker.ready){navigator.serviceWorker.ready.then(function(reg){reg.showNotification('Học tiếng Anh IT hôm nay?',body);}).catch(function(){try{new Notification('Học tiếng Anh IT hôm nay?',body);}catch(e){}});}
     else{try{new Notification('Học tiếng Anh IT hôm nay?',body);}catch(e){}}
+  }catch(e){}
+}
+function checkWelcomeBack(){ // I2: chào mừng trở lại khi vắng >24h
+  try{
+    if($('#modalBack'))return;
+    var st=store.stats;
+    var prev=st.lastOpen;
+    st.lastOpen=Date.now();save(store);
+    if(!prev)return;
+    var away=Date.now()-prev;
+    if(away<24*3600e3)return;
+    var g=gameSave(),idleCoins=(g&&g.coins)||0;
+    var streakNow=curStreak(),hadStreak=st.streak||0;
+    var atRisk=st.lastActive&&st.lastActive!==todayStr()&&streakNow>0;
+    var msg=streakNow>0?(atRisk?('Chuỗi <b>'+streakNow+' ngày</b> đang chờ — học hôm nay để giữ nhé!'):('Chuỗi <b>'+streakNow+' ngày</b> vẫn an toàn.')):(hadStreak>0?('Chuỗi trước dừng ở <b>'+hadStreak+' ngày</b> — bắt đầu lại thôi!'):'Quay lại học tiếp nào!');
+    openModal(function(card,close){
+      card.appendChild(el('div',null,'<div class="eyebrow" style="text-align:center">CHÀO MỪNG TRỞ LẠI</div><div style="font-size:16.5px;font-weight:700;text-align:center;margin-top:8px;line-height:1.45">Bạn vắng '+fmtDurVN(away)+'. '+msg+'</div>'+(idleCoins>0?('<div class="muted" style="text-align:center;margin-top:8px;font-size:13px">🐣 Mochi tích được <b>'+idleCoins+' xu</b> chờ bạn trong Game</div>'):'')));
+      var b=el('button','btn accent block');b.style.marginTop='14px';b.textContent='⚡ Học nhanh 2 phút giữ streak';
+      b.onclick=function(){close();quickStart();};card.appendChild(b);
+      var sk=el('button','btn ghost block');sk.style.marginTop='8px';sk.textContent='Để sau';sk.onclick=close;card.appendChild(sk);
+    });
   }catch(e){}
 }
 function advanceStreak(){ // D3: streak chỉ tăng khi hoàn thành ≥1 việc trong ngày
@@ -992,6 +1015,18 @@ function vHome(){
   rmc.appendChild(pills);
   rmc.appendChild(el('div','muted','<span style="font-size:12.5px">'+pdone+'/10 ngày trong Chặng '+(rp+1)+' · '+D.phaseTitles[rp]+'</span>'));
   rmc.onclick=vRoadmap;v.appendChild(rmc);
+
+  // 4b) Mochi trong Game (I2: kéo người dùng sang game)
+  const gsave=gameSave();
+  if(gsave&&((gsave.coins||0)>0||Object.keys(gsave.cleared||{}).length>0)){
+    const gaway=gsave.idle&&gsave.idle.last?Date.now()-gsave.idle.last:0;
+    const gc=el('button','card');gc.style.cssText='gap:12px;text-align:left;width:100%;color:inherit;cursor:pointer;flex-direction:row;align-items:center';
+    gc.innerHTML='<span style="width:44px;height:44px;border-radius:12px;background:var(--accent-soft);display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:22px">🐣</span>'
+      +'<span class="grow"><b style="font-size:15px">Mochi đang giữ <span style="color:var(--accent)">'+(gsave.coins||0)+' xu</span></b><br><small class="muted" style="font-size:12.5px">'+(gaway>9e5?('Đã cày '+fmtDurVN(gaway)+' — ghé thu hoạch!'):'Ghé Game thu hoạch & nâng cấp')+'</small></span>'
+      +'<span style="color:var(--faint);display:inline-flex">'+ICO.chev+'</span>';
+    gc.onclick=function(){location.href='game/';};
+    v.appendChild(gc);
+  }
 
   // 5) Từ hay sai
   const weak=weakWords();
@@ -2876,6 +2911,7 @@ $("#streakN").textContent=curStreak();
 renderTabs();
 if(!maybeSunday())vHome(); // E8: Chủ nhật tự mở tổng kết
 if(needPlacement())setTimeout(placementModal,600); // E13: đặt điểm bắt đầu lần đầu
+else setTimeout(checkWelcomeBack,650); // I2: chào mừng trở lại khi vắng >24h
 // E1/C3: nhắc học best-effort khi mở app / quay lại tab
 setTimeout(checkReminder,1500);
 document.addEventListener('visibilitychange',function(){if(!document.hidden)checkReminder();});
