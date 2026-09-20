@@ -11,7 +11,7 @@ import json, os, re, sys, shutil, importlib.util
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-ORDER = ["office", "hotel", "sales", "factory"]
+ORDER = ["office", "hotel", "sales", "factory", "logistics", "finance", "marketing", "health"]
 
 # nhóm "Câu thường dùng" chung cho mọi gói (lấy từ phrases_data.py, bỏ câu mang chất IT)
 GENERIC_GROUPS = {
@@ -188,3 +188,7 @@ def build(pid, office=None):
 if __name__ == "__main__":
     ids = sys.argv[1:] or [p for p in ORDER if os.path.exists(os.path.join(HERE, p + ".py"))]
     for pid in ids: build(pid)
+    # packs/custom.js (viết tay) cũng cần ở game/packs/
+    cj = os.path.join(ROOT, "packs", "custom.js")
+    if os.path.exists(cj) and os.path.isdir(os.path.join(ROOT, "game")):
+        shutil.copyfile(cj, os.path.join(ROOT, "game", "packs", "custom.js"))

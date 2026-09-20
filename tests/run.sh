@@ -7,4 +7,4 @@ python3 -m http.server $PORT >/dev/null 2>&1 & SRV=$!
 trap "kill $SRV" EXIT
 sleep 1
 export BASE_URL="http://localhost:$PORT/"
-for t in tests/a.mjs tests/b.mjs tests/c.mjs tests/d.mjs tests/e.mjs tests/f.mjs tests/g.mjs; do echo "== $t"; node "$t"; done
+for t in tests/a.mjs tests/b.mjs tests/c.mjs tests/d.mjs tests/e.mjs tests/f.mjs tests/g.mjs tests/h.mjs; do echo "== $t"; node "$t"; done

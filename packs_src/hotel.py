@@ -64,7 +64,7 @@ PHASES.append({
   ("Could I see your passport, please", ["see", "passport"], "xin hộ chiếu"),
   ("Your room is on the seventh floor", ["room", "seventh"], "phòng ở tầng mấy"),
   ("Breakfast is included in your room rate", ["Breakfast", "included"], "bữa sáng"),
-  ("Welcome to Hoa Sen Hotel. Your room is on the fifth floor. Here is your key card and the Wi-Fi password.", ["fifth", "key", "password"], "giao phòng cho khách"),
+  ("Welcome to Hoa Sen Hotel. Your room is on the fifth floor. Here is your key card, and the Wi-Fi password is on the holder.", ["fifth", "key", "password"], "giao phòng cho khách"),
   ("I'm sorry, your room isn't ready yet. Check-in time is two o'clock. We can keep your luggage at the front desk.", ["ready", "two", "luggage"], "khách đến sớm"),
  ],
 })
@@ -74,8 +74,8 @@ PHASES.append({
  "title": "Đặt phòng qua điện thoại & email",
  "vocab": [
   ("availability", "/əˌveɪləˈbɪləti/", "n", "tình trạng còn phòng trống", "Let me check our <b>availability</b> for those dates.", "Để tôi kiểm tra phòng trống cho những ngày đó.", "空室状況", "kūshitsu jōkyō"),
-  ("twin room", "/ˈtwɪn ruːm/", "n", "phòng hai giường đơn", "A <b>twin room</b> has two single beds.", "Phòng twin có hai giường đơn.", "ツインルーム", "tsuin rūmu"),
-  ("double room", "/ˈdʌbl ruːm/", "n", "phòng một giường đôi", "Would you like a <b>double room</b> or a twin room?", "Anh/chị muốn phòng giường đôi hay phòng hai giường đơn?", "ダブルルーム", "daburu rūmu"),
+  ("twin room", "/ˌtwɪn ˈruːm/", "n", "phòng hai giường đơn", "A <b>twin room</b> has two single beds.", "Phòng twin có hai giường đơn.", "ツインルーム", "tsuin rūmu"),
+  ("double room", "/ˌdʌbl ˈruːm/", "n", "phòng một giường đôi", "Would you like a <b>double room</b> or a twin room?", "Anh/chị muốn phòng giường đôi hay phòng hai giường đơn?", "ダブルルーム", "daburu rūmu"),
   ("room rate", "/ˈruːm reɪt/", "n", "giá phòng", "The <b>room rate</b> includes breakfast.", "Giá phòng đã bao gồm bữa sáng.", "客室料金", "kyakushitsu ryōkin"),
   ("per night", "/pə ˈnaɪt/", "phr", "mỗi đêm", "It's 1.2 million dong <b>per night</b>.", "Giá là 1,2 triệu đồng mỗi đêm.", "1泊あたり", "ippaku atari"),
   ("fully booked", "/ˌfʊli ˈbʊkt/", "adj", "kín phòng, hết phòng", "Sorry, we're <b>fully booked</b> on Saturday.", "Xin lỗi, thứ Bảy khách sạn đã kín phòng.", "満室", "manshitsu"),
@@ -86,7 +86,7 @@ PHASES.append({
  ],
  "phrases": [
   ("Good morning, Hoa Sen Hotel. How may I help you?", "Khách sạn Hoa Sen xin nghe. Tôi có thể giúp gì cho anh/chị?"),
-  ("Which dates would you like to stay?", "Anh/chị muốn ở những ngày nào ạ?"),
+  ("Which dates would you like to book?", "Anh/chị muốn đặt phòng những ngày nào ạ?"),
   ("How many guests will there be?", "Sẽ có bao nhiêu khách ạ?"),
   ("Let me check our availability. One moment, please.", "Để tôi kiểm tra phòng trống. Anh/chị chờ một chút nhé."),
   ("We have a double room with a sea view for 1.5 million dong per night.", "Chúng tôi có phòng giường đôi view biển giá 1,5 triệu đồng mỗi đêm."),
@@ -138,12 +138,12 @@ PHASES.append({
  "title": "Trả phòng & thanh toán",
  "vocab": [
   ("check out", "/ˌtʃek ˈaʊt/", "v", "trả phòng", "Guests must <b>check out</b> by 12 noon.", "Khách cần trả phòng trước 12 giờ trưa.", "チェックアウト", "chekkuauto"),
-  ("bill", "/bɪl/", "n", "hoá đơn (tổng tiền)", "Here is your <b>bill</b>. Please check it.", "Đây là hoá đơn của anh/chị. Anh/chị kiểm tra giúp nhé.", "お会計", "okaikei"),
+  ("bill", "/bɪl/", "n", "hoá đơn (tổng tiền)", "Here is your <b>bill</b>. Please check it.", "Đây là hoá đơn của anh/chị. Anh/chị kiểm tra giúp nhé.", "請求書", "seikyūsho"),
   ("minibar", "/ˈmɪnibɑː/", "n", "tủ lạnh nhỏ trong phòng (minibar)", "Did you use anything from the <b>minibar</b>?", "Anh/chị có dùng gì trong minibar không ạ?", "ミニバー", "minibā"),
   ("receipt", "/rɪˈsiːt/", "n", "biên lai", "Would you like a <b>receipt</b>?", "Anh/chị có cần biên lai không ạ?", "領収書", "ryōshūsho"),
   ("credit card", "/ˈkredɪt kɑːd/", "n", "thẻ tín dụng", "Would you like to pay by <b>credit card</b> or in cash?", "Anh/chị muốn trả bằng thẻ tín dụng hay tiền mặt?", "クレジットカード", "kurejitto kādo"),
   ("cash", "/kæʃ/", "n", "tiền mặt", "You can pay in <b>cash</b>, in dong or US dollars.", "Anh/chị có thể trả tiền mặt bằng đồng hoặc đô la Mỹ.", "現金", "genkin"),
-  ("exchange rate", "/ɪksˈtʃeɪndʒ reɪt/", "n", "tỷ giá", "Today's <b>exchange rate</b> is 25,400 dong to the dollar.", "Tỷ giá hôm nay là 25.400 đồng một đô.", "為替レート", "kawase rēto"),
+  ("exchange rate", "/ɪksˈtʃeɪndʒ reɪt/", "n", "tỷ giá", "Today's <b>exchange rate</b> is 26,300 dong to the dollar.", "Tỷ giá hôm nay là 26.300 đồng một đô.", "為替レート", "kawase rēto"),
   ("late check-out", "/ˌleɪt ˈtʃek aʊt/", "n", "trả phòng muộn", "A <b>late check-out</b> until 4 p.m. costs half the room rate.", "Trả phòng muộn đến 4 giờ chiều tính thêm nửa giá phòng.", "レイトチェックアウト", "reito chekkuauto"),
   ("service charge", "/ˈsɜːvɪs tʃɑːdʒ/", "n", "phí phục vụ", "The price includes a 5 percent <b>service charge</b>.", "Giá đã gồm 5% phí phục vụ.", "サービス料", "sābisu ryō"),
   ("airport transfer", "/ˈeəpɔːt ˌtrænsfɜː/", "n", "xe đưa đón sân bay", "Your <b>airport transfer</b> is at 3 p.m.", "Xe đưa anh/chị ra sân bay lúc 3 giờ chiều.", "空港送迎", "kūkō sōgei"),
@@ -172,7 +172,7 @@ PHASES.append({
     ("The computer says it, so you must pay.", False, "Đổ cho máy, không giải thích, thiếu thiện chí."),
   ]),
   ("Can I pay in US dollars?", [
-    ("Yes, you can. Today's exchange rate is 25,400 dong to the dollar.", True, "Trả lời + nêu tỷ giá để khách biết."),
+    ("Yes, you can. Today's exchange rate is 26,300 dong to the dollar.", True, "Trả lời + nêu tỷ giá để khách biết."),
     ("Yes, you can pay dollar.", False, "Thiếu 'in' và 's': 'You can pay in US dollars.'"),
     ("Dollar no.", False, "Quá cộc, thiếu động từ; nếu không nhận đô thì xin lỗi và chỉ chỗ đổi tiền."),
   ]),
@@ -208,7 +208,7 @@ PHASES.append({
   ("wake-up call", "/ˈweɪk ʌp kɔːl/", "n", "cuộc gọi báo thức", "Would you like a <b>wake-up call</b> tomorrow?", "Sáng mai anh/chị có cần gọi báo thức không ạ?", "モーニングコール", "mōningu kōru"),
   ("laundry service", "/ˈlɔːndri ˌsɜːvɪs/", "n", "dịch vụ giặt ủi", "Our <b>laundry service</b> takes 24 hours.", "Dịch vụ giặt ủi của khách sạn mất 24 tiếng.", "ランドリーサービス", "randorī sābisu"),
   ("early check-in", "/ˌɜːli ˈtʃek ɪn/", "n", "nhận phòng sớm", "<b>Early check-in</b> depends on availability.", "Nhận phòng sớm tuỳ vào tình trạng phòng trống.", "アーリーチェックイン", "ārī chekkuin"),
-  ("adjoining rooms", "/əˌdʒɔɪnɪŋ ˈruːmz/", "n", "phòng thông nhau", "The family booked two <b>adjoining rooms</b>.", "Gia đình ấy đặt hai phòng thông nhau.", "コネクティングルーム", "konekutingu rūmu"),
+  ("connecting rooms", "/kəˌnektɪŋ ˈruːmz/", "n", "phòng thông nhau (có cửa nối)", "The family booked two <b>connecting rooms</b>.", "Gia đình ấy đặt hai phòng thông nhau.", "コネクティングルーム", "konekutingu rūmu"),
   ("anniversary", "/ˌænɪˈvɜːsəri/", "n", "ngày kỷ niệm", "It's their wedding <b>anniversary</b>, so let's put flowers in the room.", "Hôm nay là kỷ niệm ngày cưới của họ, mình đặt hoa trong phòng nhé.", "記念日", "kinenbi"),
   ("shuttle bus", "/ˈʃʌtl bʌs/", "n", "xe buýt đưa đón", "The free <b>shuttle bus</b> to the beach leaves every hour.", "Xe đưa đón miễn phí ra biển chạy mỗi giờ một chuyến.", "シャトルバス", "shatoru basu"),
  ],
@@ -331,8 +331,8 @@ PHASES.append({
   ("menu", "/ˈmenjuː/", "n", "thực đơn", "Here's the <b>menu</b>. Today's specials are on the back.", "Đây là thực đơn. Món đặc biệt hôm nay ở mặt sau.", "メニュー", "menyū"),
   ("order", "/ˈɔːdə/", "v/n", "gọi món; món đã gọi", "Are you ready to <b>order</b>?", "Anh/chị gọi món được chưa ạ?", "注文", "chūmon"),
   ("recommend", "/ˌrekəˈmend/", "v", "gợi ý, giới thiệu (món)", "I <b>recommend</b> the grilled fish.", "Tôi gợi ý anh/chị thử món cá nướng.", "おすすめする", "osusume suru"),
-  ("starter", "/ˈstɑːtə/", "n", "món khai vị", "Would you like a <b>starter</b>? The spring rolls are very popular.", "Anh/chị có dùng món khai vị không? Chả giò bên em được khách rất thích.", "前菜", "zensai"),
-  ("main course", "/ˈmeɪn kɔːs/", "n", "món chính", "What would you like for your <b>main course</b>?", "Anh/chị muốn dùng món chính gì ạ?", "メインディッシュ", "mein disshu"),
+  ("starter", "/ˈstɑːtə/", "n", "món khai vị", "Would you like a <b>starter</b>? The spring rolls are very popular.", "Anh/chị có dùng món khai vị không ạ? Món chả giò được khách rất thích.", "前菜", "zensai"),
+  ("main course", "/ˌmeɪn ˈkɔːs/", "n", "món chính", "What would you like for your <b>main course</b>?", "Anh/chị muốn dùng món chính gì ạ?", "メインディッシュ", "mein disshu"),
   ("dessert", "/dɪˈzɜːt/", "n", "món tráng miệng", "Would you like to see the <b>dessert</b> menu?", "Anh/chị có muốn xem thực đơn tráng miệng không ạ?", "デザート", "dezāto"),
   ("specialty", "/ˈspeʃəlti/", "n", "đặc sản, món đặc trưng", "Cao lầu is a <b>specialty</b> of Hội An.", "Cao lầu là đặc sản của Hội An.", "名物", "meibutsu"),
   ("vegetarian", "/ˌvedʒəˈteəriən/", "adj/n", "chay; người ăn chay", "We have three <b>vegetarian</b> dishes on the menu.", "Thực đơn có ba món chay.", "ベジタリアン", "bejitarian"),
@@ -372,7 +372,7 @@ PHASES.append({
     ("You can eat the rice.", False, "Nghe như từ chối — nên giới thiệu món chay cụ thể."),
   ]),
   ("Sorry, we need a few more minutes.", [
-    ("No problem. Take your time. Just wave when you're ready.", True, "Thoải mái, không giục khách."),
+    ("No problem. Take your time. Just let me know when you're ready.", True, "Thoải mái, không giục khách."),
     ("OK. Fast, please.", False, "Giục khách, thiếu lịch sự."),
     ("OK, I come back after.", False, "Thiếu 'will', 'after' lơ lửng: 'I'll come back in a few minutes.'"),
   ]),
@@ -380,7 +380,7 @@ PHASES.append({
  "listen": [
   ("Are you ready to order", ["ready", "order"], "hỏi gọi món"),
   ("I recommend the grilled fish tonight", ["recommend", "fish"], "gợi ý món"),
-  ("Would you like a starter or a salad", ["starter", "salad"], "món khai vị"),
+  ("Would you like a starter before your main course", ["starter", "course"], "món khai vị"),
   ("The breakfast buffet is on the second floor", ["buffet", "second"], "buffet sáng ở đâu"),
   ("Good evening. Welcome to Lotus Restaurant. Here is the menu, and today's special is grilled prawns.", ["Welcome", "menu", "prawns"], "chào khách vào nhà hàng"),
   ("So that's two bowls of beef pho and one mango salad. Would you like anything to drink? The food will be ready in fifteen minutes.", ["bowls", "mango", "fifteen"], "nhắc lại món khách gọi"),
@@ -396,9 +396,9 @@ PHASES.append({
   ("peanut", "/ˈpiːnʌt/", "n", "đậu phộng, lạc", "This sauce has <b>peanuts</b> in it.", "Nước sốt này có đậu phộng.", "ピーナッツ", "pīnattsu"),
   ("seafood", "/ˈsiːfuːd/", "n", "hải sản", "The soup is made with <b>seafood</b>.", "Món súp này nấu từ hải sản.", "魚介類", "gyokairui"),
   ("ingredient", "/ɪnˈɡriːdiənt/", "n", "nguyên liệu, thành phần", "Let me ask the chef about the <b>ingredients</b>.", "Để tôi hỏi đầu bếp về nguyên liệu.", "食材", "shokuzai"),
-  ("gluten-free", "/ˌɡluːtn ˈfriː/", "adj", "không chứa gluten", "Rice noodles are <b>gluten-free</b>.", "Bánh phở làm từ gạo nên không có gluten.", "グルテンフリー", "guruten furī"),
+  ("gluten-free", "/ˌɡluːtn ˈfriː/", "adj", "không chứa gluten", "Our rice noodles are <b>gluten-free</b>, but let me check the sauce.", "Bánh phở làm từ gạo nên không có gluten, nhưng để tôi kiểm tra nước sốt.", "グルテンフリー", "guruten furī"),
   ("refill", "/ˈriːfɪl/", "n", "sự rót thêm, châm thêm", "Would you like a <b>refill</b> of your iced tea?", "Anh/chị có muốn châm thêm trà đá không ạ?", "おかわり", "okawari"),
-  ("takeaway", "/ˈteɪkəweɪ/", "n", "đồ mang về", "We can pack the rest as a <b>takeaway</b>.", "Chúng tôi có thể gói phần còn lại cho anh/chị mang về.", "持ち帰り", "mochikaeri"),
+  ("takeaway", "/ˈteɪkəweɪ/", "n", "đồ mang về", "Would you like a <b>takeaway</b> box for the rest?", "Anh/chị có cần hộp để gói phần còn lại mang về không ạ?", "持ち帰り", "mochikaeri"),
   ("split the bill", "/ˌsplɪt ðə ˈbɪl/", "phr", "chia hoá đơn", "Would you like to <b>split the bill</b>?", "Anh/chị có muốn chia hoá đơn không ạ?", "割り勘", "warikan"),
   ("tip", "/tɪp/", "n", "tiền boa", "A <b>tip</b> isn't required, but we really appreciate it.", "Tiền boa không bắt buộc, nhưng chúng tôi rất cảm kích.", "チップ", "chippu"),
  ],
@@ -416,7 +416,7 @@ PHASES.append({
  ],
  "dialogues": [
   ("I'm allergic to peanuts. Is the chicken salad OK?", [
-    ("Thank you for telling me. It has peanuts, but I'll ask the chef to make it without them.", True, "Cảm ơn + nói thật thành phần + báo bếp."),
+    ("Thank you for telling me. The salad has peanuts, so let me check with the chef and find a safe dish for you.", True, "Cảm ơn + nói thật thành phần + hỏi bếp để chọn món an toàn (chỉ bỏ đậu phộng ra chưa chắc đủ an toàn)."),
     ("Just a little peanut, no problem.", False, "Rất nguy hiểm — đã dị ứng thì dù ít cũng không được."),
     ("I don't know. Maybe OK.", False, "Đoán mò chuyện dị ứng — phải hỏi đầu bếp cho chắc."),
   ]),
@@ -446,7 +446,7 @@ PHASES.append({
   ("This sauce is made with peanuts", ["sauce", "peanuts"], "thành phần nước sốt"),
   ("Would you like to pay together or separately", ["together", "separately"], "cách thanh toán"),
   ("Can I get you a refill", ["get", "refill"], "châm thêm đồ uống"),
-  ("Excuse me, the guest at table six is allergic to seafood. Please don't use fish sauce in her soup. Can you check with the chef?", ["six", "seafood", "chef"], "báo dị ứng với bếp"),
+  ("Excuse me, the guest at table six is allergic to seafood. Please don't use any seafood or fish sauce in her soup. Can you check with the chef?", ["six", "seafood", "chef"], "báo dị ứng với bếp"),
   ("Here is your bill. The total is 1.2 million dong, and the service charge is included. You can pay by card here.", ["total", "service", "card"], "tính tiền tại bàn"),
  ],
 })
@@ -509,7 +509,7 @@ PHASES.append({
   ("I'll bring you some fresh towels", ["bring", "towels"], "mang khăn"),
   ("Please keep your passport in the safe", ["passport", "safe"], "két sắt"),
   ("The maintenance team will check the shower", ["maintenance", "shower"], "báo bảo trì"),
-  ("Room 305 has a Do Not Disturb sign. Please clean it after two o'clock. The guest also asked for an extra pillow.", ["Disturb", "two", "pillow"], "dặn dò buồng phòng"),
+  ("Room 305 has a Do Not Disturb sign. Please go back after two o'clock. The guest also asked for an extra pillow.", ["Disturb", "two", "pillow"], "dặn dò buồng phòng"),
   ("We found a black wallet in room 412. It's now in lost and found. Please call the guest before he leaves for the airport.", ["wallet", "lost", "airport"], "đồ khách bỏ quên"),
  ],
 })
@@ -582,7 +582,7 @@ PHASES.append({
 PHASES.append({
  "title": "Tour & hướng dẫn viên",
  "vocab": [
-  ("itinerary", "/aɪˈtɪnərəri/", "n", "lịch trình chuyến đi", "Here is the <b>itinerary</b> for tomorrow's tour.", "Đây là lịch trình tour ngày mai.", "旅程", "ryotei"),
+  ("itinerary", "/aɪˈtɪnərəri/", "n", "lịch trình chuyến đi", "Here is the <b>itinerary</b> for tomorrow's tour.", "Đây là lịch trình tour ngày mai.", "行程表", "kōteihyō"),
   ("meeting point", "/ˈmiːtɪŋ pɔɪnt/", "n", "điểm tập trung", "Our <b>meeting point</b> is the hotel lobby at 7:30.", "Điểm tập trung là sảnh khách sạn lúc 7 giờ 30.", "集合場所", "shūgō basho"),
   ("sightseeing", "/ˈsaɪtsiːɪŋ/", "n", "việc tham quan, ngắm cảnh", "We'll spend the morning <b>sightseeing</b> in Huế.", "Buổi sáng chúng ta sẽ tham quan Huế.", "観光", "kankō"),
   ("entrance fee", "/ˈentrəns fiː/", "n", "phí vào cửa", "The <b>entrance fee</b> is included in the tour price.", "Vé vào cửa đã bao gồm trong giá tour.", "入場料", "nyūjōryō"),
@@ -661,7 +661,7 @@ ROLES = {
      ("You put it wrong.", False, "Đổ lỗi cho khách; luôn xin lỗi và làm lại thẻ."),
      ("Card is broken, I make new.", False, "Thiếu mạo từ và 'will': 'I'll make a new one for you.'")]),
    ("Could you keep my bags after I check out? My flight is at night.", [
-     ("Of course. We'll keep them in the luggage room. Here's your ticket.", True, "Đồng ý + giữ ở đâu + đưa phiếu gửi đồ."),
+     ("Of course. We'll keep them in the luggage room. Here's your luggage tag.", True, "Đồng ý + giữ ở đâu + đưa phiếu gửi đồ."),
      ("Yes, you leave here.", False, "Nghe như ra lệnh: 'Sure, you can leave them with us.'"),
      ("Bags keep until what time?", False, "Dịch từng chữ, sai trật tự: 'What time will you pick them up?'")]),
    ("Where can I change money?", [
@@ -703,7 +703,7 @@ ROLES = {
      ("Sorry, food coming soon.", False, "Thiếu 'the' và 'is'; 'soon' mơ hồ — nên nói bao nhiêu phút.")]),
    ("Can I charge this to my room?", [
      ("Of course. May I have your room number, and could you sign here, please?", True, "Đồng ý + xin số phòng và chữ ký."),
-     ("Yes, room number?", False, "Hơi cộc; nên nói 'May I have your room number, please?'"),
+     ("Yes. What your room?", False, "Thiếu 'is' và 'number', nghe cộc: 'May I have your room number, please?'"),
      ("You must pay cash here.", False, "Cứng nhắc và sai quy trình — khách lưu trú thường được ghi vào tiền phòng.")]),
    ("That was delicious, thank you!", [
      ("I'm so glad you enjoyed it! I'll tell the chef.", True, "Vui vẻ đáp lời khen + chuyển lời cho bếp."),
@@ -845,9 +845,9 @@ PACK = {
   {"t": "Pool notice", "text": "SWIMMING POOL\nThe pool is open from 6 a.m. to 8 p.m. every day. On Wednesday, June 5, it will be closed from 1 to 4 p.m. for cleaning. Towels are available at the pool bar. Children under 12 must be with an adult.", "q": [
     {"q": "When is the pool closed on June 5?", "o": ["All day", "From 1 to 4 p.m.", "After 8 p.m."], "a": 1},
     {"q": "Where can guests get towels?", "o": ["At the pool bar", "At reception", "Only in their room"], "a": 0}]},
-  {"t": "Lunch menu", "text": "LOTUS RESTAURANT – SET LUNCH 250,000 VND\nStarter: spring rolls (contain peanuts) or green papaya salad\nMain: grilled chicken with rice or tofu curry (V)\nDessert: fresh fruit\n(V) = vegetarian. Prices include service charge.", "q": [
+  {"t": "Lunch menu", "text": "LOTUS RESTAURANT – SET LUNCH 250,000 VND\nStarter: spring rolls (contain peanuts) or green papaya salad (no peanuts)\nMain: grilled chicken with rice or tofu curry (V)\nDessert: fresh fruit\n(V) = vegetarian. Prices include service charge.", "q": [
     {"q": "Which main dish is vegetarian?", "o": ["Grilled chicken", "Spring rolls", "Tofu curry"], "a": 2},
-    {"q": "Which starter is NOT OK for someone allergic to peanuts?", "o": ["Spring rolls", "Papaya salad", "Fresh fruit"], "a": 0}]},
+    {"q": "Which starter is NOT OK for someone allergic to peanuts?", "o": ["Spring rolls", "Green papaya salad", "Neither of them"], "a": 0}]},
   {"t": "Staff chat", "text": "Linh (Housekeeping): Hi front desk, room 507 still has a Do Not Disturb sign and it's already 3 p.m. The guest checks out tomorrow. Could you call the room and ask if they want cleaning today? Thanks!", "q": [
     {"q": "What is the situation in room 507?", "o": ["The room is very dirty", "There is a Do Not Disturb sign", "The guest lost the key"], "a": 1},
     {"q": "What does Linh ask the front desk to do?", "o": ["Call the guest", "Clean the room", "Check the guest out"], "a": 0}]},

@@ -5,9 +5,24 @@ làm bản lưu trữ (`gioi-thieu-v<N>.html`) để xem lại app từng trông
 
 | Version lớn | Trang giới thiệu | Ảnh chụp |
 |---|---|---|
-| **v3.0** (hiện tại) | [`gioi-thieu.html`](https://hunglv201.github.io/it-english-app/gioi-thieu.html) | `img/showcase/v3/` |
+| **v3.x** (hiện tại) | [`gioi-thieu.html`](https://hunglv201.github.io/it-english-app/gioi-thieu.html) | `img/showcase/v3/` |
 | v2.0 | [`gioi-thieu-v2.html`](https://hunglv201.github.io/it-english-app/gioi-thieu-v2.html) (lưu trữ) | `img/showcase/v2/` |
 | v1.x | [`gioi-thieu-v1.html`](https://hunglv201.github.io/it-english-app/gioi-thieu-v1.html) (lưu trữ 13/09/2026) | `img/showcase/` |
+
+---
+
+## v3.1.0 — 20/09/2026 · 9 ngành, kiểm duyệt nội dung, rảnh tay, ảnh → bài học, gói nghề riêng
+
+**Nội dung**
+- Thêm 4 ngành: 🚚 **Logistics · XNK**, 💰 **Tài chính · Kế toán**, 📣 **Marketing · TMĐT**, 🩺 **Y tế · Điều dưỡng** (mỗi ngành 4 vai, 120 ngày) → **9 ngành, 39 vai**.
+- **Kiểm duyệt chéo toàn bộ 8 gói** bằng một AI biên tập độc lập: ~205 chỗ sửa (IPA, câu chưa tự nhiên, nghĩa tiếng Việt, thuật ngữ Nhật, đáp án "sai" thực ra đúng, an toàn dị ứng/y tế, thông tin thuế – hải quan quá cụ thể). Nhật ký sửa: `docs/review/*.md`.
+- Nút **⚑ Báo lỗi nội dung** trên thẻ từ, câu, hội thoại, bài nghe, dịch ngược, rảnh tay; báo lỗi lưu trên máy (Tôi › Báo lỗi nội dung) và gửi được thành GitHub issue hoặc chép gửi tay.
+
+**Tính năng**
+- 🎧 **Luyện nói rảnh tay**: app đọc → tự bật mic → chấm → sang câu sau; 3 chế độ *Nghe & nhắc lại*, *Hỏi – đáp*, *Việt → Anh*; giữ màn hình sáng; câu dưới 60% vào hàng ôn.
+- ✏️ **Nghề của tôi**: tả công việc → AI viết gói riêng 3 chặng (30 từ, 15 hội thoại, 12 bài nghe, 4 tình huống AI, câu dịch ngược), lưu trên máy, thành ngành riêng (ghép trước lộ trình Công sở chung); game cũng dùng được.
+- 📷 **Ảnh → bài học**: chụp email, menu, phiếu QC… AI đọc ảnh → tóm tắt, từ vựng (thêm vào "Của tôi"), câu trả lời mẫu, 2 câu hỏi hiểu bài, tình huống luyện nói. Cần AI đọc được ảnh (Claude trong claude.ai, Gemini, Claude API).
+- Game: đổi ngành ngay trong Hồ sơ (dùng cho bản game chạy riêng trên claude.ai).
 
 ---
 

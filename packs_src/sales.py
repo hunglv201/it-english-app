@@ -11,7 +11,7 @@ PHASES.append({
  "title": "Chào khách & giới thiệu sản phẩm",
  "vocab": [
   ("customer", "/ˈkʌstəmə/", "n", "khách hàng", "Every <b>customer</b> gets a free gift today.", "Hôm nay mỗi khách hàng đều được tặng quà.", "顧客", "kokyaku"),
-  ("product", "/ˈprɒdʌkt/", "n", "sản phẩm", "This <b>product</b> is made in Việt Nam.", "Sản phẩm này được sản xuất tại Việt Nam.", "製品", "seihin"),
+  ("product", "/ˈprɒdʌkt/", "n", "sản phẩm", "This <b>product</b> is made in Vietnam.", "Sản phẩm này được sản xuất tại Việt Nam.", "商品", "shōhin"),
   ("browse", "/braʊz/", "v", "xem lướt, ngắm hàng", "Feel free to <b>browse</b>. I'm here if you need me.", "Anh/chị cứ tự nhiên xem hàng, cần gì cứ gọi em."),
   ("collection", "/kəˈlekʃn/", "n", "bộ sưu tập, dòng hàng mới", "Our new summer <b>collection</b> has just arrived.", "Bộ sưu tập hè mới của bên em vừa về."),
   ("model", "/ˈmɒdl/", "n", "mẫu, đời (sản phẩm)", "This is the latest <b>model</b>.", "Đây là mẫu mới nhất ạ."),
@@ -81,16 +81,16 @@ PHASES.append({
   ("recommend", "/ˌrekəˈmend/", "v", "gợi ý, khuyên dùng", "I'd <b>recommend</b> the smaller size for your kitchen.", "Em gợi ý anh/chị chọn cỡ nhỏ hơn cho bếp nhà mình."),
   ("suitable", "/ˈsuːtəbl/", "adj", "phù hợp", "This model is <b>suitable</b> for a small office.", "Mẫu này phù hợp với văn phòng nhỏ."),
   ("price range", "/ˈpraɪs ˌreɪndʒ/", "n", "khoảng giá", "What's your <b>price range</b>?", "Anh/chị định mua trong khoảng giá bao nhiêu ạ?"),
-  ("usage", "/ˈjuːsɪdʒ/", "n", "mức/cách sử dụng", "With your <b>usage</b>, the basic data plan is enough.", "Với mức sử dụng của anh/chị, gói data cơ bản là đủ."),
+  ("usage", "/ˈjuːsɪdʒ/", "n", "mức/cách sử dụng", "For your <b>usage</b>, the basic data plan is enough.", "Với mức sử dụng của anh/chị, gói data cơ bản là đủ."),
   ("open-ended question", "/ˌəʊpən ˈendɪd ˈkwestʃən/", "n", "câu hỏi mở", "Start with an <b>open-ended question</b> like 'What do you need it for?'", "Hãy bắt đầu bằng một câu hỏi mở như 'Anh/chị cần dùng vào việc gì?'"),
-  ("narrow down", "/ˌnærəʊ ˈdaʊn/", "phr v", "thu hẹp (lựa chọn)", "Let's <b>narrow down</b> the options to two models.", "Mình thu hẹp lại còn hai mẫu nhé."),
+  ("narrow down", "/ˌnærəʊ ˈdaʊn/", "phr v", "thu hẹp (lựa chọn)", "Let's <b>narrow down</b> the options to two models.", "Mình thu hẹp lựa chọn lại còn hai mẫu nhé."),
  ],
  "phrases": [
   ("What will you mainly use it for?", "Anh/chị chủ yếu dùng nó vào việc gì ạ?"),
   ("Who is it for?", "Anh/chị mua cho ai dùng ạ?"),
   ("Do you have a price range in mind?", "Anh/chị đã tính trước khoảng giá chưa ạ?"),
   ("What's most important to you: price, size or quality?", "Với anh/chị điều gì quan trọng nhất: giá, kích thước hay chất lượng?"),
-  ("How often will you use it?", "Anh/chị sẽ dùng nó thường xuyên không ạ?"),
+  ("How often will you use it?", "Anh/chị định dùng nó bao lâu một lần ạ?"),
   ("What are you using at the moment?", "Hiện tại anh/chị đang dùng loại nào ạ?"),
   ("So, if I understand correctly, you need something light for travel.", "Vậy nếu em hiểu đúng thì anh/chị cần một món nhẹ để mang đi xa."),
   ("Based on what you've told me, I'd recommend this one.", "Dựa trên những gì anh/chị chia sẻ, em gợi ý mẫu này."),
@@ -105,7 +105,7 @@ PHASES.append({
   ]),
   ("It's a gift for my mother.", [
     ("That's lovely. Does she prefer something simple and easy to use?", True, "Phản hồi thân thiện + hỏi tiếp về sở thích người dùng."),
-    ("Your mother how old?", False, "Thiếu động từ và hỏi tuổi đột ngột — nên hỏi 'Does she use a smartphone much?'"),
+    ("Your mother how old?", False, "Thiếu động từ ('How old is she?') và hỏi tuổi đột ngột — nên hỏi về sở thích, thói quen của người dùng."),
     ("OK. Gift is this.", False, "Dịch từng chữ, cộc lốc, không hỏi thêm nhu cầu."),
   ]),
   ("I don't want to spend more than ten million.", [
@@ -120,7 +120,7 @@ PHASES.append({
   ]),
   ("Which one would you recommend?", [
     ("Based on your needs, I'd recommend the Lumo S3. It's light and within your price range.", True, "Gợi ý có lý do, gắn với nhu cầu khách."),
-    ("I recommend you to buy S3.", False, "Sai cấu trúc: 'I'd recommend the S3' hoặc 'I'd recommend buying the S3.'"),
+    ("I recommend you to buy S3.", False, "Sai cấu trúc (không dùng 'recommend sb to do'): 'I'd recommend the S3' và không nêu lý do."),
     ("All is good, you choose.", False, "Không tư vấn, đẩy quyết định lại cho khách."),
   ]),
  ],
@@ -138,7 +138,7 @@ PHASES.append({
 PHASES.append({
  "title": "Báo giá, ưu đãi & so sánh",
  "vocab": [
-  ("quotation", "/kwəʊˈteɪʃn/", "n", "bảng báo giá", "I'll email you a <b>quotation</b> today.", "Hôm nay em sẽ email báo giá cho anh/chị.", "見積もり", "mitsumori"),
+  ("quotation", "/kwəʊˈteɪʃn/", "n", "bảng báo giá", "I'll email you a <b>quotation</b> today.", "Hôm nay em sẽ email báo giá cho anh/chị.", "見積書", "mitsumorisho"),
   ("discount", "/ˈdɪskaʊnt/", "n", "khoản giảm giá", "We offer a 5% <b>discount</b> for orders over 100 units.", "Bên em giảm 5% cho đơn trên 100 cái.", "値引き", "nebiki"),
   ("special offer", "/ˌspeʃl ˈɒfə/", "n", "ưu đãi đặc biệt", "This <b>special offer</b> ends on Sunday.", "Ưu đãi đặc biệt này kết thúc vào Chủ nhật."),
   ("voucher", "/ˈvaʊtʃə/", "n", "phiếu mua hàng, voucher", "You can use this <b>voucher</b> next time.", "Lần sau anh/chị có thể dùng voucher này."),
@@ -170,7 +170,7 @@ PHASES.append({
   ("Can you give me a discount?", [
     ("I can offer 5% off if you pay today. That's the best price I can do.", True, "Giảm có điều kiện + giữ mức giá hợp lý."),
     ("No discount. Price is price.", False, "Từ chối cộc lốc, dễ mất khách."),
-    ("OK, I discount for you 20%.", False, "Dùng 'discount' như động từ sai cách và giảm quá tay: 'I can give you 5% off.'"),
+    ("OK, I discount for you 20%.", False, "Sai cấu trúc ('I can give you 20% off') và giảm quá tay khi chưa được duyệt."),
   ]),
   ("Why is this one more expensive than the other?", [
     ("It has a stronger motor and a three-year warranty, so it lasts much longer.", True, "Giải thích giá bằng lợi ích cụ thể."),
@@ -194,7 +194,7 @@ PHASES.append({
   ("It comes with a two-year warranty", ["two-year", "warranty"], "bảo hành"),
   ("I'll send you the quotation this afternoon", ["quotation", "afternoon"], "hẹn gửi báo giá"),
   ("This week we have a special offer. If you buy the phone, you get the headphones for free. The offer ends on Sunday.", ["special", "headphones", "Sunday"], "giới thiệu ưu đãi"),
-  ("Compared to the basic model, the Pro is faster and lighter. It's about two million more. But you can upgrade later if you prefer.", ["faster", "million", "upgrade"], "so sánh hai mẫu"),
+  ("Compared to the basic model, the Pro is faster and lighter. It costs about two million more. If you choose the basic one, you can upgrade it later.", ["faster", "million", "upgrade"], "so sánh hai mẫu"),
  ],
 })
 
@@ -202,7 +202,7 @@ PHASES.append({
 PHASES.append({
  "title": "Xử lý từ chối & băn khoăn",
  "vocab": [
-  ("objection", "/əbˈdʒekʃn/", "n", "lý do từ chối, ý phản đối (của khách)", "Price is the most common <b>objection</b> we hear.", "Giá là lý do từ chối phổ biến nhất bên mình hay gặp."),
+  ("objection", "/əbˈdʒekʃn/", "n", "lý do từ chối, ý phản đối (của khách)", "Price is the most common <b>objection</b> we hear.", "Giá là lý do từ chối mà bên mình hay gặp nhất."),
   ("concern", "/kənˈsɜːn/", "n", "điều băn khoăn, lo lắng", "I understand your <b>concern</b> about the size.", "Em hiểu băn khoăn của anh/chị về kích thước."),
   ("hesitate", "/ˈhezɪteɪt/", "v", "do dự, ngần ngại", "Please don't <b>hesitate</b> to call me.", "Anh/chị đừng ngại gọi cho em nhé."),
   ("afford", "/əˈfɔːd/", "v", "đủ khả năng chi trả", "I'm not sure I can <b>afford</b> it right now.", "Tôi không chắc lúc này mình đủ tiền mua."),
@@ -270,7 +270,7 @@ PHASES.append({
   ("checkout", "/ˈtʃekaʊt/", "n", "quầy thanh toán; bước thanh toán", "Please follow me to the <b>checkout</b>.", "Mời anh/chị theo em ra quầy thanh toán."),
   ("payment", "/ˈpeɪmənt/", "n", "sự thanh toán", "We accept <b>payment</b> by card, cash or QR code.", "Bên em nhận thanh toán bằng thẻ, tiền mặt hoặc mã QR.", "支払い", "shiharai"),
   ("instalment", "/ɪnˈstɔːlmənt/", "n", "khoản trả góp", "You can pay in six monthly <b>instalments</b> with 0% interest.", "Anh/chị có thể trả góp sáu tháng, lãi suất 0%.", "分割払い", "bunkatsu barai"),
-  ("receipt", "/rɪˈsiːt/", "n", "hóa đơn bán lẻ, biên lai", "Here's your <b>receipt</b>. Please keep it for the warranty.", "Đây là hóa đơn của anh/chị, vui lòng giữ lại để bảo hành.", "領収書", "ryōshūsho"),
+  ("receipt", "/rɪˈsiːt/", "n", "hóa đơn bán lẻ, biên lai", "Here's your <b>receipt</b>. Please keep it for the warranty.", "Đây là hóa đơn của anh/chị, vui lòng giữ lại để bảo hành.", "レシート", "reshīto"),
   ("invoice", "/ˈɪnvɔɪs/", "n", "hóa đơn đề nghị thanh toán, hóa đơn VAT", "We'll send the <b>invoice</b> with the goods.", "Bên em sẽ gửi hóa đơn kèm theo hàng.", "請求書", "seikyūsho"),
   ("deposit", "/dɪˈpɒzɪt/", "n", "tiền đặt cọc", "A 30% <b>deposit</b> is needed to start the order.", "Cần đặt cọc 30% để bắt đầu xử lý đơn."),
   ("bank transfer", "/ˈbæŋk ˌtrænsfɜː/", "n", "chuyển khoản ngân hàng", "You can pay by <b>bank transfer</b> within seven days.", "Anh/chị có thể chuyển khoản trong vòng bảy ngày.", "銀行振込", "ginkō furikomi"),
@@ -278,7 +278,7 @@ PHASES.append({
   ("contract", "/ˈkɒntrækt/", "n", "hợp đồng", "Please sign the <b>contract</b> on page three.", "Anh/chị vui lòng ký hợp đồng ở trang ba.", "契約", "keiyaku"),
  ],
  "phrases": [
-  ("Great choice! Shall I get one ready for you?", "Anh/chị chọn chuẩn quá! Em chuẩn bị một cái cho anh/chị nhé?"),
+  ("Great choice! Shall I get one ready for you?", "Anh/chị chọn rất hợp ạ! Em lấy một cái mới cho anh/chị nhé?"),
   ("How would you like to pay?", "Anh/chị muốn thanh toán bằng hình thức nào ạ?"),
   ("We accept cash, card and bank transfer.", "Bên em nhận tiền mặt, thẻ và chuyển khoản."),
   ("Would you like to pay in instalments?", "Anh/chị có muốn trả góp không ạ?"),
@@ -298,7 +298,7 @@ PHASES.append({
   ("Can I pay in instalments?", [
     ("Yes, you can pay over six or twelve months with 0% interest. You just need your ID card.", True, "Trả lời có + điều kiện cụ thể."),
     ("Yes, can. Six month.", False, "Thiếu chủ ngữ và 's': 'Yes, you can pay over six months.'"),
-    ("Instalment is for people no money.", False, "Xúc phạm khách và sai ngữ pháp."),
+    ("Instalment is for people no money.", False, "Xúc phạm khách và sai ngữ pháp (thiếu 'who have')."),
   ]),
   ("Do I need to pay everything now?", [
     ("No, just a 30% deposit today. You can pay the rest when the goods arrive.", True, "Nói rõ tiền cọc và thời điểm trả phần còn lại."),
@@ -338,14 +338,14 @@ PHASES.append({
   ("hotline", "/ˈhɒtlaɪn/", "n", "đường dây nóng, tổng đài", "Our <b>hotline</b> is open 24/7.", "Tổng đài của bên em hoạt động 24/7."),
   ("inquiry", "/ɪnˈkwaɪəri/", "n", "yêu cầu hỏi thông tin, thắc mắc", "Thank you for your <b>inquiry</b> about our new plans.", "Cảm ơn anh/chị đã hỏi về các gói mới của bên em.", "問い合わせ", "toiawase"),
   ("patience", "/ˈpeɪʃns/", "n", "sự kiên nhẫn", "Thank you for your <b>patience</b>.", "Cảm ơn anh/chị đã kiên nhẫn chờ."),
-  ("satisfaction", "/ˌsætɪsˈfækʃn/", "n", "sự hài lòng", "Customer <b>satisfaction</b> is our top priority.", "Sự hài lòng của khách hàng là ưu tiên hàng đầu của bên em.", "満足度", "manzokudo"),
+  ("satisfaction", "/ˌsætɪsˈfækʃn/", "n", "sự hài lòng", "Customer <b>satisfaction</b> is our top priority.", "Sự hài lòng của khách hàng là ưu tiên hàng đầu của bên em.", "満足", "manzoku"),
   ("membership", "/ˈmembəʃɪp/", "n", "tư cách hội viên, thẻ thành viên", "Your <b>membership</b> gives you free delivery.", "Thẻ thành viên giúp anh/chị được giao hàng miễn phí.", "会員", "kaiin"),
  ],
  "phrases": [
   ("Thank you for calling Zenta customer service. This is Linh. How can I help you?", "Cảm ơn anh/chị đã gọi đến CSKH Zenta. Em là Linh. Em có thể giúp gì cho anh/chị ạ?"),
   ("For security, could you confirm your full name and date of birth?", "Để bảo mật, anh/chị vui lòng xác nhận họ tên đầy đủ và ngày sinh ạ."),
   ("Thank you. Your identity has been verified.", "Cảm ơn anh/chị. Danh tính đã được xác minh."),
-  ("May I put you on hold for two minutes while I check?", "Em xin phép giữ máy hai phút để kiểm tra nhé ạ?"),
+  ("May I put you on hold for two minutes while I check?", "Anh/chị vui lòng giữ máy khoảng hai phút để em kiểm tra được không ạ?"),
   ("Thank you for holding.", "Cảm ơn anh/chị đã chờ máy."),
   ("I'll transfer you to the billing team. Please stay on the line.", "Em sẽ chuyển máy sang bộ phận thanh toán. Anh/chị vui lòng giữ máy."),
   ("Sorry, the line isn't very clear. Could you say that again?", "Xin lỗi, đường truyền không rõ lắm. Anh/chị nói lại giúp em được không ạ?"),
@@ -424,7 +424,7 @@ PHASES.append({
     ("Maybe you use wrong.", False, "Sai ngữ pháp ('you used it wrongly') và đổ lỗi cho khách."),
   ]),
   ("I want my money back.", [
-    ("I understand. Since the item is faulty, we can give you a full refund. It will take about five working days.", True, "Đồng ý theo chính sách + nói rõ thời gian hoàn tiền."),
+    ("I understand. Could you tell me what's wrong with it? If it's faulty, we can give you a full refund within five working days.", True, "Đồng cảm + hỏi rõ lý do trước khi hoàn tiền theo chính sách + nói rõ thời gian."),
     ("Money back is not possible, company rule.", False, "Từ chối cứng nhắc, không giải thích hay đưa phương án khác."),
     ("OK, I give back money tomorrow maybe.", False, "Sai trật tự ('give you your money back') và hứa không chắc chắn."),
   ]),
@@ -439,7 +439,7 @@ PHASES.append({
     ("Please calm down.", False, "Bảo khách 'bình tĩnh' thường làm khách bực hơn."),
   ]),
   ("My order arrived damaged. What are you going to do about it?", [
-    ("I apologise for that. We'll send you a new one today, and you don't need to return the damaged one.", True, "Xin lỗi + giải pháp rõ ràng, nhanh gọn cho khách."),
+    ("I'm so sorry about that. Could you send me a photo of the damage? Then we'll send you a new one right away.", True, "Xin lỗi + xin ảnh làm bằng chứng (đúng quy trình) + giải pháp nhanh."),
     ("Damaged is shipping company fault.", False, "Đổ lỗi cho bên giao hàng; khách mua của mình nên mình phải chịu trách nhiệm."),
     ("I will check. Maybe next week.", False, "Mơ hồ, chậm, không cho khách giải pháp."),
   ]),
@@ -493,7 +493,7 @@ PHASES.append({
     ("I don't know where. Ask shipping company.", False, "Đẩy khách sang bên khác, không kiểm tra giúp."),
   ]),
   ("Why hasn't anyone answered my email? I sent it on Monday!", [
-    ("I'm sorry for the late reply. I've found your email, and I'll resolve it for you now.", True, "Xin lỗi phản hồi chậm + hành động ngay."),
+    ("I'm sorry for the late reply. I've found your email, and I'll help you with it right now.", True, "Xin lỗi phản hồi chậm + hành động ngay."),
     ("We very busy this week.", False, "Thiếu 'are' và chỉ bào chữa, không giải quyết."),
     ("Monday is holiday, so late.", False, "Dịch từng chữ, thiếu mạo từ và chỉ bào chữa."),
   ]),
@@ -522,11 +522,11 @@ PHASES.append({
 PHASES.append({
  "title": "Giao hàng & theo dõi đơn",
  "vocab": [
-  ("delivery", "/dɪˈlɪvəri/", "n", "việc giao hàng", "<b>Delivery</b> takes two to three days in Hà Nội.", "Giao hàng trong Hà Nội mất hai đến ba ngày.", "配送", "haisō"),
+  ("delivery", "/dɪˈlɪvəri/", "n", "việc giao hàng", "<b>Delivery</b> takes two to three days in Hanoi.", "Giao hàng trong Hà Nội mất hai đến ba ngày.", "配送", "haisō"),
   ("shipping fee", "/ˈʃɪpɪŋ ˌfiː/", "n", "phí vận chuyển", "There's no <b>shipping fee</b> for orders over 500,000 dong.", "Đơn trên 500.000 đồng được miễn phí vận chuyển.", "送料", "sōryō"),
   ("tracking number", "/ˈtrækɪŋ ˌnʌmbə/", "n", "mã vận đơn", "Here's your <b>tracking number</b>: VN2048.", "Đây là mã vận đơn của anh/chị: VN2048.", "追跡番号", "tsuiseki bangō"),
-  ("courier", "/ˈkʊriə/", "n", "nhân viên / đơn vị giao hàng", "The <b>courier</b> will call you before he arrives.", "Anh giao hàng sẽ gọi cho anh/chị trước khi tới."),
-  ("dispatch", "/dɪˈspætʃ/", "v", "gửi hàng đi, xuất kho", "Your order was <b>dispatched</b> this morning.", "Đơn của anh/chị đã được xuất kho sáng nay.", "出荷", "shukka"),
+  ("courier", "/ˈkʊriə/", "n", "nhân viên / đơn vị giao hàng", "The <b>courier</b> will call you before they arrive.", "Nhân viên giao hàng sẽ gọi cho anh/chị trước khi tới."),
+  ("dispatch", "/dɪˈspætʃ/", "v", "gửi hàng đi, xuất kho", "Your order was <b>dispatched</b> this morning.", "Đơn của anh/chị đã được xuất kho sáng nay.", "発送", "hassō"),
   ("out of stock", "/ˌaʊt əv ˈstɒk/", "phr", "hết hàng", "Sorry, the red one is <b>out of stock</b> until next week.", "Xin lỗi, màu đỏ đang hết hàng đến tuần sau.", "在庫切れ", "zaikogire"),
   ("cash on delivery", "/ˌkæʃ ɒn dɪˈlɪvəri/", "n", "thanh toán khi nhận hàng (COD)", "Most customers choose <b>cash on delivery</b>.", "Phần lớn khách chọn thanh toán khi nhận hàng.", "代金引換", "daikin hikikae"),
   ("address", "/əˈdres/", "n", "địa chỉ", "Could you confirm your delivery <b>address</b>?", "Anh/chị xác nhận giúp em địa chỉ giao hàng nhé.", "住所", "jūsho"),
@@ -563,7 +563,7 @@ PHASES.append({
   ]),
   ("Do you offer cash on delivery?", [
     ("Yes, we do. You can pay the courier in cash when you receive the package.", True, "Trả lời đầy đủ + giải thích cách làm."),
-    ("Yes, have cash on delivery.", False, "Thiếu chủ ngữ: 'Yes, we offer cash on delivery.'"),
+    ("Yes, have cash on delivery.", False, "Thiếu chủ ngữ: 'Yes, we do.' / 'Yes, we offer cash on delivery.'"),
     ("Yes, but you must pay first.", False, "Mâu thuẫn — COD là trả tiền khi nhận hàng."),
   ]),
   ("I wasn't home when the courier came.", [
@@ -586,7 +586,7 @@ PHASES.append({
 PHASES.append({
  "title": "Chỉ tiêu, báo cáo & họp sale",
  "vocab": [
-  ("target", "/ˈtɑːɡɪt/", "n", "chỉ tiêu, mục tiêu doanh số", "Our monthly <b>target</b> is 500 million dong.", "Chỉ tiêu tháng của nhóm là 500 triệu đồng.", "ノルマ", "noruma"),
+  ("target", "/ˈtɑːɡɪt/", "n", "chỉ tiêu, mục tiêu doanh số", "Our monthly <b>target</b> is 500 million dong.", "Chỉ tiêu tháng của nhóm là 500 triệu đồng.", "売上目標", "uriage mokuhyō"),
   ("revenue", "/ˈrevənjuː/", "n", "doanh thu", "<b>Revenue</b> went up 12% this month.", "Doanh thu tháng này tăng 12%.", "売上", "uriage"),
   ("commission", "/kəˈmɪʃn/", "n", "tiền hoa hồng", "Sales staff get a 3% <b>commission</b> on every order.", "Nhân viên sale được hoa hồng 3% trên mỗi đơn."),
   ("lead", "/liːd/", "n", "khách hàng tiềm năng", "I got ten new <b>leads</b> from the trade fair.", "Em có thêm mười khách tiềm năng từ hội chợ.", "見込み客", "mikomikyaku"),
@@ -652,7 +652,7 @@ ROLES = {
   "scenarios": [
    ("rt_browse", "Khách vào xem hàng", "You are a foreign customer walking into a home appliance store. At first say you are just looking, then ask about an air purifier for a small bedroom."),
    ("rt_size", "Hỏi size & màu", "You are a customer in a clothing shop. Ask if a jacket comes in another colour and a bigger size, then ask to try it on."),
-   ("rt_pay", "Thanh toán tại quầy", "You are a customer at the checkout. Ask if you can pay by foreign card, ask about a membership discount and ask for a VAT invoice."),
+   ("rt_pay", "Thanh toán tại quầy", "You are a customer at the checkout. Ask if you can pay by a foreign card, ask about a membership discount and ask for a VAT invoice."),
    ("rt_return", "Đổi hàng tại cửa hàng", "You are a customer who wants to exchange shoes you bought three days ago because they are too small. You have the receipt."),
   ],
   "dialogues": [
@@ -678,7 +678,7 @@ ROLES = {
      ("So you don't buy?", False, "Dùng câu khẳng định làm câu hỏi, nghe như trách khách.")]),
    ("Can I pay with a foreign credit card?", [
      ("Yes, we accept all major international cards. Please tap it here.", True, "Trả lời rõ + hướng dẫn thao tác."),
-     ("Yes, can pay.", False, "Thiếu chủ ngữ: 'Yes, you can.'"),
+     ("Yes, can pay.", False, "Thiếu chủ ngữ: 'Yes, you can.' — và nên nói rõ cách thanh toán."),
      ("Foreign card is problem, pay cash better.", False, "Thiếu mạo từ/động từ và gây bất tiện cho khách không cần thiết.")]),
   ]},
  "cs": {"label": "CSKH · Call center", "emoji": "🎧",
@@ -831,7 +831,7 @@ PACK = {
   ("Anh/chị cần em giúp gì ạ?", "How can I help you?"),
   ("Mẫu này đang bán chạy nhất.", "This model is our best-seller."),
   ("Anh/chị muốn thanh toán bằng thẻ hay tiền mặt?", "Would you like to pay by card or cash?"),
-  ("Em xin phép giữ máy một chút nhé.", "May I put you on hold for a moment?"),
+  ("Anh/chị vui lòng giữ máy một chút được không ạ?", "May I put you on hold for a moment?"),
   ("Giá này có hiệu lực đến thứ Sáu.", "This price is valid until Friday."),
   ("Em sẽ chuyển máy sang bộ phận kỹ thuật.", "I'll transfer you to the technical team."),
   ("Em xin lỗi vì sự bất tiện này.", "I'm sorry for the inconvenience."),

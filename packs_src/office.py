@@ -14,9 +14,9 @@ PHASES.append({
   ("colleague", "/ˈkɒliːɡ/", "n", "đồng nghiệp", "This is my <b>colleague</b>, Minh.", "Đây là Minh, đồng nghiệp của mình.", "同僚", "dōryō"),
   ("introduce", "/ˌɪntrəˈdjuːs/", "v", "giới thiệu", "Let me <b>introduce</b> myself. I'm Lan.", "Cho mình tự giới thiệu. Mình là Lan.", "紹介する", "shōkai suru"),
   ("department", "/dɪˈpɑːtmənt/", "n", "phòng, ban", "I work in the sales <b>department</b>.", "Mình làm ở phòng kinh doanh.", "部署", "busho"),
-  ("position", "/pəˈzɪʃn/", "n", "vị trí, chức vụ", "What's your <b>position</b> here?", "Bạn làm vị trí gì ở đây?", "役職", "yakushoku"),
+  ("position", "/pəˈzɪʃn/", "n", "vị trí, chức vụ", "What's your <b>position</b> here?", "Bạn làm vị trí gì ở đây?", "ポジション", "pojishon"),
   ("manager", "/ˈmænɪdʒə/", "n", "quản lý, sếp", "My <b>manager</b> is Ms. Sarah Lee.", "Quản lý của mình là chị Sarah Lee.", "上司", "jōshi"),
-  ("welcome", "/ˈwelkəm/", "v/n", "chào mừng, đón tiếp", "<b>Welcome</b> to the team, Hoa!", "Chào mừng Hoa đến với nhóm!"),
+  ("welcome", "/ˈwelkəm/", "excl/v", "chào mừng, đón tiếp", "<b>Welcome</b> to the team, Hoa!", "Chào mừng Hoa đến với nhóm!"),
   ("newcomer", "/ˈnjuːkʌmə/", "n", "người mới", "Ken is a <b>newcomer</b>, so please help him.", "Ken là người mới, mọi người giúp bạn ấy nhé.", "新人", "shinjin"),
   ("small talk", "/ˈsmɔːl tɔːk/", "n", "chuyện phiếm xã giao", "We made <b>small talk</b> about the weather.", "Tụi mình nói chuyện phiếm về thời tiết.", "雑談", "zatsudan"),
   ("business card", "/ˈbɪznəs kɑːd/", "n", "danh thiếp", "Here's my <b>business card</b>.", "Đây là danh thiếp của tôi.", "名刺", "meishi"),
@@ -77,14 +77,14 @@ PHASES.append({
  "vocab": [
   ("report", "/rɪˈpɔːt/", "n/v", "báo cáo", "I send a weekly <b>report</b> every Friday.", "Mình gửi báo cáo tuần vào mỗi thứ Sáu.", "報告", "hōkoku"),
   ("schedule", "/ˈʃedjuːl/", "n", "lịch, lịch trình", "My <b>schedule</b> is full today.", "Hôm nay lịch của mình kín rồi.", "予定", "yotei"),
-  ("progress", "/ˈprəʊɡres/", "n", "tiến độ", "Let me share my <b>progress</b> this week.", "Để mình chia sẻ tiến độ tuần này.", "進捗", "shinchoku"),
+  ("progress", "/ˈprəʊɡres/", "n", "tiến độ", "Here's my <b>progress</b> for this week.", "Đây là tiến độ công việc tuần này của mình.", "進捗", "shinchoku"),
   ("complete", "/kəmˈpliːt/", "v", "hoàn thành", "I <b>completed</b> the customer list yesterday.", "Hôm qua mình đã hoàn thành danh sách khách hàng.", "完了する", "kanryō suru"),
   ("task", "/tɑːsk/", "n", "nhiệm vụ, đầu việc", "I have three <b>tasks</b> to finish today.", "Hôm nay mình có ba việc phải làm xong."),
   ("routine", "/ruːˈtiːn/", "n", "việc thường nhật", "Checking emails is part of my morning <b>routine</b>.", "Kiểm tra email là việc quen thuộc mỗi sáng của mình."),
   ("to-do list", "/təˈduː lɪst/", "n", "danh sách việc cần làm", "Calling the bank is on my <b>to-do list</b>.", "Gọi ngân hàng nằm trong danh sách việc cần làm của mình."),
   ("in charge of", "/ɪn ˈtʃɑːdʒ əv/", "phr", "phụ trách", "Hoa is <b>in charge of</b> the new office.", "Hoa phụ trách văn phòng mới.", "担当", "tantō"),
   ("workload", "/ˈwɜːkləʊd/", "n", "khối lượng công việc", "My <b>workload</b> is heavy this week.", "Tuần này khối lượng việc của mình nhiều."),
-  ("on track", "/ɒn ˈtræk/", "phr", "đúng tiến độ", "We're <b>on track</b> to finish by Friday.", "Tụi mình đang đúng tiến độ, sẽ xong trước thứ Sáu."),
+  ("on track", "/ɒn ˈtræk/", "phr", "đúng tiến độ", "We're <b>on track</b> to finish by Friday.", "Tụi mình đang đúng tiến độ, kịp xong vào thứ Sáu."),
  ],
  "phrases": [
   ("Here's a quick update on my work.", "Đây là cập nhật nhanh về công việc của mình."),
@@ -92,7 +92,7 @@ PHASES.append({
   ("Today I'm going to call three customers.", "Hôm nay mình sẽ gọi cho ba khách hàng."),
   ("I'm still working on the price list.", "Mình vẫn đang làm bảng giá."),
   ("I'm about halfway done.", "Mình xong khoảng một nửa rồi."),
-  ("We're on track to finish by Friday.", "Tụi mình đang đúng tiến độ để xong trước thứ Sáu."),
+  ("We're on track to finish by Friday.", "Tụi mình đang đúng tiến độ, kịp xong vào thứ Sáu."),
   ("No issues from my side.", "Phía mình không có vấn đề gì."),
   ("I need some help with the budget numbers.", "Mình cần giúp một chút phần số liệu ngân sách."),
   ("My workload is a bit heavy this week.", "Tuần này khối lượng việc của mình hơi nhiều."),
@@ -259,7 +259,7 @@ PHASES.append({
   ("Sorry for the late reply", ["late", "reply"], "xin lỗi trả lời muộn"),
   ("I'm writing to follow up on our meeting", ["writing", "follow"], "mục đích email"),
   ("Dear Mr. Brown, thank you for your email. I have attached the new price list. Please let me know if you have any questions.", ["attached", "price", "questions"], "email gửi bảng giá"),
-  ("Hi team, the training is moved to Wednesday afternoon. Please reply to this email to confirm. Thanks, Lan.", ["training", "Wednesday", "confirm"], "email báo đổi lịch"),
+  ("Hi team, the training has been moved to Wednesday afternoon. Please reply to this email to confirm. Thanks, Lan.", ["training", "Wednesday", "confirm"], "email báo đổi lịch"),
  ],
 })
 
@@ -293,7 +293,7 @@ PHASES.append({
  "dialogues": [
   ("Quick question: where's the sales file?", [
     ("It's in the team folder, under 'October'.", True, "Trả lời ngắn, chỉ đúng chỗ — hợp với chat."),
-    ("Sales file is in there.", False, "'in there' mơ hồ, người hỏi vẫn không biết ở đâu."),
+    ("Sales file is in there.", False, "Thiếu 'The', và 'in there' mơ hồ — người hỏi vẫn không biết ở đâu."),
     ("Why you ask?", False, "Thiếu trợ động từ và nghe khó chịu: 'Why do you ask?'"),
   ]),
   ("Can you join a quick call now?", [
@@ -460,7 +460,7 @@ PHASES.append({
  "title": "Kế hoạch, hạn chót & ưu tiên",
  "vocab": [
   ("deadline", "/ˈdedlaɪn/", "n", "hạn chót", "The <b>deadline</b> is next Wednesday.", "Hạn chót là thứ Tư tuần sau.", "締め切り", "shimekiri"),
-  ("priority", "/praɪˈɒrəti/", "n", "việc ưu tiên, mức ưu tiên", "This report is our top <b>priority</b>.", "Báo cáo này là ưu tiên hàng đầu của tụi mình.", "優先順位", "yūsen jun'i"),
+  ("priority", "/praɪˈɒrəti/", "n", "việc ưu tiên, mức ưu tiên", "This report is our top <b>priority</b>.", "Báo cáo này là ưu tiên hàng đầu của tụi mình.", "優先事項", "yūsen jikō"),
   ("urgent", "/ˈɜːdʒənt/", "adj", "gấp, khẩn", "Is this <b>urgent</b>?", "Việc này có gấp không?"),
   ("postpone", "/pəˈspəʊn/", "v", "hoãn", "We have to <b>postpone</b> the meeting.", "Tụi mình phải hoãn cuộc họp.", "延期する", "enki suru"),
   ("extend", "/ɪkˈstend/", "v", "gia hạn, kéo dài", "Can we <b>extend</b> the deadline by two days?", "Mình gia hạn thêm hai ngày được không?"),
@@ -632,7 +632,7 @@ PHASES.append({
     ("Why? I explained already.", False, "Nghe khó chịu với người nghe."),
   ]),
   ("What's the main message of your presentation?", [
-    ("In short, we met our target, and we can grow 10 percent next year.", True, "Tóm gọn thông điệp chính trong một câu."),
+    ("In short, we met our target, and we expect to grow 10 percent next year.", True, "Tóm gọn thông điệp chính trong một câu."),
     ("Main message is many things.", False, "Mơ hồ và thiếu 'The'."),
     ("My presentation has 20 slides.", False, "Trả lời sai câu hỏi — người ta hỏi ý chính."),
   ]),
@@ -670,7 +670,7 @@ PHASES.append({
   ("I'll finish the handover before I leave.", "Tôi sẽ bàn giao xong trước khi nghỉ."),
   ("Has my leave request been approved?", "Đơn xin nghỉ của tôi đã được duyệt chưa?"),
   ("I worked two hours of overtime yesterday.", "Hôm qua tôi làm thêm hai tiếng."),
-  ("How do I claim my travel expenses?", "Tôi làm thế nào để thanh toán chi phí đi lại?"),
+  ("How do I claim my travel expenses?", "Tôi làm thủ tục hoàn lại chi phí đi lại thế nào?"),
   ("I'll be on a business trip to Đà Nẵng next week.", "Tuần sau tôi đi công tác Đà Nẵng."),
   ("The office is closed on Monday for the public holiday.", "Văn phòng nghỉ thứ Hai vì ngày lễ."),
  ],
@@ -852,7 +852,7 @@ ROLES = {
   ],
   "dialogues": [
    ("How is your team doing this month?", [
-     ("We're on track. We finished three of our four projects, and the last one will be done next week.", True, "Kết luận trước + số liệu + mốc thời gian."),
+     ("We're on track. We've finished three of our four projects, and the last one will be done next week.", True, "Kết luận trước + số liệu + mốc thời gian."),
      ("Team is OK, everybody working.", False, "Thiếu mạo từ và 'is', không có kết quả cụ thể."),
      ("Very busy, very tired.", False, "Than vãn, không báo cáo kết quả.")]),
    ("Can my team get one more person?", [

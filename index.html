@@ -122,15 +122,24 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .brand{display:flex;flex-direction:column;gap:1px}
 .trackchip{align-self:flex-start;margin-top:3px;height:20px;padding:0 8px;border-radius:999px;border:1px solid var(--line);background:var(--surface2);color:var(--muted);font-family:inherit;font-size:11.5px;font-weight:600;line-height:1;cursor:pointer;white-space:nowrap}
 .trackchip:hover{color:var(--ink);border-color:var(--accent)}
-.trgrid{display:grid;grid-template-columns:1fr;gap:8px}
-@media(min-width:460px){.trgrid{grid-template-columns:1fr 1fr}}
-.trtile{display:flex;align-items:center;gap:12px;text-align:left;padding:9px 12px;min-height:52px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;font:inherit}
+.trgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.trtile{display:flex;align-items:center;gap:8px;text-align:left;padding:8px 9px;min-height:54px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;font:inherit}
 .trtile:hover,.trtile:focus-visible{border-color:var(--accent);outline:none}
 .trtile.on{border-color:var(--accent);background:var(--accent-soft)}
-.trtile .te{font-size:24px;width:30px;text-align:center;flex:0 0 auto}
+.trtile .te{font-size:20px;width:24px;text-align:center;flex:0 0 auto}
 .trtile .tt{display:flex;flex-direction:column;gap:2px;min-width:0}
-.trtile b{font-size:14.5px}.trtile small{font-size:12px;color:var(--muted);line-height:1.35}
+.trtile b{font-size:13.5px;line-height:1.25}.trtile small{font-size:11px;color:var(--muted);line-height:1.3;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 .modal.onb{gap:12px;max-height:92vh;overflow-y:auto}
+a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.row>.btn.ghost{white-space:nowrap}
+.flagbtn{flex:0 0 auto;width:30px;height:30px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--faint);font-size:14px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.flagbtn:hover,.flagbtn:focus-visible{color:var(--amber);border-color:var(--line);outline:none}
+.hfcard{gap:10px;padding:22px 18px;text-align:center;align-items:center;min-height:230px;justify-content:center;position:relative}
+.hfcard .flagbtn{position:absolute;top:8px;right:8px}
+.hfst{font-family:var(--mono);font-size:13px;color:var(--muted);padding:4px 12px;border-radius:999px;background:var(--surface2)}
+.hfst.on{color:#fff;background:var(--danger);animation:pulse 1s ease-in-out infinite}
+.hfq{font-size:22px;font-weight:700;line-height:1.35;font-family:var(--disp)}
+.hfheard{font-size:15px;color:var(--accent-ink);min-height:22px}
 .onb-dots{display:flex;gap:6px}.onb-dots i{width:22px;height:4px;border-radius:4px;background:var(--line)}.onb-dots i.on{background:var(--accent)}
 .brand b{font-family:var(--disp);font-size:18px;font-weight:800;letter-spacing:-.02em;line-height:1}
 .brand span{font-size:11.5px;color:var(--muted);font-weight:500}
@@ -279,7 +288,7 @@ body.kb .pinbar{bottom:0}
 .phtile{min-width:0;display:flex;flex-direction:column;gap:5px;text-align:left;padding:9px 10px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);color:var(--ink);min-height:64px}
 .phtile.on{border-color:var(--accent);background:var(--accent-soft)}
 .phtile .n{font-family:var(--mono);font-size:11px;color:var(--faint)}
-.phtile .t{font-size:12.5px;font-weight:600;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.phtile .t{font-size:12.5px;font-weight:600;line-height:1.25;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 .phtile .pb{height:4px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:auto}.phtile .pb i{display:block;height:100%;background:var(--accent)}
 .phtile.done .pb i{background:#1f9d55}
 
@@ -355,22 +364,25 @@ body.kb .pinbar{bottom:0}
 
 <!-- Dữ liệu tải sau khi khung + skeleton đã hiển thị (C1: tránh trắng màn) -->
 <!-- v3.0: gói ngành. Chọn gói theo store.cfg.track (hoặc ?track=); người dùng cũ có tiến độ → IT; mặc định → Công sở chung -->
-<script>(function(){var T={office:1,it:1,hotel:1,sales:1,factory:1},t='',s=null;
+<script>(function(){var T={office:1,it:1,hotel:1,sales:1,factory:1,logistics:1,finance:1,marketing:1,health:1,custom:1},t='',s=null;
 try{s=JSON.parse(localStorage.getItem('it-english-v1')||'null');}catch(e){}
 if(s&&s.cfg&&T[s.cfg.track])t=s.cfg.track;
 else if(s&&((s.stats&&s.stats.placed)||Object.keys((s.days&&s.days.done)||{}).length||((s.days&&s.days.cur)||1)>1))t='it';
 var q=(location.search.match(/[?&]track=([a-z]+)/)||[])[1];if(q&&T[q]){t=q;window.TRACK_FROM_URL=q;}
+if(t==='custom'&&!(s&&s.customPack&&s.customPack.phases&&s.customPack.phases.length))t='office';
 if(!T[t])t='office';window.TRACK=t;
 if(t==='it')document.write('<script src="data.gen.js"><\/script><script src="phrases.gen.js"><\/script><script src="roles.gen.js"><\/script>');
+else if(t==='custom')document.write('<script src="packs/office.gen.js"><\/script><script src="packs/custom.js"><\/script>');
 else document.write('<script src="packs/'+t+'.gen.js"><\/script>');})();</script>
 <script>
 // ---------- Lesson data: 100-day curriculum (data.gen.js) ----------
 const D=window.DATA;
 // ---------- v3.0: gói ngành (TRACK) — nạp ở <head>, xem packs_src/README.md ----------
 const APP_NAME='Nói Nghề';
-const TRACKS=[{"id":"office","emoji":"🏢","label":"Công sở chung","short":"Công sở","desc":"Văn phòng · họp · email · phỏng vấn","roles":[["staff","🧑‍💼","Nhân viên văn phòng"],["admin","🗂️","Hành chính – Nhân sự"],["lead","📋","Trưởng nhóm / Quản lý"],["candidate","🎓","Sinh viên · Ứng viên"]],"them":"Đồng nghiệp"},{"id":"it","emoji":"💻","label":"IT · Phần mềm","short":"IT","desc":"Dev · QA · DevOps · BA · PM · Designer · Data","roles":[["dev","💻","Developer"],["qa","🧪","QA / Tester"],["devops","🛠️","DevOps / SRE"],["ba","📋","Business Analyst"],["pm","🧭","PM / Scrum Master"],["designer","🎨","UI/UX Designer"],["data","📊","Data / Analyst"]],"them":"Đồng nghiệp"},{"id":"hotel","emoji":"🏨","label":"Khách sạn · Du lịch","short":"Khách sạn","desc":"Lễ tân · nhà hàng · buồng phòng · tour","roles":[["reception","🛎️","Lễ tân"],["fnb","🍽️","Nhà hàng · Bar"],["housekeeping","🧹","Buồng phòng"],["guide","🗺️","Hướng dẫn viên · Tour"]],"them":"Khách"},{"id":"sales","emoji":"🎧","label":"Bán hàng · CSKH","short":"Bán hàng","desc":"Sale · chăm sóc khách hàng · call center","roles":[["retail","🛍️","Bán hàng tại cửa hàng"],["cs","🎧","CSKH · Call center"],["telesales","📞","Telesales"],["b2b","🤝","Sale B2B · Account"]],"them":"Khách hàng"},{"id":"factory","emoji":"🏭","label":"Sản xuất · Nhà máy","short":"Nhà máy","desc":"QA/QC · kỹ sư · tổ trưởng · kế hoạch","roles":[["qc","🔍","QA / QC"],["engineer","🔧","Kỹ sư sản xuất · Bảo trì"],["leader","👷","Tổ trưởng · Giám sát"],["planner","📦","Kế hoạch · Kho · Mua hàng"]],"them":"Đồng nghiệp"}];
+const TRACKS=[{"id":"office","emoji":"🏢","label":"Công sở chung","short":"Công sở","desc":"Văn phòng · họp · email · phỏng vấn","them":"Đồng nghiệp","roles":[["staff","🧑‍💼","Nhân viên văn phòng"],["admin","🗂️","Hành chính – Nhân sự"],["lead","📋","Trưởng nhóm / Quản lý"],["candidate","🎓","Sinh viên · Ứng viên"]]},{"id":"it","emoji":"💻","label":"IT · Phần mềm","short":"IT","desc":"Dev · QA · DevOps · BA · PM · Designer · Data","them":"Đồng nghiệp","roles":[["dev","💻","Developer"],["qa","🧪","QA / Tester"],["devops","🛠️","DevOps / SRE"],["ba","📋","Business Analyst"],["pm","🧭","PM / Scrum Master"],["designer","🎨","UI/UX Designer"],["data","📊","Data / Analyst"]]},{"id":"hotel","emoji":"🏨","label":"Khách sạn · Du lịch","short":"Khách sạn","desc":"Lễ tân · nhà hàng · buồng phòng · tour","them":"Khách","roles":[["reception","🛎️","Lễ tân"],["fnb","🍽️","Nhà hàng · Bar"],["housekeeping","🧹","Buồng phòng"],["guide","🗺️","Hướng dẫn viên · Tour"]]},{"id":"sales","emoji":"🎧","label":"Bán hàng · CSKH","short":"Bán hàng","desc":"Sale · chăm sóc khách hàng · call center","them":"Khách hàng","roles":[["retail","🛍️","Bán hàng tại cửa hàng"],["cs","🎧","CSKH · Call center"],["telesales","📞","Telesales"],["b2b","🤝","Sale B2B · Account"]]},{"id":"factory","emoji":"🏭","label":"Sản xuất · Nhà máy","short":"Nhà máy","desc":"QA/QC · kỹ sư · tổ trưởng · kế hoạch","them":"Đồng nghiệp","roles":[["qc","🔍","QA / QC"],["engineer","🔧","Kỹ sư sản xuất · Bảo trì"],["leader","👷","Tổ trưởng · Giám sát"],["planner","📦","Kế hoạch · Kho · Mua hàng"]]},{"id":"logistics","emoji":"🚚","label":"Logistics · Xuất nhập khẩu","short":"Logistics","desc":"Chứng từ · kho · vận tải · mua hàng","them":"Đối tác","roles":[["docs","📄","Chứng từ XNK"],["warehouse","🏬","Kho vận"],["forwarding","🚢","Forwarder · Vận tải"],["purchasing","🛒","Mua hàng · Nhà cung cấp"]]},{"id":"finance","emoji":"💰","label":"Tài chính · Kế toán","short":"Kế toán","desc":"Kế toán · ngân hàng · kiểm toán","them":"Sếp · đối tác","roles":[["accountant","📒","Kế toán"],["banking","🏦","Giao dịch viên ngân hàng"],["audit","🔎","Kiểm toán"],["fpa","📈","Phân tích tài chính (FP&A)"]]},{"id":"marketing","emoji":"📣","label":"Marketing · TMĐT","short":"Marketing","desc":"Marketing · quảng cáo · vận hành shop online","them":"Đồng nghiệp","roles":[["digital","📱","Digital marketing · Ads"],["content","✍️","Content · Social"],["ecom","🛒","Vận hành sàn TMĐT"],["brand","🎯","Brand · Account agency"]]},{"id":"health","emoji":"🩺","label":"Y tế · Điều dưỡng","short":"Y tế","desc":"Điều dưỡng · lễ tân phòng khám · dược","them":"Bệnh nhân","roles":[["nurse","🩺","Điều dưỡng"],["reception","🗂️","Lễ tân phòng khám"],["pharmacy","💊","Nhà thuốc · Dược"],["care","🤝","Chăm sóc · Hộ lý"]]},{"id":"custom","emoji":"✏️","label":"Nghề của tôi","short":"Nghề tôi","desc":"Gói AI tạo theo mô tả công việc của bạn","them":"Đồng nghiệp","roles":[["staff","🧑‍💼","Nhân viên văn phòng"],["admin","🗂️","Hành chính – Nhân sự"],["lead","📋","Trưởng nhóm / Quản lý"],["candidate","🎓","Sinh viên · Ứng viên"]]}];
 const TRACK=window.TRACK||'office';
 const TRK=TRACKS.find(function(t){return t.id===TRACK;})||TRACKS[0];
+if(TRACK==='custom'&&window.CUSTOM_PACK){TRK.label=window.CUSTOM_PACK.label||TRK.label;TRK.short=window.CUSTOM_PACK.short||TRK.short;}
 const PACK=window.PACK||null; // null = gói IT (dữ liệu gốc data/phrases/roles.gen.js)
 function who(){return (typeof store!=='undefined'&&store.cfg&&store.cfg.persona)||(PACK?PACK.persona:'a Vietnamese software developer');}
 function ctxName(){return PACK?PACK.context:'software development';}
@@ -378,7 +390,7 @@ function themVi(){return TRK.them||'Đồng nghiệp';}
 const REPORT=(PACK&&PACK.report)||{title:'Standup 60 giây',short:'Standup 60s',sub:'Nói như họp sáng 🎙️',hint:'Hôm qua · hôm nay · vướng',
   steps:[['Yesterday','I finished / worked on …'],['Today','I’m going to …'],['Blockers','No blockers. / I’m blocked by …']],kind:'daily standup',structure:'yesterday/today/blockers',
   sample:'Yesterday I finished the login API and fixed two bugs. Today I\'m going to write unit tests for the payment module. No blockers right now.'};
-if(!REPORT.hint)REPORT.hint=({office:'Đã làm · sẽ làm · vướng',hotel:'Trong ca · còn lại · lưu ý',sales:'Kết quả · hôm nay · khó khăn',factory:'Sản lượng · lỗi · kế hoạch'})[TRACK]||REPORT.steps.map(function(x){return x[0];}).join(' · ');
+if(!REPORT.hint)REPORT.hint=({office:'Đã làm · sẽ làm · vướng',custom:'Đã làm · sẽ làm · vướng',hotel:'Trong ca · còn lại · lưu ý',sales:'Kết quả · hôm nay · khó khăn',factory:'Sản lượng · lỗi · kế hoạch',logistics:'Lô hàng · vướng · tiếp theo',finance:'Số liệu · chênh lệch · việc cần làm',marketing:'Kết quả · nhận định · tiếp theo',health:'Bệnh nhân · thay đổi · cần theo dõi'})[TRACK]||REPORT.steps.map(function(x){return x[0];}).join(' · ');
 function switchTrack(id,hash){if(!TRACKS.some(function(t){return t.id===id;}))return;store.cfg.track=id;store.cfg.trackChosen=true;
   var r=(TRACKS.find(function(t){return t.id===id;})||{}).roles||[];if(!r.some(function(x){return x[0]===store.cfg.role;}))store.cfg.role=(r[0]||[])[0]||'';
   save(store);if(id!==TRACK){location.href=location.pathname+(hash||'');}else if(typeof go==='function')go('home');}
@@ -387,7 +399,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="3.0.0", APP_BUILD="2026-09-20";
+const APP_VERSION="3.1.0", APP_BUILD="2026-09-20";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -619,8 +631,8 @@ function attachSwipe(node,onLeft,onRight){
 const TABS=[["home","Hôm nay",ICO.home],["roadmap","Lộ trình",ICO.route],["practice","Luyện",ICO.dumbbell],["me","Tôi",ICO.user]];
 let cur="home";
 // Mỗi màn thuộc về một tab (để làm sáng đúng tab); tab bar đóng vai trò "về gốc"
-const TAB_OF={standup:'home',reverse:'practice',rolequiz:'practice',sreview:'practice',podcast:'practice',jd:'me',events:'me',home:'home',roadmap:'roadmap',practice:'practice',vocab:'practice',phrase:'practice',listen:'practice',talk:'practice',rewrite:'practice',reading:'practice',me:'me',progress:'me',history:'me',settings:'me'};
-function tabRender(k){return {standup:vStandup,reverse:vReverse,rolequiz:vRoleQuiz,sreview:vSReview,podcast:vPodcast,jd:vJD,events:vEvents,home:vHome,roadmap:vRoadmap,practice:vPractice,vocab:vVocab,phrase:vPhrase,listen:vListen,talk:vTalk,rewrite:vRewrite,reading:vReading,me:vMe,progress:vProgress,history:vHistory,settings:openSettings}[k]||vHome;}
+const TAB_OF={handsfree:'practice',photo:'practice',reports:'me',standup:'home',reverse:'practice',rolequiz:'practice',sreview:'practice',podcast:'practice',jd:'me',events:'me',home:'home',roadmap:'roadmap',practice:'practice',vocab:'practice',phrase:'practice',listen:'practice',talk:'practice',rewrite:'practice',reading:'practice',me:'me',progress:'me',history:'me',settings:'me'};
+function tabRender(k){return {handsfree:vHandsfree,photo:vPhoto,reports:vReports,standup:vStandup,reverse:vReverse,rolequiz:vRoleQuiz,sreview:vSReview,podcast:vPodcast,jd:vJD,events:vEvents,home:vHome,roadmap:vRoadmap,practice:vPractice,vocab:vVocab,phrase:vPhrase,listen:vListen,talk:vTalk,rewrite:vRewrite,reading:vReading,me:vMe,progress:vProgress,history:vHistory,settings:openSettings}[k]||vHome;}
 function renderTabs(){
   const n=$("#tabs");n.innerHTML="";
   TABS.forEach(([k,label,ic])=>{
@@ -647,12 +659,14 @@ function vPractice(){
       [ICO.talk,'Giao tiếp AI','Trò chuyện · AI sửa lỗi',function(){go('talk');}],
       ['🎙️',REPORT.title,REPORT.sub.replace(/\s*🎙️/,''),standupStart],
       ['🔁','Dịch ngược','Câu Việt → nói tiếng Anh',revStart],
-      ['📅','Sự kiện sắp tới','Luyện trước buổi họp/demo',function(){go('events');}]]],
+      ['📅','Sự kiện sắp tới','Luyện trước buổi họp/demo',function(){go('events');}],
+      ['🎧','Rảnh tay','Chỉ nghe & nói, không chạm',hfStart]]],
     ['Nghe',[
       [ICO.ear,'Nghe','Chép chính tả · nhại theo',function(){go('listen');}],
       ['🎧',PACK?PACK.podcast:'Podcast dev','Nghe thụ động ~5 phút',podcastStart]]],
     ['Công việc thật',[
       ['✍️','Viết tin nhắn','AI sửa giọng: lịch sự / ngắn gọn',function(){go('rewrite');}],
+      ['📷','Ảnh → bài học','Chụp email, menu, phiếu…',function(){go('photo');}],
       ['📖',PACK?'Đọc hiểu 30 giây':'Đọc log / lỗi',PACK?READING.slice(0,3).map(function(x){return x.t;}).join(' · '):'Stack trace · README · PR',readingStart]]]
   ];
   groups.forEach(function(g){
@@ -764,14 +778,16 @@ function vMe(){
   ]));
   v.appendChild(iosGroup('Nội dung của tôi',[
     iosRow('Từ của tôi',mine?String(mine):'0',function(){vMode='list';vTopic='mine';go('vocab');}),
-    iosRow('Lịch sử hội thoại',conv?String(conv):'0',function(){go('history');})
+    iosRow('Lịch sử hội thoại',conv?String(conv):'0',function(){go('history');}),
+    iosRow('⚑ Báo lỗi nội dung',String((store.reports||[]).length),function(){go('reports');})
   ]));
   v.appendChild(iosGroup('Xuất dữ liệu (Anki / CSV)',[
     iosRow('Từ của tôi → CSV',mine?String(mine):'0',function(){exportCSV('it-english-cua-toi.csv',(store.myVocab||[]));}),
     iosRow('Từ hay sai → CSV',weak?String(weak):'0',function(){exportCSV('it-english-hay-sai.csv',weakWords());})
   ]));
   v.appendChild(iosGroup('Cá nhân hoá',[
-    iosRow('Vai trò & mô tả công việc',roleLabel(),function(){go('jd');}),
+    iosRow('Ngành & vai trò',TRK.emoji+' '+TRK.short,trackPicker),
+    iosRow('Mô tả công việc · gói nghề riêng',store.customPack?('✏️ '+store.customPack.label):'',function(){go('jd');}),
     iosRow('Sự kiện sắp tới',String(eventsUpcoming(30).length),function(){go('events');}),
     iosRow('Câu hay sai (SRS)',String(psrsWeak().length),sreviewStart),
     iosRow('Ảnh chia sẻ thành tích','PNG',shareCard)
@@ -820,8 +836,8 @@ function placementModal(){onboardModal(store.cfg.trackChosen?3:1,{});}
 // v3.0: làm quen 3 bước — ngành → vai → trình độ; bước nào cũng bỏ qua được, bỏ qua = gói Công sở chung
 function trackGrid(onPick,extra){
   var g=el('div','trgrid');
-  TRACKS.forEach(function(t){var b=el('button','trtile'+(t.id===TRACK&&store.cfg.trackChosen?' on':''));b.type='button';
-    b.innerHTML='<span class="te">'+t.emoji+'</span><span class="tt"><b>'+esc(t.label)+'</b><small>'+esc(t.desc)+'</small></span>';b.onclick=function(){onPick(t.id);};g.appendChild(b);});
+  TRACKS.forEach(function(t){if(t.id==='custom'&&!(store.customPack&&store.customPack.phases))return;var b=el('button','trtile'+(t.id===TRACK&&store.cfg.trackChosen?' on':''));b.type='button';
+    var lb=t.id==='custom'&&store.customPack?store.customPack.label:t.label;b.innerHTML='<span class="te">'+t.emoji+'</span><span class="tt"><b>'+esc(lb)+'</b><small>'+esc(t.desc)+'</small></span>';b.onclick=function(){onPick(t.id);};g.appendChild(b);});
   if(extra){var o=el('button','trtile');o.type='button';o.innerHTML='<span class="te">✏️</span><span class="tt"><b>Ngành khác</b><small>Tự tả công việc — AI tạo tình huống & từ riêng</small></span>';o.onclick=function(){onPick('other');};g.appendChild(o);}
   return g;}
 function onboardModal(step,st){
@@ -1537,14 +1553,14 @@ function openDay(n){
       <div class="vi" style="color:var(--muted);font-size:14px;margin-top:2px">${w.vi}</div>${jaLine(w)}
       <div class="ex" style="margin-top:4px;font-size:14px">${w.ex.replace(/<b>/g,'<span class="hl">').replace(/<\/b>/g,'</span>')}</div>`;
     var pbV=playBtn(w.t);pbV.addEventListener('click',function(){touched.v=true;updateComplete();});
-    row.appendChild(tx);row.appendChild(pbV);vc.appendChild(row);});
+    row.appendChild(tx);row.appendChild(pbV);row.appendChild(reportBtn('vocab',w));vc.appendChild(row);});
   v.appendChild(vc);
   const ph=D.phrases[day.ph];const pc=el('div','card');pc.appendChild(el('div','eyebrow','2 · Mẫu câu'));
   const prow=el('div','phrase');const pt=el('div','grow');
   pt.innerHTML=`<div class="en">${ph.en}</div><div class="vi">${ph.vi}</div>${ph.note?`<div class="note">${ph.note}</div>`:''}`;
   var pbP=playBtn(ph.en);pbP.addEventListener('click',function(){touched.p=true;updateComplete();});
-  prow.appendChild(pt);prow.appendChild(pbP);pc.appendChild(prow);v.appendChild(pc);
-  const d=DIALOGUES[day.di];const dc=el('div','card');dc.appendChild(el('div','eyebrow','3 · Giao tiếp — chọn cách đáp'));
+  prow.appendChild(pt);prow.appendChild(pbP);prow.appendChild(reportBtn('phrase',ph));pc.appendChild(prow);v.appendChild(pc);
+  const d=DIALOGUES[day.di];const dc=el('div','card');var dh=el('div','row between');dh.appendChild(el('div','eyebrow','3 · Giao tiếp — chọn cách đáp'));dh.appendChild(reportBtn('dialogue',d));dc.appendChild(dh);
   dc.appendChild(el('div','who',themVi()));
   const brow=el('div','row');brow.style.gap="8px";brow.appendChild(el('div','bubble them',d.them));brow.appendChild(playBtn(d.them));dc.appendChild(brow);
   const ow=el('div');ow.style.display="flex";ow.style.flexDirection="column";ow.style.gap="8px";ow.style.marginTop="4px";
@@ -1555,7 +1571,7 @@ function openDay(n){
       if(!o.good){const g=d.opts.find(x=>x.good);[...ow.children].forEach(c=>{if(c.firstChild&&c.firstChild.textContent===g.t)c.classList.add('good');});}
     };ow.appendChild(b);});
   dc.appendChild(ow);v.appendChild(dc);
-  const L=DICTATION[day.li];const lc=el('div','card');lc.appendChild(el('div','eyebrow','4 · Nghe'));
+  const L=DICTATION[day.li];const lc=el('div','card');var lh=el('div','row between');lh.appendChild(el('div','eyebrow','4 · Nghe'));lh.appendChild(reportBtn('listen',L));lc.appendChild(lh);
   const full=L.s.join(" ");
   const lrow=el('div','row');lrow.style.gap="12px";const big=el('button','play');big.innerHTML=ICO.play;big.setAttribute('aria-label','Nghe');big.onclick=()=>speak(full,big);
   lrow.appendChild(big);lrow.appendChild(el('div','muted','Nghe câu, rồi xem đáp án'));lc.appendChild(lrow);
@@ -1681,7 +1697,7 @@ function drawCard(){
     c.appendChild(el('div','divider'));
     const a=el('div','answer');
     a.innerHTML='<div class="vi">'+card.vi+'</div>'+jaLine(card)+'<div class="ex">'+card.ex.replace(/<b>/g,'<span class="hl">').replace(/<\/b>/g,'</span>')+'</div><div class="ex-vi">'+card.exVi+'</div>';
-    const eb=el('button','btn ghost sm');eb.style.alignSelf="flex-start";eb.innerHTML=ICO.play+' Nghe câu ví dụ';eb.onclick=function(){speak(card.ex,eb);};a.appendChild(eb);
+    const eb=el('button','btn ghost sm');eb.style.alignSelf="flex-start";eb.innerHTML=ICO.play+' Nghe câu ví dụ';eb.onclick=function(){speak(card.ex,eb);};var ebr=el('div','row between');ebr.appendChild(eb);ebr.appendChild(reportBtn('vocab',card));a.appendChild(ebr);
     c.appendChild(a);
   }
   v.appendChild(c);
@@ -2253,6 +2269,8 @@ async function providerChat(cfg,input,opts){
     if(/\s|[A-Z]/.test(gmodel))gmodel=gmodel.toLowerCase().replace(/\s+/g,'-');
     if(gmodel&&gmodel!==cfg.model){try{store.ai.model=gmodel;save(store);}catch(e){}}
     var gContents=turns.map(function(m){return {role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]};});
+    if(opts&&opts.image){var gl=gContents[gContents.length-1];gl.parts.unshift({inline_data:{mime_type:opts.image.mime,data:opts.image.data}});}
+    var gMax=(opts&&opts.maxTokens)||2048;
     // noThink=true: tắt "suy nghĩ" (thinkingBudget:0) để model không tiêu hết token đầu ra cho thought
     function callG(mdl,maxTok,noThink){
       var gc={temperature:0.7,maxOutputTokens:maxTok};
@@ -2266,9 +2284,9 @@ async function providerChat(cfg,input,opts){
     function gFinish(j){return (((j.candidates||[])[0]||{}).finishReason)||'';}
     // Chỉ model "thinking" (2.5/3.x, flash-latest) mới nhận thinkingConfig; lite/2.0 gửi vào sẽ 400 → tránh request lỗi thừa
     var gThink=(/2\.5|3\.\d|flash-latest|pro-latest/i.test(gmodel)) && !/lite|2\.0|1\.5/i.test(gmodel);
-    let res=await withRetry(function(){return callG(gmodel,2048,gThink);});
+    let res=await withRetry(function(){return callG(gmodel,gMax,gThink);});
     if(res.status===404 && gmodel!=='gemini-flash-latest'){
-      var res404=await withRetry(function(){return callG('gemini-flash-latest',2048,true);});
+      var res404=await withRetry(function(){return callG('gemini-flash-latest',gMax,true);});
       if(res404.ok){try{store.ai.model='gemini-flash-latest';save(store);aiReset();}catch(e){}res=res404;gmodel='gemini-flash-latest';}
     }
     if(res.status===400 && gThink){var res400=await withRetry(function(){return callG(gmodel,8192,false);});if(res400.ok)res=res400;} // model không cho thinkingBudget:0
@@ -2282,7 +2300,8 @@ async function providerChat(cfg,input,opts){
     }
     if(!text)throw new Error('gemini-empty');
   }else if(cfg.provider==='claude'){
-    const body={model:model,max_tokens:400,messages:turns.map(function(m){return {role:m.role==='assistant'?'assistant':'user',content:m.content};})};
+    const body={model:model,max_tokens:(opts&&opts.maxTokens)||400,messages:turns.map(function(m){return {role:m.role==='assistant'?'assistant':'user',content:m.content};})};
+    if(opts&&opts.image){var cl=body.messages[body.messages.length-1];cl.content=[{type:'image',source:{type:'base64',media_type:opts.image.mime,data:opts.image.data}},{type:'text',text:cl.content}];}
     if(system)body.system=system;
     const res=await withRetry(function(){return fetch('https://api.anthropic.com/v1/messages',
       {method:'POST',headers:{'content-type':'application/json','x-api-key':cfg.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify(body)});});
@@ -2290,9 +2309,10 @@ async function providerChat(cfg,input,opts){
     const j=await res.json();
     text=(j.content||[]).map(function(p){return p.text||'';}).join('');
   }else if(cfg.provider==='groq'){
+    if(opts&&opts.image)throw new Error('noimg');
     const m2=(system?[{role:'system',content:system}]:[]).concat(turns.map(function(m){return {role:m.role==='assistant'?'assistant':'user',content:m.content};}));
     const res=await withRetry(function(){return fetch('https://api.groq.com/openai/v1/chat/completions',
-      {method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+cfg.key},body:JSON.stringify({model:model,messages:m2,temperature:0.7,max_tokens:400})});});
+      {method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+cfg.key},body:JSON.stringify({model:model,messages:m2,temperature:0.7,max_tokens:(opts&&opts.maxTokens)||400})});});
     if(!res.ok)throw new Error('groq '+res.status);
     const j=await res.json();
     text=(((j.choices||[])[0]||{}).message||{}).content||'';
@@ -2564,7 +2584,7 @@ function vTalkAI(){
     v.appendChild(quick);
     const sg=el('div','card');if(notConfigured){sg.style.opacity='.55';sg.style.pointerEvents='none';}
     sg.appendChild(el('div','eyebrow','Hoặc để AI gợi ý theo lĩnh vực của bạn'));
-    const di=el('input','input');di.id='aiDomain';di.placeholder=({office:'VD: kế toán, họp với sếp người Úc, viết email',hotel:'VD: lễ tân resort, khách Hàn, đặt tour',sales:'VD: CSKH ngân hàng, khách gọi khiếu nại',factory:'VD: QC linh kiện điện tử, chuyên gia Nhật'})[TRACK]||'VD: backend Java, họp khách Nhật, xin nghỉ phép';di.value=aiDomain;di.autocomplete='off';
+    const di=el('input','input');di.id='aiDomain';di.placeholder=({office:'VD: kế toán, họp với sếp người Úc, viết email',hotel:'VD: lễ tân resort, khách Hàn, đặt tour',logistics:'VD: chứng từ XNK, khách Hàn, hàng FCL',finance:'VD: kế toán công nợ, sếp người Nhật',marketing:'VD: chạy ads cho shop mỹ phẩm',health:'VD: điều dưỡng khoa nội, bệnh nhân nước ngoài',sales:'VD: CSKH ngân hàng, khách gọi khiếu nại',factory:'VD: QC linh kiện điện tử, chuyên gia Nhật'})[TRACK]||'VD: backend Java, họp khách Nhật, xin nghỉ phép';di.value=aiDomain;di.autocomplete='off';
     di.onkeydown=function(e){if(e.key==='Enter')aiSuggestScenarios();};
     sg.appendChild(di);
     const row=el('div','row');row.style.gap='10px';
@@ -2816,7 +2836,7 @@ function vListen(){
   }
   const prog=el('div','row between');
   prog.innerHTML='<span class="muted">'+(DICTATION[lIdx].p?'Đoạn':'Câu')+' '+(lIdx+1)+' / '+DICTATION.length+(DICTATION[lIdx].p?' <span class="chip" style="height:22px;padding:0 8px;font-size:11.5px">🗣 đoạn họp</span>':'')+'</span>';prog.appendChild(apStartBtn(apListenStart));
-  v.appendChild(prog);
+  prog.appendChild(reportBtn('listen',DICTATION[lIdx]));v.appendChild(prog);
   v.appendChild(lPlayer(full,!!DICTATION[lIdx].p));
 
   if(lMode==='dictation'&&DICTATION[lIdx].p){ // v2.0: bài nghe dạng đoạn — điền từ còn thiếu ngay trong đoạn
@@ -3013,7 +3033,7 @@ function phraseRow(en,vi,gname){
   const pb=playBtn(en);pb.style.cssText="width:38px;height:38px";btns.appendChild(pb);
   const cp=el('button','play');cp.innerHTML=ICO.copy;cp.setAttribute('aria-label','Copy');
   cp.style.cssText="width:38px;height:38px;color:var(--muted)";cp.onclick=()=>copyText(en,cp);
-  btns.appendChild(cp);
+  btns.appendChild(cp);btns.appendChild(reportBtn('phrase',{en:en,vi:vi}));
   row.appendChild(tx);row.appendChild(btns);
   return row;
 }
@@ -3336,7 +3356,7 @@ function vReverse(){
   v.appendChild(viewHead('Dịch ngược · câu '+(rv.i+1)+'/'+rv.q.length,'Nói câu này bằng tiếng Anh','Đừng dịch từng chữ — nói như bạn sẽ nói ở chỗ làm.'));
   var qc=el('div','card');qc.style.cssText='gap:10px';
   qc.innerHTML='<div class="eyebrow">Tiếng Việt'+(q.dev?' · '+(PACK?PACK.reverse_tag:'kiểu dev'):'')+'</div><div style="font-size:20px;font-weight:700;line-height:1.4">'+esc(q.vi)+'</div>';
-  v.appendChild(qc);
+  qc.style.position='relative';var qrb=reportBtn('reverse',q);qrb.style.cssText='position:absolute;top:8px;right:8px';qc.appendChild(qrb);v.appendChild(qc);
   if(!rv.res&&rv.busy){v.appendChild(aiWait('AI đang chấm câu của bạn…',3));main.appendChild(v);return;}
   if(!rv.res){
     var rr=null;
@@ -3455,7 +3475,7 @@ function vRoleQuiz(){
   if(rq.i>=rq.list.length){var c=el('div','card');c.style.cssText='text-align:center;gap:12px;padding:28px 18px';c.innerHTML='<div style="font-size:38px">'+((ROLE_PACKS[curRole()]||{}).emoji||'💬')+'</div><div style="font-size:20px;font-weight:800;font-family:var(--disp)">Xong '+rq.list.length+' tình huống</div><div class="muted">'+(rq.ok||0)+' câu chọn đúng ngay lần đầu</div>';var a=el('button','btn accent block');a.textContent='↻ Làm lại';a.onclick=roleQuizStart;c.appendChild(a);v.appendChild(c);main.appendChild(v);return;}
   var d=rq.list[rq.i];
   v.appendChild(viewHead('Chọn cách đáp · '+roleLabel(),'Tình huống '+(rq.i+1)+'/'+rq.list.length));
-  var chat=el('div','card');chat.style.gap='10px';chat.appendChild(el('div','who',themVi()));
+  var chat=el('div','card');chat.style.gap='10px';var chh=el('div','row between');chh.appendChild(el('div','who',themVi()));chh.appendChild(reportBtn('dialogue',d));chat.appendChild(chh);
   var br=el('div','row');br.style.gap='8px';br.appendChild(el('div','bubble them',esc(d.them)));br.appendChild(playBtn(d.them));chat.appendChild(br);v.appendChild(chat);
   var ow=el('div');ow.style.cssText='display:flex;flex-direction:column;gap:10px';
   var opts=rq.order||(rq.order=shuffleArr(d.opts.map(function(o,i){return i;})));
@@ -3493,6 +3513,7 @@ function vJD(){
     }
   }
   if(jdBusy)v.appendChild(aiWait('AI đang đọc mô tả công việc…',5));
+  if((store.cfg.jd||'').length>=20||store.customPack)v.appendChild(cpCard());
   var btn=el('button','btn accent block');btn.textContent=jdBusy?'AI đang phân tích…':(jdRes?'Phân tích lại':'Phân tích');btn.disabled=jdBusy;btn.onclick=jdGo;v.appendChild(pinBar(btn));
   main.appendChild(v);
 }
@@ -3644,7 +3665,7 @@ function vEvents(){
   var f=el('div','card');f.style.gap='10px';
   var d=el('input','input');d.type='date';d.value=new Date(Date.now()+864e5).toISOString().slice(0,10);f.appendChild(d);
   var s=el('select','input');EVENT_TYPES.forEach(function(x){var o=document.createElement('option');o.value=x[0];o.textContent=x[1];s.appendChild(o);});f.appendChild(s);
-  var n=el('input','input');n.placeholder=({office:'Ghi chú (tuỳ chọn): họp báo cáo quý với sếp',hotel:'Ghi chú (tuỳ chọn): đoàn 20 khách Úc nhận phòng',sales:'Ghi chú (tuỳ chọn): gặp khách B2B chốt hợp đồng',factory:'Ghi chú (tuỳ chọn): khách hàng audit dây chuyền 2'})[TRACK]||'Ghi chú (tuỳ chọn): demo tính năng thanh toán cho khách Nhật';n.maxLength=140;f.appendChild(n);
+  var n=el('input','input');n.placeholder=({office:'Ghi chú (tuỳ chọn): họp báo cáo quý với sếp',hotel:'Ghi chú (tuỳ chọn): đoàn 20 khách Úc nhận phòng',logistics:'Ghi chú (tuỳ chọn): họp với forwarder về lô hàng trễ',finance:'Ghi chú (tuỳ chọn): kiểm toán cuối năm',marketing:'Ghi chú (tuỳ chọn): pitch chiến dịch Tết cho khách',health:'Ghi chú (tuỳ chọn): tiếp đón bệnh nhân Hàn Quốc',sales:'Ghi chú (tuỳ chọn): gặp khách B2B chốt hợp đồng',factory:'Ghi chú (tuỳ chọn): khách hàng audit dây chuyền 2'})[TRACK]||'Ghi chú (tuỳ chọn): demo tính năng thanh toán cho khách Nhật';n.maxLength=140;f.appendChild(n);
   var add=el('button','btn accent block');add.textContent='＋ Thêm sự kiện';add.onclick=function(){if(!d.value){toast('Chọn ngày');return;}if(!store.events)store.events=[];store.events.push({id:Date.now(),date:d.value,type:s.value,note:n.value.trim().slice(0,140)});save(store);toast('Đã thêm','ok');vEvents();};f.appendChild(add);
   v.appendChild(f);
   var t=todayStr();var list=(store.events||[]).filter(function(e){return e.date>=t;}).sort(function(a,b){return a.date<b.date?-1:1;});
@@ -3659,7 +3680,7 @@ function quickAsk(){
   openModal(function(card,close){
     card.appendChild(el('h3',null,'Hỏi nhanh ✨'));
     card.appendChild(el('div','muted','<span style="font-size:13px">Hỏi nghĩa, cách dùng, so sánh từ — hoặc dán câu đồng nghiệp vừa nhắn để hiểu & trả lời.</span>'));
-    var ta=el('textarea','input');ta.rows=3;ta.style.cssText='min-height:84px;height:auto;line-height:1.45;padding:10px 12px';ta.placeholder=({office:'VD: "deadline" với "due date" khác gì?',hotel:'VD: "reservation" với "booking" khác gì?',sales:'VD: "refund" với "reimburse" khác gì?',factory:'VD: "defect" với "failure" khác gì?'})[TRACK]||'VD: "blocker" với "impediment" khác gì?';card.appendChild(ta);
+    var ta=el('textarea','input');ta.rows=3;ta.style.cssText='min-height:84px;height:auto;line-height:1.45;padding:10px 12px';ta.placeholder=({office:'VD: "deadline" với "due date" khác gì?',hotel:'VD: "reservation" với "booking" khác gì?',logistics:'VD: "ETA" với "ETD" khác gì?',finance:'VD: "invoice" với "receipt" khác gì?',marketing:'VD: "reach" với "impression" khác gì?',health:'VD: "symptom" với "sign" khác gì?',sales:'VD: "refund" với "reimburse" khác gì?',factory:'VD: "defect" với "failure" khác gì?'})[TRACK]||'VD: "blocker" với "impediment" khác gì?';card.appendChild(ta);
     var out=el('div');out.style.cssText='display:flex;flex-direction:column;gap:8px';card.appendChild(out);
     var b=el('button','btn accent block');b.textContent='Hỏi';card.appendChild(b);
     b.onclick=async function(){var q=ta.value.trim();if(!q){toast('Nhập câu hỏi');return;}
@@ -3736,6 +3757,304 @@ window.addEventListener('online',paintOffline);window.addEventListener('offline'
 (function(){var vv=window.visualViewport;if(!vv)return;function f(){var open=(window.innerHeight-vv.height)>140;document.body.classList.toggle('kb',open);}vv.addEventListener('resize',f);})();
 function buzz(ok){try{if(navigator.vibrate)navigator.vibrate(ok?12:[25,40,25]);}catch(e){}}
 function aiWait(label,lines){var w=el('div','card aiwait');w.appendChild(el('div','lab','<i></i>'+(label||'AI đang xử lý…')));for(var i=0;i<(lines||3);i++){var s=el('div','skel');s.style.cssText='height:14px;border-radius:7px;width:'+(i===(lines||3)-1?60:(90-i*8))+'%';w.appendChild(s);}setTimeout(function(){if(w.isConnected){var r=w.getBoundingClientRect();if(r.bottom>innerHeight-150)w.scrollIntoView({block:'center',behavior:'smooth'});}},40);return w;}
+// ================= v3.1 =================
+// ---- R1: Báo lỗi nội dung (lưu trên máy + gửi qua GitHub issue / chép) ----
+const REPORT_REPO='https://github.com/hunglv201/it-english-app/issues/new';
+const REPORT_TYPES=['Sai nghĩa tiếng Việt','Sai phát âm / IPA','Sai ngữ pháp / không tự nhiên','Đáp án đúng/sai bị nhầm','Tiếng Nhật sai','Khác'];
+function reportText(kind,o){
+  try{
+    if(kind==='vocab')return o.t+' '+(o.ipa||'')+' ('+(o.pos||'')+') = '+o.vi+(o.ja?' · 🇯🇵 '+String(o.ja).replace('|',' / '):'')+'\nEx: '+String(o.ex||'').replace(/<\/?b>/g,'')+'\nVI: '+(o.exVi||'');
+    if(kind==='phrase')return o.en+'\nVI: '+(o.vi||'');
+    if(kind==='dialogue')return 'Them: '+o.them+'\n'+(o.opts||[]).map(function(x){return (x.good?'✓ ':'✗ ')+x.t+' — '+x.fb;}).join('\n');
+    if(kind==='listen')return (o.s||[]).join(' ')+'\nBlanks: '+(o.blank||[]).map(function(i){return o.s[i];}).join(', ');
+    if(kind==='reverse')return 'VI: '+o.vi+'\nEN: '+o.en;
+  }catch(e){}
+  return String(o&&o.text||'');
+}
+function reportBtn(kind,o){
+  var b=el('button','flagbtn','⚑');b.type='button';b.title='Báo lỗi nội dung';b.setAttribute('aria-label','Báo lỗi nội dung');
+  b.onclick=function(e){e.stopPropagation();reportModal(kind,o);};return b;
+}
+function reportIssueUrl(list){
+  var title=list.length===1?('[Nội dung] '+TRACK+' · '+list[0].kind+' · '+list[0].type):('[Nội dung] '+list.length+' báo lỗi');
+  var body=list.map(function(r,i){return '### '+(i+1)+'. '+r.type+' — gói `'+r.track+'` · '+r.kind+(r.where?' · '+r.where:'')+'\n```\n'+r.text+'\n```\n'+(r.note?'**Gợi ý sửa:** '+r.note+'\n':'');}).join('\n');
+  body+='\n_Gửi từ '+APP_NAME+' v'+APP_VERSION+'_';
+  if(body.length>6000)body=body.slice(0,6000)+'\n…(đã cắt bớt — xem bản sao chép)';
+  return REPORT_REPO+'?labels=content&title='+encodeURIComponent(title)+'&body='+encodeURIComponent(body);
+}
+function reportModal(kind,o){
+  var st={type:''};
+  openModal(function(card,close){
+    card.appendChild(el('h3',null,'⚑ Báo lỗi nội dung'));
+    var pre=el('pre');pre.style.cssText='margin:0;white-space:pre-wrap;word-break:break-word;font-family:var(--mono);font-size:12px;line-height:1.5;background:var(--surface2);border-radius:10px;padding:10px 12px;max-height:150px;overflow:auto';
+    pre.textContent=reportText(kind,o);card.appendChild(pre);
+    card.appendChild(el('div','muted','<span style="font-size:13px">Lỗi gì?</span>'));
+    var w=el('div');w.style.cssText='display:flex;flex-wrap:wrap;gap:6px';
+    REPORT_TYPES.forEach(function(t){var c=el('button','chip',t);c.type='button';c.onclick=function(){st.type=t;[].forEach.call(w.children,function(x){x.classList.toggle('on',x===c);});};w.appendChild(c);});
+    card.appendChild(w);
+    var ta=el('textarea','input');ta.rows=2;ta.placeholder='Gợi ý sửa (tuỳ chọn): câu đúng nên là…';ta.style.cssText='min-height:64px;line-height:1.45;padding:10px 12px';card.appendChild(ta);
+    var sv=el('button','btn accent block');sv.textContent='Lưu báo lỗi';
+    sv.onclick=function(){
+      if(!st.type){toast('Chọn loại lỗi trước');return;}
+      var r={at:new Date().toISOString(),track:TRACK,kind:kind,type:st.type,note:ta.value.trim().slice(0,400),text:reportText(kind,o).slice(0,700),where:(D.phaseTitles&&DAYS[(store.days.cur||1)-1])?('ngày '+(store.days.cur||1)):''};
+      if(!store.reports)store.reports=[];store.reports.unshift(r);store.reports=store.reports.slice(0,200);save(store);
+      card.innerHTML='';card.appendChild(el('h3',null,'Đã lưu, cảm ơn bạn 🙏'));
+      card.appendChild(el('div','muted','<span style="font-size:13.5px">Báo lỗi nằm ở Tôi › Báo lỗi nội dung. Gửi ngay cho người làm app để sửa ở bản sau:</span>'));
+      var gh=el('a','btn accent block');gh.href=reportIssueUrl([r]);gh.target='_blank';gh.rel='noopener';gh.textContent='Gửi qua GitHub';gh.onclick=function(){r.sent=true;save(store);};card.appendChild(gh);
+      var cp=el('button','btn ghost block');cp.textContent='Chép nội dung báo lỗi';cp.onclick=function(){copyText('['+r.type+'] '+r.track+' · '+r.kind+'\n'+r.text+(r.note?'\nGợi ý: '+r.note:''),cp);};card.appendChild(cp);
+      var ok=el('button','btn ghost block');ok.textContent='Xong';ok.onclick=close;card.appendChild(ok);
+    };
+    card.appendChild(sv);
+  });
+}
+function vReports(){
+  main.innerHTML='';var v=el('div','view');v.appendChild(backBtn('Tôi','me'));
+  var list=store.reports||[];
+  v.appendChild(viewHead('Của tôi · '+list.length+' báo lỗi','Báo lỗi nội dung','Bấm ⚑ ở thẻ từ, câu, hội thoại hay bài nghe để báo nội dung sai. Báo lỗi lưu trên máy bạn; gửi cho người làm app qua GitHub hoặc chép gửi tay.'));
+  if(!list.length){v.appendChild(el('div','card muted','Chưa có báo lỗi nào.'));main.appendChild(v);return;}
+  var c=el('div','card');c.style.gap='2px';
+  list.forEach(function(r,i){var row=el('div','row between');row.style.cssText='gap:10px;padding:9px 0;border-bottom:1px solid var(--line2);align-items:flex-start';
+    row.innerHTML='<span class="grow" style="min-width:0"><b style="font-size:13.5px">'+esc(r.type)+'</b> <small class="muted">· '+esc(r.track)+' · '+esc(r.kind)+(r.sent?' · đã gửi':'')+'</small><br><span style="font-size:12.5px;white-space:pre-wrap;word-break:break-word;color:var(--muted)">'+esc(r.text.split('\n')[0])+'</span>'+(r.note?'<br><span style="font-size:12.5px">→ '+esc(r.note)+'</span>':'')+'</span>';
+    var x=el('button','icobtn','✕');x.style.cssText='width:30px;height:30px;font-size:13px;flex:0 0 auto';x.setAttribute('aria-label','Xoá');x.onclick=function(){store.reports.splice(i,1);save(store);vReports();};row.appendChild(x);c.appendChild(row);});
+  v.appendChild(c);
+  var unsent=list.filter(function(r){return !r.sent;});
+  var gh=el('a','btn accent block');gh.href=reportIssueUrl(unsent.length?unsent.slice(0,15):list.slice(0,15));gh.target='_blank';gh.rel='noopener';gh.textContent='Gửi '+(unsent.length||list.length)+' báo lỗi qua GitHub';
+  gh.onclick=function(){(unsent.length?unsent:list).slice(0,15).forEach(function(r){r.sent=true;});save(store);setTimeout(vReports,300);};
+  var cp=el('button','btn ghost');cp.textContent='Chép tất cả';cp.onclick=function(){copyText(list.map(function(r){return '['+r.type+'] '+r.track+' · '+r.kind+'\n'+r.text+(r.note?'\nGợi ý: '+r.note:'');}).join('\n\n'),cp);};
+  var r2=el('div','row');r2.appendChild(cp);gh.classList.add('grow');r2.appendChild(gh);v.appendChild(pinBar(r2));
+  main.appendChild(v);
+}
+
+// ---- H1: Luyện nói rảnh tay (chỉ giọng nói: AI đọc → tự bật mic → chấm → câu sau) ----
+let hf={on:false,run:false,mode:'repeat',list:[],i:0,try:0,st:'',heard:'',pct:null,n:10,res:[],wl:null};
+function hfSpeakP(text,lang){return new Promise(function(res){
+  if(!('speechSynthesis'in window)){res();return;}
+  try{speechSynthesis.cancel();}catch(e){}
+  var u=new SpeechSynthesisUtterance(String(text).replace(/<[^>]+>/g,''));
+  u.lang=lang||voiceLang();u.rate=(store.cfg&&store.cfg.rate)||0.95;
+  if(lang&&/^vi/.test(lang)){var vv=(speechSynthesis.getVoices()||[]).find(function(x){return /^vi/i.test(x.lang);});if(vv)u.voice=vv;}else if(VOICE)u.voice=VOICE;
+  var done=false,fin=function(){if(!done){done=true;res();}};u.onend=u.onerror=fin;
+  setTimeout(fin,1500+String(text).length*110);speechSynthesis.speak(u);});}
+function hfListenP(maxMs){return new Promise(function(res){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){res('');return;}
+  var r=new SR();r.lang='en-US';r.interimResults=true;r.continuous=false;var fin='',inter='',done=false;
+  var end=function(){if(done)return;done=true;clearTimeout(to);hf.stopMic=null;res((fin||inter).trim());};
+  r.onresult=function(e){inter='';for(var i=e.resultIndex;i<e.results.length;i++){var t=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=(fin?' ':'')+t.trim();else inter+=t;}hf.heard=(fin||inter).trim();hfPaintLive();};
+  r.onerror=function(){};r.onend=end;
+  var to=setTimeout(function(){try{r.stop();}catch(e){}setTimeout(end,600);},maxMs||9000);
+  hf.stopMic=function(){try{r.abort();}catch(e){}end();};
+  try{r.start();}catch(e){end();}});}
+function hfHasVi(){try{return (speechSynthesis.getVoices()||[]).some(function(x){return /^vi/i.test(x.lang);});}catch(e){return false;}}
+function hfBuild(mode,n){
+  var cur=store.days.cur||1,ph=(DAYS[cur-1]||{}).phase||0,items=[];
+  var near=DAYS.filter(function(d){return Math.abs(d.phase-ph)<=1;});
+  if(mode==='reply'){
+    var seen={};near.forEach(function(d){var x=DIALOGUES[d.di];if(x&&!seen[x.them]){seen[x.them]=1;items.push(x);}});roleDialogues().forEach(function(x){items.push(x);});
+    items=shuffleArr(items).slice(0,n).map(function(x){var g=x.opts.find(function(o){return o.good;})||x.opts[0];return {q:x.them,a:g.t,vi:'',ref:x};});
+  }else{
+    var pool=[];var seen2={};
+    near.forEach(function(d){var p=D.phrases[d.ph];if(p&&!seen2[p.en]){seen2[p.en]=1;pool.push({en:p.en,vi:p.vi});}});
+    (PHRASES[Math.min(ph,PHRASES.length-1)]||{items:[]}).items.forEach(function(x){if(!seen2[x.en]&&x.en.split(' ').length<=12){seen2[x.en]=1;pool.push(x);}});
+    psrsDue().slice(0,4).forEach(function(it){if(it&&it.en&&!seen2[it.en]){seen2[it.en]=1;pool.push({en:it.en,vi:it.vi||''});}});
+    items=shuffleArr(pool).slice(0,n).map(function(x){return {q:x.en,a:x.en,vi:x.vi||'',ref:x};});
+  }
+  return items;
+}
+function hfStart(){hfStop(true);hf.on=true;hf.run=false;hf.res=[];hf.i=0;go('handsfree');}
+async function hfWake(on){try{if(on&&navigator.wakeLock&&!hf.wl){hf.wl=await navigator.wakeLock.request('screen');}else if(!on&&hf.wl){hf.wl.release();hf.wl=null;}}catch(e){}}
+function hfStop(silent){hf.run=false;hf.token=(hf.token||0)+1;if(hf.stopMic)hf.stopMic();try{speechSynthesis.cancel();}catch(e){}hfWake(false);if(!silent&&document.querySelector('.hfv'))vHandsfree();}
+async function hfGo(){
+  if(!hasSR()){toast('Trình duyệt chưa hỗ trợ nhận giọng nói — dùng Chrome (Android/máy tính) hoặc Safari (iPhone)');return;}
+  if(!hf.list.length||hf.i>=hf.list.length){hf.list=hfBuild(hf.mode,hf.n);hf.i=0;hf.res=[];}
+  if(!hf.list.length){toast('Chưa có câu để luyện');return;}
+  hf.run=true;var tk=hf.token=(hf.token||0)+1;hfWake(true);vHandsfree();
+  var alive=function(){return hf.run&&hf.token===tk&&!!document.querySelector('.hfv');};
+  while(alive()&&hf.i<hf.list.length){
+    var it=hf.list[hf.i];hf.try=0;hf.heard='';hf.pct=null;
+    while(alive()&&hf.try<2){
+      hf.st='say';vHandsfree();
+      if(hf.mode==='translate')await hfSpeakP(it.vi||it.q,'vi-VN');else await hfSpeakP(it.q);
+      if(!alive())return;
+      hf.st='listen';hf.heard='';vHandsfree();
+      var words=it.a.split(/\s+/).length;var heard=await hfListenP(Math.min(15000,4500+words*650));
+      if(!alive())return;
+      var m=wordMatch(it.a,heard);var pass=hf.mode==='reply'?50:70;hf.heard=heard;hf.pct=heard?m.pct:0;hf.st='fb';vHandsfree();
+      if(hf.pct>=pass){await hfSpeakP(hf.pct>=90?'Excellent!':'Good!');break;}
+      hf.try++;
+      if(hf.mode==='reply'){await hfSpeakP('You can say:');if(!alive())return;await hfSpeakP(it.a);if(hf.try<2){await hfSpeakP('Your turn.');}}
+      else if(hf.mode==='translate'){await hfSpeakP(it.a);}
+      else await hfSpeakP(heard?'Again.':'Say it with me.');
+    }
+    if(!alive())return;
+    hf.res[hf.i]=hf.pct||0;if((hf.pct||0)<60&&it.a)psrsAdd(it.a,{vi:it.vi||it.q,src:'phrase'});
+    bumpActivity();store.stats.done=(store.stats.done||0)+1;save(store);
+    hf.i++;
+  }
+  if(hf.token===tk){hf.run=false;hfWake(false);if(hf.i>=hf.list.length){hf.st='done';advanceStreak&&advanceStreak();save(store);hfSpeakP('Well done! Session complete.');}vHandsfree();}
+}
+function hfPaintLive(){var e=$('#hfHeard');if(e)e.textContent=hf.heard?('“'+hf.heard+'”'):'…';}
+function vHandsfree(){
+  if(!hf.on){hfStart();return;}
+  viewTop('hf');main.innerHTML='';var v=el('div','view hfv');
+  var back=el('button','btn ghost sm');back.style.alignSelf='flex-start';back.textContent='‹ Luyện';back.onclick=function(){hfStop(true);hf.on=false;go('practice');};v.appendChild(back);
+  v.appendChild(viewHead('Rảnh tay · chỉ dùng giọng nói','Luyện nói không cần chạm 🎧','App đọc → tự bật mic → chấm → sang câu sau. Không cần chạm màn hình — hợp lúc đi đường, nghỉ giữa ca. Đeo tai nghe có mic sẽ nghe rõ hơn.'));
+  if(!hasSR())v.appendChild(el('div','card','<div style="font-size:14px;color:var(--amber)">Trình duyệt này chưa nhận được giọng nói. Mở bằng Chrome (Android / máy tính) hoặc Safari (iPhone).</div>'));
+  if(!hf.run&&hf.st!=='done'&&!hf.list.length){
+    var seg=el('div','seg');[['repeat','Nghe & nhắc lại'],['reply','Hỏi – đáp'],['translate','Việt → Anh']].forEach(function(m){var b=el('button',hf.mode===m[0]?'on':'',m[1]);b.onclick=function(){if(m[0]==='translate'&&!hfHasVi())toast('Máy chưa có giọng đọc tiếng Việt — app sẽ đọc câu tiếng Anh thay thế');hf.mode=m[0];vHandsfree();};seg.appendChild(b);});v.appendChild(seg);
+    v.appendChild(el('div','muted','<span style="font-size:13px">'+({repeat:'App đọc câu tiếng Anh, bạn nhắc lại. Đạt ≥70% là qua; chưa đạt được nghe lại 1 lần.',reply:themVi()+' hỏi, bạn trả lời. Sai thì app đọc câu mẫu để bạn nói theo.',translate:'App đọc câu tiếng Việt, bạn nói bằng tiếng Anh; app đọc đáp án sau mỗi câu.'})[hf.mode]+'</span>'));
+    var nseg=el('div','seg');[5,10,20].forEach(function(k){var b=el('button',hf.n===k?'on':'',k+' câu');b.onclick=function(){hf.n=k;vHandsfree();};nseg.appendChild(b);});v.appendChild(nseg);
+    var go1=el('button','btn accent block');go1.style.height='64px';go1.style.fontSize='18px';go1.textContent='▶ Bắt đầu';go1.onclick=hfGo;v.appendChild(pinBar(go1));
+    main.appendChild(v);return;
+  }
+  if(hf.st==='done'&&!hf.run){
+    var avg=hf.res.length?Math.round(hf.res.reduce(function(a,b){return a+b;},0)/hf.res.length):0;
+    var dc=el('div','card');dc.style.cssText='text-align:center;gap:10px;padding:26px 18px';dc.innerHTML='<div style="font-size:38px">🎧</div><div style="font-size:21px;font-weight:800;font-family:var(--disp)">Xong '+hf.res.length+' câu · trung bình '+avg+'%</div><div class="muted">Câu dưới 60% đã vào hàng ôn câu (SRS).</div>';
+    v.appendChild(dc);
+    var again=el('button','btn accent block');again.textContent='↻ Phiên mới';again.onclick=function(){hf.list=[];hf.st='';hfGo();};
+    var hb=el('button','btn ghost');hb.textContent='Đổi chế độ';hb.onclick=function(){hf.list=[];hf.st='';vHandsfree();};
+    var r=el('div','row');r.appendChild(hb);again.classList.add('grow');r.appendChild(again);v.appendChild(pinBar(r));main.appendChild(v);return;
+  }
+  var it=hf.list[Math.min(hf.i,hf.list.length-1)]||{q:'',a:'',vi:''};
+  v.appendChild(el('div','row between','<span class="eyebrow">Câu '+(Math.min(hf.i+1,hf.list.length))+'/'+hf.list.length+'</span><span class="eyebrow">'+({repeat:'Nghe & nhắc lại',reply:'Hỏi – đáp',translate:'Việt → Anh'})[hf.mode]+'</span>'));
+  var bar=el('div','bar');bar.innerHTML='<i style="width:'+Math.round(hf.i/hf.list.length*100)+'%"></i>';v.appendChild(bar);
+  var c=el('div','card hfcard');
+  var stTxt={say:'🔊 Đang đọc…',listen:'🎤 Bạn nói đi…',fb:(hf.pct!=null?(hf.pct>=(hf.mode==='reply'?50:70)?'✓ ':'↻ ')+hf.pct+'%':'')}[hf.st]||'⏸ Tạm dừng';
+  c.innerHTML='<div class="hfst '+(hf.st==='listen'?'on':'')+'">'+stTxt+'</div>'
+    +(hf.mode==='translate'?'<div class="hfq">'+esc(it.vi||it.q)+'</div><div class="muted" style="font-size:14px">'+(hf.st==='fb'?esc(it.a):'…')+'</div>'
+      :hf.mode==='reply'?'<div class="who">'+esc(themVi())+'</div><div class="hfq">'+esc(it.q)+'</div><div class="muted" style="font-size:13.5px">Gợi ý: '+(hf.st==='fb'?esc(it.a):'…')+'</div>'
+      :'<div class="hfq">'+esc(it.q)+'</div><div class="muted" style="font-size:14px">'+esc(it.vi||'')+'</div>')
+    +'<div class="hfheard" id="hfHeard">'+(hf.heard?'“'+esc(hf.heard)+'”':'…')+'</div>';
+  if(it.ref&&hf.mode!=='reply')c.appendChild(reportBtn('phrase',it.ref));
+  v.appendChild(c);
+  var row=el('div','row');row.style.gap='10px';
+  var stop=el('button','btn ghost');stop.style.height='64px';stop.textContent='■ Dừng';stop.onclick=function(){hfStop(true);hf.list=[];hf.st='';vHandsfree();};
+  var pz=el('button','btn accent grow');pz.style.cssText='height:64px;font-size:18px';pz.textContent=hf.run?'⏸ Tạm dừng':'▶ Tiếp tục';pz.onclick=function(){if(hf.run)hfStop();else hfGo();};
+  row.appendChild(stop);row.appendChild(pz);v.appendChild(pinBar(row));
+  main.appendChild(v);
+}
+
+// ---- C4: "Nghề của tôi" — AI tạo gói riêng 3 chặng (30 từ, 15 hội thoại, 12 bài nghe), lưu trên máy, thành ngành 'custom' ----
+let cpBusy=false,cpStep='';
+function cpNorm(w){return String(w).toLowerCase().replace(/[^a-z0-9']/g,'');}
+function cpFixPhase(ph,title){
+  var out={title:String(title||ph.title||'Chặng').slice(0,60),vocab:[],phrases:[],dialogues:[],listen:[]};
+  (ph.vocab||[]).forEach(function(w){if(!w||!w.t||!w.vi)return;var t=String(w.t).trim().slice(0,40);var ex=String(w.ex||'').slice(0,160);
+    if(ex.indexOf('<b>')<0){var re=new RegExp('('+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','i');ex=re.test(ex)?ex.replace(re,'<b>$1</b>'):('<b>'+t+'</b> — '+ex);}
+    var cw=cleanWord({t:t,ipa:w.ipa||'',pos:w.pos||'',vi:w.vi,ex:ex,exVi:w.exVi||''});cw.t=t;out.vocab.push(cw);});
+  (ph.phrases||[]).forEach(function(x){if(x&&x.en&&x.vi)out.phrases.push({en:String(x.en).slice(0,160),vi:String(x.vi).slice(0,160)});});
+  (ph.dialogues||[]).forEach(function(d,k){if(!d||!d.them||!d.opts||d.opts.length!==3)return;var o=d.opts.map(function(x){return {t:String(x.t||'').slice(0,200),good:!!x.good,fb:String(x.fb||'').slice(0,160)};});
+    if(o.filter(function(x){return x.good;}).length!==1||o.some(function(x){return !x.t;}))return;var gi=o.findIndex(function(x){return x.good;});var g=o.splice(gi,1)[0];o.splice((out.dialogues.length+k)%3,0,g);out.dialogues.push({them:String(d.them).slice(0,200),opts:o});});
+  (ph.listen||[]).forEach(function(l){if(!l||!l.s)return;var words=String(l.s).split(/\s+/).filter(Boolean);var used={},bl=[];
+    (l.blanks||[]).forEach(function(b){for(var i=0;i<words.length;i++){if(!used[i]&&cpNorm(words[i])===cpNorm(b)&&/[a-z]/i.test(words[i])){used[i]=1;bl.push(i);break;}}});
+    if(!bl.length)return;var it={s:words,blank:bl.sort(function(a,b){return a-b;}),hint:String(l.hint||'').slice(0,60)};if(words.filter(function(w){return /[.?!]$/.test(w);}).length>=2||words.length>=15)it.p=1;out.listen.push(it);});
+  return out;
+}
+async function cpGenerate(){
+  var job=(store.cfg.jd||'').trim();if(job.length<20){toast('Tả công việc của bạn ở ô trên trước (≥ 1 câu)');return;}
+  var sp=await aiInit();if(!sp){toast('Cần cấu hình AI (Giao tiếp › Cài đặt AI)');return;}
+  cpBusy=true;cpStep='Lên khung 3 chặng…';vJD();
+  try{
+    var lv=store.cfg.level||'A2';
+    var plan=await sp.json('A Vietnamese worker described their job: """'+job.slice(0,1500)+'""". Design a short workplace-English course (English level '+lv+') about THEIR job. Reply ONLY JSON {"label":"short Vietnamese name of their job, max 22 chars, with full diacritics","short":"max 10 chars","persona":"a Vietnamese <their job in simple English, max 8 words>","context":"their field in English, max 5 words","phases":[3 short Vietnamese phase titles (topics of real situations in their job), full diacritics],"ai":[4 objects {"k":"short id a-z","l":"Vietnamese label 2-5 words","s":"English roleplay prompt: who the AI plays (a colleague/customer/manager of theirs) and what happens; ask me questions"}],"rev":[6 arrays ["short Vietnamese sentence they say at work","natural English translation, max 12 words"]]}',{modelTier:'default',cache:false,maxTokens:1500});
+    if(!plan||!plan.phases||plan.phases.length<3)throw new Error('plan');
+    var phases=[];
+    for(var i=0;i<3;i++){
+      cpStep='Viết chặng '+(i+1)+'/3: '+plan.phases[i]+'…';vJD();
+      var ph=await sp.json('Workplace English for '+(plan.persona||'a Vietnamese worker')+' (their job: """'+job.slice(0,400)+'"""). Topic of this lesson: "'+plan.phases[i]+'". English level '+lv+': short, natural, correct sentences a native speaker would say at work. Vietnamese with full diacritics. Reply ONLY JSON {"vocab":[10 objects {"t":"English word or short phrase specific to this job and topic","ipa":"IPA with stress marks, like /rɪˈsiːt/","pos":"n|v|adj|phr","vi":"short Vietnamese meaning","ex":"short example sentence with the term wrapped in <b></b>","exVi":"Vietnamese translation"}],"phrases":[6 objects {"en":"useful sentence they say in this situation","vi":"Vietnamese"}],"dialogues":[5 objects {"them":"what the other person (customer/colleague/manager) says","opts":[3 objects {"t":"a possible reply","good":true for exactly ONE natural polite correct reply, false for 2 replies with typical Vietnamese-learner mistakes or impolite/unhelpful","fb":"short Vietnamese feedback explaining why"}]}],"listen":[4 objects {"s":"sentence to listen to (3 short ones of 6-12 words, and 1 passage of 2-3 sentences)","blanks":[1-2 content words copied exactly from s; 3 for the passage],"hint":"short Vietnamese hint"}]}',{modelTier:'default',cache:false,maxTokens:4000});
+      var fx=cpFixPhase(ph||{},plan.phases[i]);
+      if(fx.vocab.length<5||fx.dialogues.length<2||fx.listen.length<2||fx.phrases.length<3)throw new Error('phase '+(i+1));
+      phases.push(fx);
+    }
+    var cp={label:String(plan.label||'Nghề của tôi').slice(0,24),short:String(plan.short||plan.label||'Nghề tôi').slice(0,12),persona:/^an? /i.test(String(plan.persona||''))?String(plan.persona).slice(0,90):'',context:String(plan.context||'').slice(0,40),
+      ai:(plan.ai||[]).filter(function(x){return x&&x.l&&x.s;}).slice(0,4).map(function(x,k){return {k:'cp_'+(String(x.k||'').replace(/[^a-z]/g,'')||k),l:String(x.l).slice(0,40),s:String(x.s).slice(0,400)};}),
+      rev:(plan.rev||[]).filter(function(x){return x&&x[0]&&x[1];}).slice(0,6).map(function(x){return [String(x[0]).slice(0,120),String(x[1]).slice(0,120)];}),
+      phases:phases,job:job.slice(0,300),created:todayStr()};
+    store.customPack=cp;save(store);cpBusy=false;cpStep='';
+    toast('Đã tạo gói “'+cp.label+'” 🎉','ok');switchTrack('custom');
+  }catch(e){cpBusy=false;cpStep='';toast('AI chưa tạo được gói ('+(e&&e.message||'lỗi')+') — thử lại');vJD();}
+}
+function cpCard(){
+  var c=el('div','card');c.style.gap='10px';
+  var cp=store.customPack;
+  c.appendChild(el('div','eyebrow','✨ Gói riêng cho nghề của bạn'));
+  if(cp){
+    c.appendChild(el('div',null,'<div style="font-size:15px"><b>✏️ '+esc(cp.label)+'</b> · tạo '+esc(vnDate(cp.created||todayStr()))+'</div><div class="muted" style="font-size:13px">'+cp.phases.map(function(p){return esc(p.title);}).join(' · ')+' — rồi tiếp lộ trình Công sở chung.</div>'));
+    var r=el('div','row');r.style.gap='8px';
+    if(TRACK!=='custom'){var o=el('button','btn accent grow');o.textContent='Học gói này';o.onclick=function(){switchTrack('custom');};r.appendChild(o);}
+    var re=el('button','btn ghost grow');re.textContent='Tạo lại';re.disabled=cpBusy;re.onclick=cpGenerate;r.appendChild(re);
+    var del=el('button','btn ghost');del.textContent='Xoá';del.onclick=function(){if(!confirmTap(del))return;delete store.customPack;if(TRACK==='custom'){switchTrack('office');return;}save(store);vJD();};r.appendChild(del);
+    c.appendChild(r);
+  }else{
+    c.appendChild(el('div','muted','<span style="font-size:13.5px">Nghề của bạn chưa có gói sẵn? AI viết riêng <b>3 chặng</b> theo mô tả ở trên: 30 từ, 15 hội thoại chọn đáp, 12 bài nghe, 4 tình huống luyện nói — lưu trên máy, thành ngành “Nghề của tôi”.</span>'));
+    var g=el('button','btn accent block');g.textContent=cpBusy?'AI đang viết…':'✨ Tạo gói riêng (3 chặng)';g.disabled=cpBusy;g.onclick=cpGenerate;c.appendChild(g);
+  }
+  if(cpBusy)c.appendChild(aiWait(cpStep||'AI đang viết…',5));
+  return c;
+}
+function confirmTap(b){if(b.dataset.sure){return true;}b.dataset.sure='1';var t=b.textContent;b.textContent='Bấm lần nữa để xoá';setTimeout(function(){if(b.isConnected){b.textContent=t;delete b.dataset.sure;}},2500);return false;}
+
+// ---- P1: Ảnh tài liệu thật → bài học (email, menu, phiếu, thông báo…) ----
+let ph1={img:null,url:'',busy:false,res:null,ans:{}};
+async function aiVisionJson(prompt,blob){
+  if(window.claude&&window.claude.use){
+    var sp=await window.claude.use('sample').catch(function(){return null;});
+    if(sp){var lim=sp.limits?await sp.limits().catch(function(){return null;}):null;if(lim&&!lim.images)throw new Error('noimg');return await sp.json(prompt,{images:blob,modelTier:'default'});}
+  }
+  var c=store.ai;if(!c||!c.key||!c.provider)throw new Error('noai');
+  if(c.provider==='groq')throw new Error('noimg');
+  var b64=await new Promise(function(res,rej){var fr=new FileReader();fr.onload=function(){res(String(fr.result).split(',')[1]||'');};fr.onerror=rej;fr.readAsDataURL(blob);});
+  var r=await providerChat(c,prompt,{image:{mime:blob.type||'image/jpeg',data:b64},maxTokens:2500});
+  return parseJSONLoose(r.text);
+}
+function phShrink(file){return new Promise(function(res){
+  var img=new Image();var u=URL.createObjectURL(file);
+  img.onload=function(){var s=Math.min(1,1400/Math.max(img.width,img.height));var cv=document.createElement('canvas');cv.width=Math.round(img.width*s);cv.height=Math.round(img.height*s);
+    cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);URL.revokeObjectURL(u);cv.toBlob(function(b){res(b||file);},'image/jpeg',0.82);};
+  img.onerror=function(){URL.revokeObjectURL(u);res(file);};img.src=u;});}
+async function phGo(){
+  if(!ph1.img){toast('Chọn hoặc chụp ảnh trước');return;}
+  if(!aiConfigured()){toast('Cần cấu hình AI (Giao tiếp › Cài đặt AI) — dùng Gemini hoặc Claude');return;}
+  ph1.busy=true;ph1.res=null;ph1.ans={};vPhoto();
+  try{
+    var r=await aiVisionJson('This photo shows a real work document or sign that '+who()+' deals with (email, chat, menu, form, label, notice, report, screen…). English level of the learner: '+(store.cfg.level||'A2')+'. Reply ONLY JSON {"kind":"short Vietnamese name of the document type","summary":"1-2 short Vietnamese sentences with full diacritics: what it says / asks","vocab":[up to 8 objects {"t":"useful English word or phrase FROM the document","ipa":"IPA","pos":"n|v|adj|phr","vi":"Vietnamese meaning","ex":"short example sentence with the term in <b></b>","exVi":"Vietnamese"}],"replies":[3 objects {"en":"a short natural sentence they could SAY or WRITE in response to this document","vi":"Vietnamese"}],"questions":[2 objects {"q":"English comprehension question about the document","o":[3 short options],"a":index 0-2 of the correct option}],"scenario":{"label":"Vietnamese label 3-6 words","prompt":"one English sentence: who the other person is (related to this document) and what the conversation is about"}}. If the image has no readable text, reply {"error":"no text"}.',ph1.img);
+    if(!r||r.error||!(r.vocab||r.replies))throw new Error((r&&r.error)||'empty');
+    ph1.res=r;store.photoLessons=(store.photoLessons||[]);store.photoLessons.unshift({at:todayStr(),kind:String(r.kind||''),summary:String(r.summary||''),n:(r.vocab||[]).length});store.photoLessons=store.photoLessons.slice(0,20);bumpActivity();save(store);
+  }catch(e){var m=String(e&&e.message||e);toast(m==='noimg'?'AI hiện tại không đọc được ảnh — dùng Gemini hoặc Claude (Cài đặt AI)':m==='no text'?'Ảnh không có chữ đọc được — chụp gần và rõ hơn':'AI chưa đọc được ảnh, thử lại');}
+  ph1.busy=false;vPhoto();
+}
+function vPhoto(){
+  viewTop('ph'+(ph1.res?1:0));main.innerHTML='';var v=el('div','view');
+  var back=el('button','btn ghost sm');back.style.alignSelf='flex-start';back.textContent='‹ Luyện';back.onclick=function(){go('practice');};v.appendChild(back);
+  v.appendChild(viewHead('Công việc thật','Ảnh → bài học 📷','Chụp email, tin nhắn, menu, phiếu QC, thông báo… AI đọc ảnh, rút từ vựng, câu trả lời mẫu, 2 câu hỏi hiểu bài và một tình huống luyện nói. Ảnh không được lưu lại.'));
+  var pc=el('div','card');pc.style.gap='10px';
+  var inp=el('input');inp.type='file';inp.accept='image/*';inp.setAttribute('capture','environment');inp.style.display='none';inp.id='phFile';
+  inp.onchange=async function(){var f=inp.files&&inp.files[0];if(!f)return;if(ph1.url)URL.revokeObjectURL(ph1.url);ph1.img=await phShrink(f);ph1.url=URL.createObjectURL(ph1.img);ph1.res=null;vPhoto();};
+  pc.appendChild(inp);
+  if(ph1.url){var im=el('img');im.src=ph1.url;im.alt='Ảnh tài liệu';im.style.cssText='width:100%;max-height:260px;object-fit:contain;border-radius:12px;background:var(--surface2)';pc.appendChild(im);}
+  var pick=el('button','btn ghost block');pick.textContent=ph1.url?'📷 Chọn ảnh khác':'📷 Chụp / chọn ảnh';pick.onclick=function(){inp.click();};pc.appendChild(pick);
+  v.appendChild(pc);
+  if(ph1.busy)v.appendChild(aiWait('AI đang đọc ảnh…',5));
+  var r=ph1.res;
+  if(r){
+    var sc=el('div','card');sc.style.gap='6px';sc.innerHTML='<div class="eyebrow">'+esc(r.kind||'Tài liệu')+'</div><div style="font-size:14.5px;line-height:1.5">'+esc(r.summary||'')+'</div>';v.appendChild(sc);
+    var vw=(r.vocab||[]).filter(function(w){return w&&w.t&&w.vi;});
+    if(vw.length){var vc=el('div','card');vc.style.gap='6px';vc.appendChild(el('div','eyebrow','Từ vựng trong ảnh · '+vw.length));
+      var exist={};(store.myVocab||[]).forEach(function(w){exist[w.t]=1;});
+      vw.forEach(function(w){var row=el('div','phrase');var tx=el('div','grow');tx.innerHTML='<div class="en"><b>'+esc(w.t)+'</b> <span class="ipa">'+esc(w.ipa||'')+'</span></div><div class="vi">'+esc(w.vi)+'</div>';row.appendChild(tx);row.appendChild(playBtn(w.t));vc.appendChild(row);});
+      var ad=el('button','btn ghost block');var left=vw.filter(function(w){return !exist[String(w.t).toLowerCase()];}).length;ad.textContent=left?('＋ Thêm '+left+' từ vào “Của tôi”'):'✓ Đã có trong “Của tôi”';ad.disabled=!left;
+      ad.onclick=function(){var n=0;vw.forEach(function(w){var cw=cleanWord({t:w.t,ipa:w.ipa||'',pos:w.pos||'',vi:w.vi,ex:w.ex||('<b>'+w.t+'</b>'),exVi:w.exVi||''});cw.custom=true;if(cw.t&&!exist[cw.t]){store.myVocab.push(cw);exist[cw.t]=1;n++;}});save(store);toast('Đã thêm '+n+' từ','ok');vPhoto();};vc.appendChild(ad);v.appendChild(vc);}
+    var rp=(r.replies||[]).filter(function(x){return x&&x.en;});
+    if(rp.length){var rc=el('div','card');rc.style.gap='6px';rc.appendChild(el('div','eyebrow','Bạn có thể nói / trả lời'));
+      rp.forEach(function(o){var row=el('div','phrase');var tx=el('div','grow');tx.innerHTML='<div class="en">'+esc(o.en)+'</div><div class="vi">'+esc(o.vi||'')+'</div>';row.appendChild(tx);row.appendChild(playBtn(o.en));var s=el('button','play');s.textContent=isSaved(o.en)?'★':'☆';s.setAttribute('aria-label','Lưu câu');s.onclick=function(){toggleSaved(o.en,'Ảnh tài liệu');psrsAdd(o.en,{vi:o.vi||'',src:'text'});s.textContent='★';};row.appendChild(s);rc.appendChild(row);});v.appendChild(rc);}
+    (r.questions||[]).forEach(function(q,qi){if(!q||!q.o||q.o.length<2)return;var qc=el('div','card');qc.appendChild(el('div',null,'<b style="font-size:14.5px;line-height:1.4">'+esc(q.q)+'</b>'));
+      q.o.forEach(function(o,oi){var b=el('button','opt');b.textContent=o;var a=ph1.ans[qi];if(a!=null){b.disabled=true;if(oi===+q.a)b.classList.add('good');else if(oi===a)b.classList.add('bad');}else b.onclick=function(){ph1.ans[qi]=oi;buzz(oi===+q.a);vPhoto();};qc.appendChild(b);});v.appendChild(qc);});
+    if(r.scenario&&r.scenario.prompt){var tb=el('button','btn accent block');tb.textContent='🎙️ Luyện hội thoại: '+(r.scenario.label||'theo tài liệu');tb.onclick=function(){go('talk');aiUseCustom(r.scenario.label||'Ảnh tài liệu',r.scenario.prompt);};v.appendChild(pinBar(tb));}
+  }else if(!ph1.busy){
+    var gb=el('button','btn accent block');gb.textContent='Tạo bài học từ ảnh';gb.disabled=!ph1.img;gb.onclick=phGo;v.appendChild(pinBar(gb));
+  }
+  main.appendChild(v);
+}
+
 // ---------- boot ----------
 $("#streakN").textContent=curStreak();
 renderTabs();paintOffline();

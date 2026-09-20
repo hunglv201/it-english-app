@@ -1,7 +1,7 @@
 # Nói Nghề — Tiếng Anh đúng nghề của bạn
 
 *(Tên cũ đến v2.0: IT English.)* Ứng dụng web giúp người Việt trình độ cơ bản luyện **tiếng Anh công việc theo ngành**:
-🏢 Công sở chung (mặc định) · 💻 IT · 🏨 Khách sạn – Du lịch · 🎧 Bán hàng – CSKH · 🏭 Sản xuất – Nhà máy — hoặc tự tả nghề của bạn để AI tạo tình huống và từ vựng riêng. Chạy hoàn toàn trong trình duyệt, không cần server,
+🏢 Công sở chung (mặc định) · 💻 IT · 🏨 Khách sạn – Du lịch · 🎧 Bán hàng – CSKH · 🏭 Sản xuất – Nhà máy · 🚚 Logistics – XNK · 💰 Tài chính – Kế toán · 📣 Marketing – TMĐT · 🩺 Y tế – Điều dưỡng — hoặc tả nghề của bạn để AI viết hẳn một gói riêng (✏️ Nghề của tôi). Chạy hoàn toàn trong trình duyệt, không cần server,
 không cần tài khoản.
 
 **Live demo:** https://hunglv201.github.io/it-english-app/
@@ -14,6 +14,9 @@ không cần tài khoản.
 
 ## Tính năng
 
+- **Luyện nói rảnh tay (v3.1)** — app đọc, tự bật mic, chấm và sang câu sau; không cần chạm màn hình (Nghe & nhắc lại · Hỏi – đáp · Việt → Anh).
+- **Ảnh → bài học (v3.1)** — chụp email, menu, phiếu… AI rút từ vựng, câu trả lời mẫu, câu hỏi hiểu bài và tình huống luyện nói.
+- **⚑ Báo lỗi nội dung (v3.1)** — trên mọi thẻ/câu; gửi thành GitHub issue.
 - **Chọn ngành (v3.0)** — mở app lần đầu: ngành → vị trí → trình độ, bước nào cũng **bỏ qua được** (bỏ qua = *Công sở chung*). Đổi ngành bất cứ lúc nào bằng chip dưới tên app; tiến độ lộ trình giữ riêng từng ngành. Link `?track=hotel|sales|factory|office|it` mở sẵn một ngành.
 - **Hôm nay** — bài học thích ứng mỗi ngày (4 việc ngắn, ~5 phút): ôn từ, nghe, trò chuyện AI, luyện câu. Có streak (chuỗi ngày) và thanh tiến độ.
 - **Lộ trình theo ngành** — IT 370 ngày (185 hội thoại, 222 bài nghe); các ngành khác 12 chặng · 120 ngày (60 hội thoại, 72 bài nghe, 120 từ). Mỗi ngày gồm từ vựng, mẫu câu, hội thoại, bài nghe và phần luyện thêm với AI.

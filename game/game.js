@@ -740,6 +740,12 @@ async function aiCallWith(c,system,msgs){
 /* ---------- PROFILE (mobile-first) ---------- */
 const RANKS=[[1,'Tập sự'],[3,'Junior Dev'],[6,'Mid Dev'],[10,'Senior Dev'],[15,'Tech Lead'],[20,'Kiến trúc sư']];
 function rankName(){let r=RANKS[0][1];RANKS.forEach(x=>{if(G.lv>=x[0])r=x[1];});return r;}
+// v3.1: đổi ngành ngay trong game (ghi chung store của app) — cần cho bản game chạy riêng (vd claude.ai)
+const GTRACKS=[['office','🏢','Công sở chung'],['it','💻','IT · Phần mềm'],['hotel','🏨','Khách sạn · Du lịch'],['sales','🎧','Bán hàng · CSKH'],['factory','🏭','Sản xuất · Nhà máy'],['logistics','🚚','Logistics · XNK'],['finance','💰','Tài chính · Kế toán'],['marketing','📣','Marketing · TMĐT'],['health','🩺','Y tế · Điều dưỡng']];
+function trackSheet(){openModal((m,close)=>{const curT=window.TRACK||'it';m.innerHTML='<div class="eyebrow">NGÀNH</div><b class="h" style="font-size:18px">Chọn ngành để chơi</b><p class="tip" style="margin-top:6px">Quái, câu hỏi và Boss AI lấy theo ngành. Dùng chung với app học.</p>';
+  const w=el('div');w.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px';
+  GTRACKS.forEach(t=>{const b=el('button','btn'+(t[0]===curT?' blue':' ghost'),t[1]+' '+t[2]);b.style.cssText='height:auto;min-height:44px;font-size:13px;padding:8px';b.onclick=()=>{const a=loadApp();a.cfg=a.cfg||{};a.cfg.track=t[0];a.cfg.trackChosen=true;saveApp(a);close();location.reload();};w.appendChild(b);});
+  m.appendChild(w);});}
 function setRow(icon,label,value,onClick,cls){const r=el(onClick?'button':'div','srow'+(cls?' '+cls:''));r.innerHTML='<span class="si">'+icon+'</span><span class="sl">'+label+'</span><span class="sv">'+(value||'')+'</span>'+(onClick?'<span class="sc">›</span>':'');if(onClick)r.onclick=onClick;return r;}
 function toggleRow(icon,label,on,onChange){const r=el('div','srow');r.innerHTML='<span class="si">'+icon+'</span><span class="sl">'+label+'</span>';const t=el('button','sw'+(on?' on':''));t.setAttribute('role','switch');t.setAttribute('aria-checked',on?'true':'false');t.innerHTML='<i></i>';t.onclick=()=>{onChange(!on);};r.appendChild(t);return r;}
 function group(title,rows){const g=el('div','sgroup');if(title)g.appendChild(el('div','slab',title));const box=el('div','sbox');rows.forEach(r=>box.appendChild(r));g.appendChild(box);return g;}
@@ -761,6 +767,7 @@ function vProfile(){
     setRow('🤖','Boss AI',inClaude()?'<b style="color:var(--green)">Claude sẵn có</b>':(aiCfg()?'<b style="color:var(--green)">'+(PROV[aiCfg().provider]||[aiCfg().provider])[0].split(' ·')[0]+'</b>':'chưa có key'),aiSetupSheet),
     toggleRow('🔊','Âm thanh',G.sound!==false,v=>{G.sound=v;saveG();main.classList.remove('vin');vProfile();}),
     toggleRow('🌸','Hoa rơi & hiệu ứng nền',G.fx!==false,v=>{G.fx=v;saveG();document.body.classList.toggle('nofx',!v);main.classList.remove('vin');vProfile();}),
+    setRow('🧭','Ngành đang học',(PACK?PACK.emoji+' '+PACK.short:'💻 IT'),trackSheet),
     setRow('📖','Xem lại hướng dẫn','',tutorial),
     setRow('📱','Mở app học '+APPN,'',openApp),
     setRow('🗑️','Đặt lại tiến trình game','',()=>openModal((m,close)=>{m.innerHTML='<div class="h" style="font-size:20px">Đặt lại?</div><p class="muted">Xoá toàn bộ XP, xu, huy hiệu, sao. Không ảnh hưởng app học.</p>';const r=el('div','row');r.style.cssText='gap:10px;margin-top:12px';const a=el('button','btn ghost grow','Huỷ');a.onclick=close;const b2=el('button','btn grow','Đặt lại');b2.onclick=()=>{localStorage.removeItem(GKEY);location.reload();};r.appendChild(a);r.appendChild(b2);m.appendChild(r);}),'danger')

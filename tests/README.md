@@ -8,6 +8,7 @@ Chạy toàn bộ: `tests/run.sh` (tự bật server tĩnh cổng 8765). Ảnh c
 | `b.mjs` | Đợt B — Standup 60s, Dịch ngược, biểu đồ tiến bộ, game ưu tiên từ hay sai, log đấu thoại, showcase tải ảnh |
 | `e.mjs` | UI/UX v1.22: bỏ nút AI nổi, báo offline, khung chờ AI, danh sách từ tải dần, lưới chặng |
 | `f.mjs` | v2.0: đoạn họp nhiều ô điền (chấm từng từ), vai Designer/Data |
+| `h.mjs` | v3.1: 4 gói mới, báo lỗi nội dung, rảnh tay (giả SpeechRecognition), Nghề của tôi (AI giả tạo gói → track custom, cả game), ảnh → bài học (giả sample images), game đổi ngành |
 | `g.mjs` | v3.0 đa ngành: làm quen (bỏ qua → Công sở), chọn ngành → tải gói, mọi màn với 5 gói, game theo gói, JD gợi ý chuyển ngành, tiến độ riêng từng ngành |
 | `d.mjs` | Cập nhật tại chỗ không chạy lại hiệu ứng / không nhảy lên đầu trang; chỉ khi vào màn mới |
 | `c.mjs` | Đợt C — tiếng Nhật, SRS câu, chọn đáp theo vai, cá nhân hoá JD, sự kiện, podcast, hỏi nhanh, ảnh chia sẻ, cache AI + luật ngữ pháp offline, game theo vai |

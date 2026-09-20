@@ -7,11 +7,11 @@
 
 **Nói Nghề** (tên cũ đến v2.0: *IT English*; repo/khoá localStorage vẫn giữ tên `it-english`) — bộ 3 sản phẩm web tĩnh
 (vanilla HTML/CSS/JS, không framework, không build) giúp người Việt trình độ cơ bản luyện **tiếng Anh công việc theo ngành**
-(v3.0: Công sở chung — mặc định, IT, Khách sạn · Du lịch, Bán hàng · CSKH, Sản xuất · Nhà máy). Chủ repo: `hunglv201`. Ngôn ngữ giao tiếp với người dùng: **tiếng Việt**.
+(v3.1: 9 ngành — Công sở chung (mặc định), IT, Khách sạn · Du lịch, Bán hàng · CSKH, Sản xuất · Nhà máy, Logistics · XNK, Tài chính · Kế toán, Marketing · TMĐT, Y tế · Điều dưỡng — và "Nghề của tôi" do AI tạo). Chủ repo: `hunglv201`. Ngôn ngữ giao tiếp với người dùng: **tiếng Việt**.
 
 | Sản phẩm | File | URL Pages | Mô tả |
 |---|---|---|---|
-| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Gói ngành (IT 370 ngày, các ngành khác 120 ngày), từ vựng SRS, câu thường dùng, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **3.0.0** (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
+| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Gói ngành (IT 370 ngày, các ngành khác 120 ngày), từ vựng SRS, câu thường dùng, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **3.1.0** (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
 | **Trang giới thiệu (showcase)** | `gioi-thieu.html` (**v3.0**, ảnh `img/showcase/v3/`) + lưu trữ `gioi-thieu-v2.html`, `gioi-thieu-v1.html` | `…/gioi-thieu.html` | Landing fullpage scroll-snap, nền particle-net, mục "Mới trong v3.0" (lưới 5 ngành), mục **Lịch sử phiên bản** (`#versions`). Dark-first. Quy ước version lớn: xem mục 7 |
 | **Game "Nói Nghề Quest"** | `game/index.html` + `game/game.js` (+ bản sao `game/data.gen.js`, `game/phrases.gen.js`) | `…/game/` | Bản game anime **mobile-first**: RPG bản đồ ngày → quiz battle → boss visual novel, AFK idle (Mochi tự cày xu), Shop, huy hiệu, tab **Nói** 5 chế độ luyện nói. Dùng chung dữ liệu + AI key với app |
 
@@ -23,7 +23,8 @@ Ngoài Pages, cả 3 còn được publish làm **claude.ai Artifact** (xem mụ
 it-english-app/
 ├── index.html            # App: toàn bộ UI + logic (HTML/CSS/JS 1 file, ~220 KB)
 ├── data.gen.js           # gói IT: window.DATA — sinh từ gen_data.py, KHÔNG sửa tay
-├── packs/<id>.gen.js     # v3.0: gói office/hotel/sales/factory (window.PACK + DATA + PHRASES + ROLES) — sinh từ packs_src/build.py
+├── packs/<id>.gen.js     # gói ngành office/hotel/sales/factory/logistics/finance/marketing/health (window.PACK + DATA + PHRASES + ROLES) — sinh từ packs_src/build.py
+├── packs/custom.js       # VIẾT TAY: ghép store.customPack ("Nghề của tôi", AI tạo) vào đầu gói office khi track='custom'
 ├── packs_src/            # nguồn gói ngành: <id>.py (PACK), build.py (kiểm tra chặt + sinh), README.md (SCHEMA + quy tắc nội dung)
 ├── phrases.gen.js        # window.PHRASES — sinh từ phrases_data.py, KHÔNG sửa tay
 ├── gen_data.py / phases_extra.py / phrases_data.py   # nguồn sinh dữ liệu (Python 3, không lib ngoài)
@@ -51,7 +52,9 @@ it-english-app/
 │   ├── demo/giao-tiep-ai-demo.mp4    # video demo luồng Giao tiếp AI (không tiếng)
 │   ├── design/, bgchooser.html
 │   ├── REVIEW-2026-09-13.md          # review UX/thị trường (mã A1…E16), phần 'Còn lại' đã lạc hậu
-│   ├── DINH-HUONG-DA-NGANH-2026-09-20.md  # ⭐ định hướng v3.0 đa ngành
+│   ├── DINH-HUONG-DA-NGANH-2026-09-20.md  # định hướng v3.0 đa ngành (đã làm)
+│   ├── BACKLOG.md                    # ⭐ việc để sau (kiểm tra trình độ, tiếng Nhật chính, lớp học…)
+│   ├── review/*.md                   # nhật ký kiểm duyệt nội dung từng gói (v3.1)
 │   └── REVIEW-2026-09-20.md          # ⭐ rà soát kỹ thuật + tổng hợp hướng cải tiến + kế hoạch 3 đợt — ĐỌC TRƯỚC KHI CHỌN VIỆC
 ├── push.sh               # push bằng token trong .env (gitignored)
 ├── README.md             # tài liệu người dùng
@@ -67,8 +70,9 @@ it-english-app/
 `who()` (persona cho mọi prompt AI; `store.cfg.persona` từ JD ghi đè), `REPORT` (báo cáo 60s theo ngành), `AI_SCENARIOS/READING/EVENT_TYPES/REV`
 lấy từ `PACK` nếu có. Đổi ngành: `switchTrack(id)` → lưu + tải lại; tiến độ lộ trình từng ngành cất ở `store.trackDays[track]={days,focus}`
 (`store.daysTrack` = ngành đang giữ `store.days`). Làm quen: `onboardModal(step)` (3 bước, đều bỏ qua được), `trackPicker()`, `trackNudge()`.
+**v3.1**: `track='custom'` = office.gen.js + packs/custom.js (đọc `store.customPack` do `cpGenerate()` tạo: 3 chặng, validate bằng `cpFixPhase`). Báo lỗi nội dung: `reportBtn(kind,obj)` → `store.reports[]` → GitHub issue (`reportIssueUrl`). Rảnh tay: `hf` + `hfGo()` (vòng lặp `hfSpeakP`→`hfListenP`→`wordMatch`, dừng khi rời màn `.hfv`). Ảnh → bài học: `vPhoto`/`phGo` + `aiVisionJson` (claude.ai `sample({images})`, Gemini `inline_data`, Claude API `image`; `providerChat(opts.image, opts.maxTokens)`).
 Thêm ngành mới: viết `packs_src/<id>.py` theo SCHEMA → `python3 packs_src/build.py <id>` → thêm id vào `ORDER` (build.py), `TRACKS` + map
-`T` trong 2 script nạp (app + game), placeholder theo ngành (tìm `({office:` trong index.html), `sw.js` ASSETS, test `tests/g.mjs`.
+`T` trong 2 script nạp (app + game), `GTRACKS` trong game.js, placeholder/hint theo ngành (tìm `({office:` trong index.html), `sw.js` ASSETS, test `tests/h.mjs`. Quy trình nội dung: agent viết theo README → **agent khác kiểm duyệt** (log vào `docs/review/`) → build.
 
 **Gói IT (dữ liệu gốc):**
 
@@ -124,7 +128,7 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 4. Pages build tự chạy từ `main` (legacy, root `/`); có thể kích hoạt thêm bằng `POST /repos/hunglv201/it-english-app/pages/builds` (trả 201).
    Shell cloud/device **không** truy cập được `github.io` (proxy chặn) → kiểm tra bằng API `pages/builds/latest` (status `built`, đúng commit).
 5. Artifact claude.ai (đọc `action:list` để lấy URL nếu cần):
-   - Game: `b021f5f2-79f1-4ce0-8d44-2336124b7183` — publish `scratchpad/gameart/index.html` (bản game/index.html **bỏ** doctype/html/head/body, giữ `<title>`, `<link>`, `<style>`) với `root` + `files:{"game.js":"game.js"}`, capability `sample`.
+   - Game: `https://claude.ai/artifact/NkUhE8SvgU8UZTXsmbzS5G` — publish `scratchpad/gameart/index.html` (bản game/index.html **bỏ** doctype/html/head/body + script CSP; script nạp gói **thay bằng bản tạo `<script async=false>` động** — không dùng `document.write` trong artifact) với `root` + `files` gồm game.js, data/phrases/roles.gen.js và `packs/*.gen.js` + `packs/custom.js`, capability `sample`. Ngành chọn trong game › Hồ sơ › Ngành đang học.
    - Showcase: `e31f3307-4779-4d84-83cc-387be652b315` — file `docs/it-english-showcase.html`.
    - App: cũng có artifact riêng (tìm trong gallery).
 6. Khi tăng version app: sửa chuỗi version trong `index.html` **và** `CACHE` trong `sw.js`.
@@ -140,6 +144,7 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 
 ## 8. Lịch sử tóm tắt (mới → cũ)
 
+- 09/2026 **v3.1.0**: +4 ngành (Logistics, Tài chính, Marketing, Y tế); kiểm duyệt chéo 8 gói (~205 sửa, `docs/review/`); ⚑ báo lỗi nội dung; luyện nói rảnh tay; "Nghề của tôi" (AI tạo gói 3 chặng); ảnh → bài học; game đổi ngành trong Hồ sơ. Test `h.mjs`.
 - 09/2026 **v3.0.0 (major)**: đổi tên **Nói Nghề**; đa ngành (Công sở chung mặc định, IT, Khách sạn, Bán hàng, Nhà máy; 23 vai); làm quen 3 bước bỏ qua được; tiến độ riêng từng ngành; báo cáo 60s theo nghề; JD mọi ngành + 12 từ riêng; game theo ngành; showcase v3.0 (v2 lưu trữ). Nội dung 4 gói mới viết bởi subagent theo `packs_src/README.md`, build.py kiểm tra.
 - 09/2026 **v2.0.0 (major)**: nội dung ×2 — 185 hội thoại chọn đáp (trước 74, sửa lỗi đáp án đúng luôn ở vị trí 1), 222 bài nghe gồm 74 đoạn họp 2–3 câu (điền nhiều ô, shadowing dài), thêm vai Designer & Data (7 vai); showcase v2.0 chụp lại 25 ảnh + mục Standup/Dịch ngược/Theo vai/Tiếng Nhật + lịch sử phiên bản, v1 lưu trữ ở `gioi-thieu-v1.html`; `CHANGELOG.md`.
 - 09/2026 **v1.22.0**: nâng cấp UI/UX — bỏ nút AI nổi, Luyện 4 nhóm ô gọn, Lộ trình lưới 37 chặng, danh sách từ tải dần, Giao tiếp đưa chip tình huống lên đầu, Câu thường dùng gọn, thanh ghim nền đặc, báo offline, khung chờ AI, rung, vùng chạm 44px, bàn phím không che ô nhập.
@@ -158,6 +163,8 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 - App v1.17.x: "Nghe hết" hội thoại có xướng vai, header Giao tiếp 1 hàng, video demo.
 
 ## 9. Ý tưởng còn mở (chưa làm)
+
+📋 **Việc để sau: [`docs/BACKLOG.md`](docs/BACKLOG.md)** (kiểm tra trình độ 3 phút, tiếng Nhật công sở làm ngôn ngữ chính, lớp học doanh nghiệp, ngành mới…).
 
 ✅ **v3.0 đa ngành** đã làm (D0–D5 trong [`docs/DINH-HUONG-DA-NGANH-2026-09-20.md`](docs/DINH-HUONG-DA-NGANH-2026-09-20.md)). Tiếp theo có thể: gói Logistics · Tài chính · Marketing–TMĐT · Y tế; nhờ người trong nghề đọc duyệt nội dung các gói mới; thêm tiếng Nhật cho câu mẫu.
 
