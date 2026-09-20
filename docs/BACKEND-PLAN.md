@@ -1,452 +1,309 @@
-# Kế hoạch backend cho Nói Nghề (Supabase · đăng nhập Google + Facebook)
+# Kế hoạch triển khai backend — Nói Nghề (Supabase · server-first · offline · đăng nhập Google)
 
-> Nghiên cứu 20/09/2026 · app v3.1.1 · tài liệu kế hoạch, **chưa triển khai**.
-> ⚠️ **Cập nhật:** chủ repo muốn **dữ liệu lưu trên server** → xem **§11 Phương án server-first** (nội dung bài học vào DB + xuất bản, khách tự động + liên kết Google/FB). §1–§10 là phương án local-first ban đầu, vẫn dùng cho phần đăng nhập, bảo mật, pháp lý, ngân sách.
-> Mục tiêu: người học **tuỳ chọn** đăng nhập bằng Google/Facebook để đồng bộ tiến độ nhiều máy, dùng AI miễn phí có hạn mức,
-> vào lớp học, chia sẻ gói "Nghề của tôi"; chủ app xem báo lỗi nội dung và thống kê. Chạy trong **gói Free** của Supabase càng lâu càng tốt.
+> Bản gộp 20/09/2026 · app v3.1.1 · tài liệu kế hoạch, **chưa triển khai**.
+> Thay thế các bản nháp trước (local-first, có Facebook). **Không làm đăng nhập Facebook.**
 
 ---
 
-## 1. Nguyên tắc thiết kế
+## 0. Quyết định đã chốt
 
-1. **Máy người dùng là gốc (local-first).** `localStorage` vẫn là nơi lưu chính; không đăng nhập thì app chạy y như bây giờ, kể cả offline.
-   Backend chỉ **đồng bộ** và cung cấp thứ bắt buộc phải có server (giữ key AI, lớp học, báo lỗi, thống kê).
-2. **Nội dung bài học không vào database.** 9 gói ngành vẫn là file tĩnh trên GitHub Pages (rẻ, nhanh, offline được).
-3. **Lưu ít nhất có thể.** Không lưu key AI của người dùng, ảnh, ghi âm, mật khẩu; lịch sử hội thoại chỉ giữ bản tóm tắt ngắn.
-4. **Mọi bảng bật Row Level Security (RLS).** Anon key để lộ trong code là bình thường; an toàn nằm ở policy.
-5. **Service role key và key AI chỉ nằm trong secrets của Edge Functions**, không bao giờ vào repo hay trình duyệt.
-
-## 2. Kiến trúc
-
-```
-Trình duyệt (GitHub Pages: index.html, game/, packs/*.gen.js)
-  │  supabase-js (tự host file vendor/supabase.min.js — CSP chỉ cho 'self')
-  ├── Auth: Google / Facebook (OAuth, PKCE)  ─────────►  Supabase Auth
-  ├── Đồng bộ tiến độ (REST, RLS theo user)  ─────────►  Postgres: progress, profiles
-  ├── Báo lỗi, lớp học, gói chia sẻ, thống kê ────────►  Postgres (RLS) + RPC
-  ├── AI (khi không có key riêng)  ──────────────────►  Edge Function `ai`  ──►  Gemini / Claude (key trong secrets)
-  └── Lớp học: bảng xếp hạng (chỉ khi mở màn Lớp) ───►  Realtime
-Meta ──(xoá dữ liệu người dùng)──► Edge Function `fb-data-deletion`
-GitHub Actions: sao lưu pg_dump hằng tuần · ping giữ project không bị tạm dừng
-```
-
-### 2.1 Frontend: vẫn để trên GitHub Pages
-
-**Có — giữ GitHub Pages cho frontend.** App là trang tĩnh (HTML/JS), còn đăng nhập, dữ liệu và AI đều gọi thẳng tới Supabase từ trình duyệt, nên không cần server riêng cho FE.
-Đăng nhập Google/Facebook chạy tốt trên trang tĩnh: sau khi đăng nhập, Supabase chuyển về `https://hunglv201.github.io/it-english-app/` kèm mã, supabase-js tự đổi mã lấy phiên.
-
-| | GitHub Pages (hiện tại) | Cloudflare Pages / Vercel / Netlify |
-|---|---|---|
-| Chi phí | Miễn phí | Miễn phí (gói cá nhân) |
-| Deploy | Push `main` là xong (như bây giờ) | Nối repo GitHub, push là tự deploy |
-| Giới hạn | Site ≤ 1 GB, băng thông mềm ~100 GB/tháng — thừa cho app này | Rộng hơn |
-| Header bảo mật (CSP thật, cache) | Không đặt được header; CSP dùng thẻ `<meta>` như hiện tại (đủ dùng, riêng `frame-ancestors` không đặt được) | Đặt được file `_headers` |
-| Bản xem trước theo nhánh/PR | Không | Có (tiện test đăng nhập trên nhánh) |
-| Tên miền riêng | Có | Có |
-
-Đề xuất: **MVP giữ GitHub Pages** (không phải đổi gì, chỉ thêm URL này vào danh sách redirect của Supabase/Google/Facebook).
-Chỉ chuyển sang Cloudflare Pages khi cần tên miền riêng + header bảo mật hoặc bản xem trước theo nhánh; khi chuyển chỉ phải cập nhật lại các URL redirect ở 3 nơi.
-Repo và quy trình git (commit, 2 nhánh, `push.sh`) giữ nguyên; thêm thư mục `supabase/` cho backend trong cùng repo.
-
-Vùng đặt project: **Singapore (ap-southeast-1)** — gần Việt Nam nhất (độ trễ thấp). Lưu ý đây là chuyển dữ liệu ra nước ngoài (xem §8).
-
-## 3. Đăng nhập Google + Facebook
-
-### 3.1 Luồng trong app
-
-- Nút **"Đăng nhập để đồng bộ"** ở Tôi › Tài khoản (và gợi ý nhẹ sau 7 ngày học). Không bắt buộc, không chặn bất kỳ tính năng offline nào.
-- `supabase.auth.signInWithOAuth({provider:'google'|'facebook', options:{redirectTo: 'https://hunglv201.github.io/it-english-app/'}})`, dùng **PKCE**
-  (supabase-js v2 mặc định cho web). Trang quay về → `exchangeCodeForSession` tự động → lần đồng bộ đầu (§5).
-- Trước khi bấm đăng nhập: 1 dòng đồng ý có link **Chính sách quyền riêng tư** (bắt buộc theo luật + Google/Meta yêu cầu).
-- Đăng xuất: xoá phiên, **giữ nguyên** dữ liệu trên máy. Xoá tài khoản: Tôi › Tài khoản › Xoá (xoá hết trên server).
-- Cùng email ở Google và Facebook → Supabase tự **liên kết danh tính** vào một user (identity linking theo email đã xác minh).
-
-### 3.2 Việc cần làm ở Google
-
-1. Google Cloud Console → tạo project → **OAuth consent screen**: loại *External*, tên "Nói Nghề", logo, email hỗ trợ,
-   link chính sách quyền riêng tư + điều khoản, scope chỉ `openid`, `email`, `profile` (không phải scope nhạy cảm → không cần thẩm định bảo mật).
-2. **Credentials → OAuth client ID** loại *Web application*:
-   Authorized JavaScript origins `https://hunglv201.github.io` (+ `http://localhost:8765` để dev);
-   Authorized redirect URI `https://<project-ref>.supabase.co/auth/v1/callback`.
-3. Dán Client ID/Secret vào Supabase → Authentication → Providers → Google. Thêm `https://hunglv201.github.io/it-english-app/**` vào **Redirect URLs**.
-4. Chuyển consent screen sang *In production* (xác minh thương hiệu tuỳ chọn, vài ngày làm việc — nên làm để màn đăng nhập hiện tên + logo).
-
-### 3.3 Việc cần làm ở Facebook (Meta)
-
-1. developers.facebook.com → tạo app, use case **Authenticate and request data from users with Facebook Login**; bật quyền `public_profile` + `email`
-   (thiếu `email` thì Supabase không lấy được email → đăng nhập lỗi).
-2. Valid OAuth Redirect URI: `https://<project-ref>.supabase.co/auth/v1/callback`; App domain `hunglv201.github.io`.
-3. Điền icon, **Privacy Policy URL**, **Data Deletion** (URL hướng dẫn *hoặc* callback — đề xuất callback Edge Function `fb-data-deletion`).
-4. App mới ở **Development mode** — chỉ admin/tester đăng nhập được. Muốn mọi người dùng: gửi **App Review** (quay video luồng đăng nhập, giải thích dùng email để làm gì),
-   thường 1–5 ngày làm việc, rồi chuyển **Live**. Có thể cần xác minh doanh nghiệp/cá nhân tuỳ thời điểm — tính trước thời gian chờ.
-5. Dán App ID/Secret vào Supabase → Providers → Facebook.
-
-### 3.4 Trang tĩnh cần thêm (GitHub Pages)
-
-- `chinh-sach.html` — chính sách quyền riêng tư (thu gì, để làm gì, lưu ở đâu/bao lâu, quyền xem/sửa/xoá, liên hệ).
-- `dieu-khoan.html` — điều khoản sử dụng ngắn (AI có thể sai, nội dung tham khảo, không phải tư vấn y tế/thuế…).
-- `xoa-du-lieu.html` — hướng dẫn tự xoá tài khoản + trang tra trạng thái yêu cầu xoá (Meta trả về link này).
-
-## 4. Backend quản lý gì · lưu gì
-
-### 4.1 Bảng dữ liệu
-
-| Bảng | Lưu gì | Không lưu | Ai đọc / ghi (RLS) | Dung lượng ước tính |
-|---|---|---|---|---|
-| `profiles` | `id` (= auth user), tên hiển thị, avatar URL (từ Google/FB), `track`, `role`, `level`, `created_at`, `last_seen_at`, `is_admin`, `ai_tier` | email (đã có trong `auth.users`), SĐT, ngày sinh | Chủ tài khoản đọc/sửa (trừ `is_admin`, `ai_tier`) | < 1 KB/người |
-| `progress` | `user_id`, `store` (jsonb — bản **rút gọn** của `it-english-v1`: cfg, days/trackDays, srs, psrs, saved, myVocab, streak/stats, events, standups điểm), `game` (jsonb — `it-english-game-v1`), `rev` (số phiên bản), `updated_at`, `device` | key AI, lịch sử hội thoại đầy đủ (chỉ 5 buổi gần nhất dạng tóm tắt), ảnh | Chỉ chủ tài khoản | ~15–20 KB/người (Postgres nén jsonb) |
-| `ai_usage` | `user_id`, `day`, `calls`, `tokens_in/out`, `provider` | nội dung prompt/trả lời | Chủ đọc; **chỉ Edge Function ghi** | ~60 B/người/ngày |
-| `content_reports` | gói, loại (vocab/phrase/…), loại lỗi, trích nội dung, gợi ý sửa, `app_version`, `status` (mới/đã sửa/bỏ qua), `resolved_at`, `user_id` (có thể null) | — | Ai cũng **ghi** được (kể cả chưa đăng nhập, qua RPC có giới hạn); **chỉ admin đọc/sửa** | ~0,5 KB/báo lỗi |
-| `custom_packs` | gói "Nghề của tôi": `owner`, nhãn, mô tả nghề (rút gọn), `data` (jsonb 3 chặng), `is_public`, `share_code`, `uses` | mô tả JD đầy đủ nếu không công khai | Chủ sửa/xoá; gói `is_public` ai cũng đọc | ~30 KB/gói |
-| `classes` | `code` (6 ký tự), tên lớp, `track`, `owner`, `created_at` | — | Thành viên đọc; chủ sửa | nhỏ |
-| `class_members` | `class_id`, `user_id`, biệt danh trong lớp, vai (owner/member), `joined_at` | — | Thành viên cùng lớp đọc; tự vào/ra | nhỏ |
-| `daily_activity` | `user_id`, `day`, `track`, số việc xong, phút học ước tính (1 dòng/người/ngày — cho streak lớp + tỉ lệ quay lại) | từng lượt bấm | Chủ ghi (RPC upsert); admin đọc gộp | ~100 B/người/ngày |
-| `app_config` | cấu hình: hạn mức AI/ngày, bật/tắt tính năng, phiên bản tối thiểu, thông báo | — | Ai cũng đọc; admin sửa | rất nhỏ |
-| `deletion_requests` | mã xác nhận, `user_id`, nguồn (app/facebook), thời điểm, trạng thái | — | Chỉ Edge Function / admin | rất nhỏ |
-
-View / RPC:
-- `class_leaderboard(class_id)` — *security definer*, chỉ trả biệt danh + streak + số ngày học tuần này (không lộ dữ liệu khác).
-- `report_content(...)` — ghi báo lỗi có kiểm tra độ dài + giới hạn ~20 báo lỗi/giờ/địa chỉ.
-- `touch_activity(day, track, tasks)` — upsert `daily_activity`.
-- `admin_stats(from, to)` — gộp: người dùng mới, DAU/WAU, tỉ lệ quay lại ngày 1/7/30, ngành được chọn, lượt AI.
-
-### 4.2 Edge Functions
-
-| Function | Làm gì |
+| Chủ đề | Chốt |
 |---|---|
-| `ai` | Nhận `{prompt|messages, tier, image?}` + JWT → kiểm tra hạn mức (`ai_usage` + `app_config`) → gọi Gemini (hoặc Claude) bằng key trong secrets → ghi usage → trả text. Chặn prompt quá dài, ảnh > 1,5 MB; không log nội dung. |
-| `fb-data-deletion` | Callback Meta: kiểm tra `signed_request` (HMAC bằng App Secret) → tìm user theo FB id → xoá → trả `{url, confirmation_code}` trỏ `xoa-du-lieu.html?code=…`. |
-| `delete-account` | Người dùng tự xoá: xoá `progress`, `custom_packs` riêng, thành viên lớp, `auth.users` (cần service role nên phải là function). |
-| `notify-report` *(tuỳ chọn)* | Khi có báo lỗi mới → gửi Telegram/email cho chủ app (Database Webhook). |
+| Backend | **Supabase**, vùng **Singapore (ap-southeast-1)**, gói **Free** càng lâu càng tốt |
+| Dữ liệu | **Server là nguồn gốc** cho cả nội dung bài học lẫn dữ liệu người học; máy chỉ là bản sao làm việc |
+| Tài khoản | Mở app → **tài khoản khách tự động** (`signInAnonymously`) → nâng cấp bằng **Google** (`linkIdentity`) để giữ lâu dài, dùng nhiều máy |
+| Đăng nhập | **Chỉ Google**. Không Facebook. Email OTP / Zalo để backlog |
+| Offline | Học được đầy đủ khi mất mạng; ghi local trước, outbox đồng bộ sau |
+| Frontend | Giữ **GitHub Pages** (trang tĩnh gọi thẳng Supabase) |
+| AI | Qua Edge Function `ai`, key chung trong secrets; hạn mức **khách 10 / Google 20 lượt/ngày**; ai có key riêng hoặc chạy trong claude.ai thì không tốn quota |
 
-### 4.3 Chủ app quản lý ở đâu
+## 1. Kiến trúc
 
-- Giai đoạn đầu: **Supabase Studio** (dashboard có sẵn) + vài *saved query*: báo lỗi mới theo gói, người dùng mới/ngày, lượt AI/ngày, dung lượng DB.
-- Sau: `admin.html` nhỏ trong repo (chỉ tài khoản `is_admin` mới gọi được RPC admin) — duyệt báo lỗi (đánh dấu đã sửa), xem thống kê, chỉnh `app_config`.
+```
+Trình duyệt (GitHub Pages: index.html, game/, admin.html)
+  ├─ Service Worker: vỏ app (HTML/JS/CSS, vendor/supabase.min.js)
+  ├─ IndexedDB: packs (gói ngành đã xuất bản) · state (bản sao dữ liệu người học) · outbox (thay đổi chờ gửi)
+  │
+  ├── Auth: khách tự động + Google (OAuth PKCE, linkIdentity) ──► Supabase Auth
+  ├── RPC apply_changes / get_state / report_content …       ──► Postgres (RLS)
+  ├── Tải gói ngành (manifest + JSON theo version)            ──► Storage (bucket công khai, CDN)
+  └── AI / xuất bản gói / xoá tài khoản                       ──► Edge Functions: ai · publish-pack · delete-account
+                                                                      └► Gemini / Claude (key trong secrets)
+GitHub Actions: backup pg_dump hằng tuần · keepalive hằng ngày · dọn khách không hoạt động > 30 ngày
+```
 
-## 5. Đồng bộ tiến độ (phần khó nhất)
+- supabase-js **tự host** (`vendor/supabase.min.js`) vì CSP chỉ cho `'self'`; thêm `https://<ref>.supabase.co` + `wss://` vào `connect-src`.
+- Service worker **không** cache request tới Supabase (trừ file gói đã có version).
+- Repo, 2 nhánh, `push.sh` giữ nguyên; backend nằm trong thư mục `supabase/` cùng repo.
+- Chuyển sang Cloudflare Pages chỉ khi cần tên miền riêng + header bảo mật + bản xem trước theo nhánh (khi đó chỉ cập nhật lại URL redirect ở Supabase và Google).
 
-- **Khi nào:** lúc mở app (nếu đã đăng nhập), khi hoàn thành một việc (gom 5 giây mới gửi), khi rời trang (`visibilitychange`). Không realtime.
-- **Kéo về:** chỉ hỏi `updated_at` + `rev` (vài trăm byte); nếu server mới hơn bản máy đang có mới tải `store` đầy đủ.
-- **Gộp khi 2 máy cùng sửa** (không ghi đè mù):
-  - `srs` / `psrs`: theo từng từ/câu, giữ bản có `reps` lớn hơn (hoà thì `due` muộn hơn).
-  - `days.done`, `trackDays`: hợp (union) các ngày đã xong; `cur` lấy lớn hơn.
-  - `saved`, `myVocab`, `reports` chưa gửi: hợp theo khoá (`en` / `t`).
-  - streak, `stats.done`: lấy lớn hơn; `cfg`: theo `updated_at` của máy sửa sau.
-  - game: `cleared`, `badges` hợp; `coins/xp/lv` lấy lớn hơn.
-- **Lần đầu đăng nhập trên máy thứ hai:** hỏi "Gộp tiến độ của máy này với tài khoản?" (mặc định Gộp) — tránh mất dữ liệu.
-- Bỏ khỏi bản đồng bộ: `ai` (key), `convos` đầy đủ (chỉ gửi 5 buổi gần nhất rút gọn), cache AI.
+## 2. Tài khoản
 
-## 6. Bảo mật
+### 2.1 Luồng
 
-- RLS mẫu: `progress` — `using (auth.uid() = user_id) with check (auth.uid() = user_id)`; `content_reports` — insert qua RPC, select chỉ `is_admin()`.
-- Cột nhạy cảm (`is_admin`, `ai_tier`) không cho người dùng tự sửa: policy update chỉ cho các cột còn lại (hoặc trigger chặn).
-- Edge Function `ai`: bắt buộc JWT hợp lệ, hạn mức theo ngày + theo phút, CORS chỉ cho `https://hunglv201.github.io`.
-- Trình duyệt: thêm `https://<ref>.supabase.co` và `wss://<ref>.supabase.co` vào CSP `connect-src`; service worker **không** cache request tới Supabase.
-- Kiểm thử RLS tự động: script đăng nhập 2 user giả, thử đọc/ghi chéo → phải bị từ chối.
-- Sao lưu: gói Free không có backup → GitHub Action chạy `pg_dump` hằng tuần (lưu vào repo riêng tư hoặc artifact, mã hoá).
-- Giữ project không bị tạm dừng (Free dừng sau 7 ngày không có request): GitHub Action gọi 1 request nhẹ mỗi ngày trong giai đoạn ít người dùng.
+1. Mở app lần đầu → tạo **khách** ngầm (có Cloudflare Turnstile chống tạo user rác) → dữ liệu lên server ngay, không hỏi gì.
+2. Gợi ý **"Lưu tiến độ bằng Google"** khi: học đủ 3 ngày · bấm tính năng cần tài khoản (dùng máy khác, lớp học, chia sẻ gói) · trên iOS sớm hơn (Safari có thể xoá dữ liệu trang sau 7 ngày không mở).
+3. Bấm → `linkIdentity({provider:'google'})` → quay về app, cùng user id, không mất gì.
+4. Nếu Google đó **đã có tài khoản khác** → màn gộp: "Tài khoản này đã có tiến độ — Gộp (mặc định) / Dùng tiến độ tài khoản / Dùng tiến độ máy này" → đăng nhập tài khoản cũ + đẩy dữ liệu khách qua `apply_changes`.
+5. Máy thứ hai: "Đăng nhập bằng Google" → kéo dữ liệu về.
+6. Đăng xuất: giữ bản sao trên máy cho tới khi người dùng chọn xoá. **Xoá tài khoản**: Tôi › Tài khoản › Xoá (xoá hết trên server).
+7. Trước khi liên kết: 1 dòng đồng ý có link Chính sách quyền riêng tư.
 
-## 7. Ngân sách gói Free (tóm tắt từ phân tích trước)
+Phân quyền: khách và Google đều là `authenticated`; phân biệt bằng claim `is_anonymous` trong RLS (khách không tạo lớp, không chia sẻ gói công khai, hạn mức AI thấp hơn).
+
+### 2.2 Việc cần làm ở Google
+
+1. Google Cloud Console → project → **OAuth consent screen**: *External*, tên "Nói Nghề", logo, email hỗ trợ, link chính sách + điều khoản; scope chỉ `openid email profile` (không nhạy cảm → không cần thẩm định bảo mật).
+2. **OAuth client ID** loại *Web application*: origins `https://hunglv201.github.io` (+ `http://localhost:8765`); redirect URI `https://<ref>.supabase.co/auth/v1/callback`.
+3. Dán Client ID/Secret vào Supabase → Auth → Providers → Google; thêm `https://hunglv201.github.io/it-english-app/**` vào Redirect URLs; bật **Anonymous sign-ins** và **Manual linking**.
+4. Chuyển consent screen sang *In production* (xác minh thương hiệu vài ngày — để màn đăng nhập hiện tên + logo).
+
+### 2.3 Trang tĩnh cần thêm
+
+`chinh-sach.html` (quyền riêng tư) · `dieu-khoan.html` (điều khoản: AI có thể sai, nội dung tham khảo, không phải tư vấn y tế/thuế) · `xoa-du-lieu.html` (hướng dẫn tự xoá tài khoản).
+
+## 3. Server lưu gì
+
+### 3.1 Nội dung bài học (dùng chung, chỉ admin sửa)
+
+| Bảng | Cột chính |
+|---|---|
+| `tracks` | `id`, nhãn, emoji, mô tả, `persona`, `counterpart`, `context`, `report` jsonb, `podcast`, `sort`, `is_published` |
+| `track_roles` | `track_id`, `key`, nhãn, emoji, `sort` (39 vai) |
+| `phases` | `id`, `track_id`, `idx`, `title`, `core_ref` (chặng lõi dùng chung) |
+| `vocab` | `phase_id`, `term`, `ipa`, `pos`, `vi`, `ex`, `ex_vi`, `ja`, `ja_romaji`, `sort` (~1.190) |
+| `phrase_groups` / `phrases` | `en`, `vi`, `note` (~1.600) |
+| `dialogues` / `dialogue_options` | câu người kia nói; 3 lựa chọn `text`, `is_good`, `feedback` — thuộc chặng hoặc vai (~790) |
+| `listen_items` | `sentence`, `blanks` text[], `hint`, `is_passage` (~710) |
+| `ai_scenarios`, `reading_items`, `reverse_items`, `event_types`, `quips` | tình huống AI, bài đọc, dịch ngược, sự kiện, câu Mochi |
+| `content_revisions` | lịch sử sửa (trigger): bảng, dòng, trước/sau, ai, lúc nào |
+| `pack_releases` | `track_id`, `version`, `published_at`, `by`, `size`, `checksum`, `notes` |
+
+Toàn bộ nội dung ~7.000 dòng, ~3–5 MB.
+
+### 3.2 Dữ liệu người học (mô hình lai)
+
+| Bảng | Lưu gì | RLS |
+|---|---|---|
+| `profiles` | tên, avatar (từ Google), `track`, `role`, `level`, `is_anonymous`, `ai_tier`, `is_admin`, `created_at`, `last_seen_at` | chủ đọc/sửa (trừ `is_admin`, `ai_tier`) |
+| `user_state` | jsonb trạng thái chi tiết: cfg, SRS từ/câu, câu đã lưu, từ của tôi, streak, game, gói "Nghề của tôi" riêng; `rev`, `updated_at` | chủ **chỉ đọc**; ghi qua RPC `apply_changes` |
+| `user_days` | ngày đã xong theo ngành (`user_id`, `track`, `day`, `done_at`) | chủ đọc; ghi qua RPC |
+| `daily_activity` | 1 dòng/người/ngày: ngành, số việc xong, phút ước tính | chủ đọc; admin xem gộp |
+| `attempts_daily` | số câu đúng/sai theo loại bài mỗi ngày | chủ đọc; admin xem gộp |
+| `applied_changes` | id các thay đổi đã áp (chống gửi trùng), giữ 30 ngày | chỉ server |
+| `ai_usage` | lượt + token AI theo ngày, không lưu nội dung | chủ đọc; chỉ function ghi |
+| `content_reports` | báo lỗi: `item_type`, `item_id`, loại lỗi, gợi ý sửa, `app_version`, `status` | ai cũng gửi (RPC có giới hạn); chỉ admin đọc/sửa |
+
+≈ **25 KB/người** → gói Free chứa khoảng **15.000 người** hoạt động.
+
+### 3.3 Vận hành
+
+`app_config` (hạn mức AI, phiên bản tối thiểu, bật/tắt tính năng, thông báo) · `deletion_requests` (lưu vết yêu cầu xoá).
+
+### 3.4 Không lưu
+
+Key AI của người dùng · ảnh chụp tài liệu · ghi âm · nội dung prompt/trả lời AI · lịch sử hội thoại đầy đủ (chỉ tóm tắt 5 buổi gần nhất) · mật khẩu · SĐT · ngày sinh.
+
+## 4. Xuất bản nội dung
+
+```
+Admin sửa trong admin.html (hoặc Supabase Studio) ──► bảng nội dung (bản nháp)
+        │ bấm "Xuất bản ngành X"
+        ▼
+Edge Function publish-pack: kiểm tra (luật như build.py: đủ từ/chặng, đúng 1 đáp án tốt, ô trống có thật…)
+        → dựng JSON đúng định dạng packs/*.gen.js → Storage: packs/<track>/v<N>.json + packs/manifest.json
+        ▼
+App mở lên: tải manifest (~1 KB) → khác version thì tải gói mới (~40 KB gzip) → lưu IndexedDB → dùng offline
+```
+
+- Có nháp / đã xuất bản; lỗi thì quay về version trước.
+- `packs_src/*.py` + `build.py` chỉ dùng **một lần** để nhập 9 gói + IT vào DB; sau đó DB là bản gốc (script xuất ngược ra file để sao lưu vào git).
+- Bỏ `document.write` trong loader: app đọc gói từ IndexedDB (lần đầu offline dùng gói Công sở có sẵn trong Service Worker).
+
+## 5. Offline & đồng bộ
+
+- Mọi thao tác học **ghi bản sao IndexedDB trước** → màn hình cập nhật ngay → thêm vào outbox `{id, ts, op, data}` (vd `srs.grade`, `day.done`, `saved.add`, `report.add`, `activity.touch`).
+- Bộ đồng bộ chạy khi: mở app · có mạng lại · quay lại tab · mỗi 60s nếu còn outbox · trước khi đóng tab.
+  1. Đẩy outbox theo lô ≤ 50 → RPC `apply_changes(changes, base_rev)` → server áp theo luật gộp, trả `rev` mới → xoá mục đã nhận.
+  2. Kéo về: so `rev`; server mới hơn → tải bản đầy đủ → gộp vào bản sao.
+  3. Lỗi mạng/5xx → thử lại 5s, 15s, 60s, 5 phút; 401 → làm mới phiên rồi gửi lại.
+- Mỗi thay đổi có **id duy nhất** → gửi lại không bị cộng đôi.
+- **Luật gộp**: SRS theo từng từ/câu giữ bản `reps` lớn hơn (hoà thì `due` muộn hơn) · ngày đã xong hợp lại, `cur` lấy lớn hơn · câu lưu, từ của tôi hợp theo khoá · streak, `stats`, coins/xp/lv lấy lớn hơn · `cleared`, `badges` hợp · `cfg` theo thời điểm sửa sau.
+- `navigator.storage.persist()` lúc đầu; không dùng Background Sync (iOS không hỗ trợ).
+- Trường hợp đặc biệt: lần đầu mở không có mạng → chạy chế độ máy, ghi outbox, có mạng thì tạo khách rồi đẩy lên · phiên hết hạn khi offline lâu → vẫn học bình thường, có mạng thì làm mới phiên · outbox quá lớn → gộp bớt thao tác cùng khoá · app quá cũ → server trả mã yêu cầu cập nhật.
+
+| Chạy offline đầy đủ | Offline có giới hạn | Cần mạng |
+|---|---|---|
+| Hôm nay, Lộ trình, từ vựng + SRS, câu thường dùng, nghe (giọng máy), chọn cách đáp, dịch ngược tự gõ, game (trừ Boss AI), streak, thống kê | Báo lỗi ⚑ (xếp hàng), đổi ngành (chỉ ngành đã tải), nhận giọng nói (tuỳ trình duyệt), chấm ngữ pháp bằng luật có sẵn | Mọi thứ gọi AI, liên kết Google, lớp học, tải gói chưa có |
+
+Hiển thị: chấm trạng thái ✓ đã đồng bộ · ↻ đang đồng bộ · ⏸ offline (N chờ gửi); Tôi › Tài khoản có "Lần đồng bộ cuối" + nút "Đồng bộ ngay". Không bao giờ chặn việc học vì mất mạng.
+
+## 6. Hàm phía server
+
+| Tên | Loại | Làm gì |
+|---|---|---|
+| `apply_changes(changes, base_rev)` | RPC | áp outbox theo luật gộp, bỏ id trùng, cập nhật `user_state`/`user_days`/`daily_activity`/`attempts_daily`, trả `rev` |
+| `get_state()` | RPC | trả `user_state` + `rev` |
+| `report_content(...)` | RPC | ghi báo lỗi, kiểm tra độ dài, ≤ 20 lần/giờ |
+| `admin_stats(from, to)` | RPC (admin) | người mới, DAU/WAU, quay lại ngày 1/7/30, ngành được chọn, lượt AI |
+| `ai` | Edge Function | JWT → kiểm hạn mức theo ngày + phút → gọi Gemini/Claude (có ảnh) → ghi `ai_usage` → trả text; chặn prompt quá dài, ảnh > 1,5 MB; không log nội dung |
+| `publish-pack` | Edge Function (admin) | kiểm tra + dựng JSON + Storage + manifest + `pack_releases` |
+| `delete-account` | Edge Function | xoá toàn bộ dữ liệu + `auth.users` (cần service role) |
+
+## 7. Bảo mật
+
+- Mọi bảng bật **RLS**; anon key lộ trong code là bình thường.
+- Dữ liệu người học chỉ ghi qua RPC `security definer` → không ai ghi thẳng jsonb tuỳ ý.
+- `is_admin`, `ai_tier` không cho người dùng tự sửa (policy + trigger).
+- **Service role key và key AI chỉ nằm trong Supabase secrets**, không bao giờ vào repo, `.env` được push, hay trình duyệt.
+- Edge Function: bắt buộc JWT, CORS chỉ `https://hunglv201.github.io` (+ localhost khi dev).
+- Turnstile khi tạo khách; giới hạn tạo user 30 lần/giờ/IP.
+- Test RLS tự động: 2 user giả thử đọc/ghi chéo → phải bị từ chối.
+
+## 8. Ngân sách gói Free
 
 | Giới hạn Free | Dùng cho | Chịu được |
 |---|---|---|
-| DB 500 MB | `progress` ~20 KB/người | ~20.000 tài khoản (chừa 30%) |
-| Băng thông 5 GB/tháng | đồng bộ ~20 KB/người/ngày | ~8.000 người/ngày |
-| Edge Function 500.000 lượt/tháng | AI ~10 lượt/người/ngày | **~1.600 người/ngày** — nút thắt chính |
-| 50.000 MAU | đăng nhập | dư |
-| Realtime 200 kết nối | bảng xếp hạng lớp (chỉ khi mở màn Lớp) | vài nghìn học viên |
+| DB 500 MB | ~25 KB/người + nội dung ~5 MB | ~15.000 người hoạt động (có dọn khách 30 ngày) |
+| Băng thông DB 5 GB/tháng | đồng bộ | ~8.000 người/ngày |
+| Băng thông cache/CDN 5 GB | tải gói ngành | ~100.000 lượt tải gói/tháng |
+| Edge Function 500.000 lượt/tháng | AI | **~1.600 người/ngày dùng AI** — nút thắt chính |
+| 50.000 MAU | tính cả khách (giả định an toàn) | dư |
+| Tạm dừng sau 7 ngày không có request | — | keepalive hằng ngày |
 
-Hạn mức AI mặc định đề xuất: **20 lượt/ngày/tài khoản** (chỉnh trong `app_config`); người có key riêng hoặc chạy trong claude.ai không tốn quota.
-Lên **Pro (25 USD/tháng)** khi: DB > 350 MB, băng thông > 4 GB/tháng, Edge Function > 400.000 lượt/tháng hoặc ~1.000 người/ngày dùng AI qua server.
-Chi phí thật lớn nhất là **phí gọi Gemini/Claude** nếu dùng key chung — cần đặt trần chi phí ở phía nhà cung cấp AI.
+Lên **Pro (25 USD/tháng)** khi DB > 350 MB, băng thông > 4 GB/tháng hoặc Edge Function > 400.000 lượt/tháng. Chi phí thật lớn nhất là **phí gọi Gemini/Claude** → đặt trần chi phí ở nhà cung cấp AI.
 
-## 8. Pháp lý dữ liệu cá nhân (Việt Nam) — cần kiểm tra lại với người có chuyên môn
+## 9. Pháp lý (Việt Nam) — cần kiểm tra lại với người có chuyên môn
 
-- Từ **01/01/2026**: **Luật Bảo vệ dữ liệu cá nhân 2025** và **Nghị định 356/2025/NĐ-CP** có hiệu lực, thay **Nghị định 13/2023/NĐ-CP**.
-- Việc app cần làm tối thiểu: chính sách quyền riêng tư rõ ràng; **thu thập sự đồng ý** trước khi đăng nhập/đồng bộ; chỉ thu dữ liệu cần thiết;
-  cho người dùng **xem, sửa, xoá, rút lại đồng ý** (nút Xoá tài khoản); xử lý sự cố lộ lọt; lưu vết yêu cầu xoá.
-- Đặt server ở Singapore là **chuyển dữ liệu ra nước ngoài** → có thể phải lập hồ sơ đánh giá tác động chuyển dữ liệu; luật mới cũng có quy định về
-  nhân sự/bộ phận bảo vệ dữ liệu và một số miễn trừ cho doanh nghiệp nhỏ/khởi nghiệp trong thời gian chuyển tiếp — **cần xác nhận cụ thể** trước khi mở cho người dùng thật.
-- Không thu dữ liệu nhạy cảm: gói Y tế chỉ là nội dung học, app không hỏi tình trạng sức khoẻ; mô tả công việc người dùng tự nhập nên nhắc "đừng ghi tên công ty/khách hàng thật".
+- Từ 01/01/2026: **Luật Bảo vệ dữ liệu cá nhân 2025** + **Nghị định 356/2025/NĐ-CP** (thay Nghị định 13/2023).
+- Tối thiểu: chính sách quyền riêng tư rõ; thu thập sự đồng ý; chỉ thu dữ liệu cần thiết; cho xem/sửa/xoá/rút đồng ý; xử lý sự cố lộ lọt; lưu vết yêu cầu xoá.
+- Tài khoản khách vẫn là dữ liệu cá nhân (gắn với thiết bị) → chính sách phải nói rõ ngay từ lần mở đầu (dòng thông báo nhỏ + link).
+- Server ở Singapore = **chuyển dữ liệu ra nước ngoài** → có thể cần hồ sơ đánh giá tác động; xác nhận miễn trừ cho cá nhân/doanh nghiệp nhỏ trước khi mở cho người dùng thật.
+- Không thu dữ liệu nhạy cảm; nhắc "đừng ghi tên công ty/khách hàng thật" ở ô mô tả công việc.
 
-*(Đây là thông tin tham khảo, không phải tư vấn pháp lý.)*
+*(Thông tin tham khảo, không phải tư vấn pháp lý.)*
 
-## 9. Cấu trúc repo đề xuất
+## 10. Cấu trúc repo
 
 ```
 supabase/
   config.toml
   migrations/
-    0001_core.sql            # profiles, progress, app_config + RLS + trigger tạo profile khi đăng ký
-    0002_reports.sql         # content_reports + RPC report_content
-    0003_ai_usage.sql        # ai_usage + hàm kiểm tra hạn mức
-    0004_classes.sql         # classes, class_members, class_leaderboard()
-    0005_packs_stats.sql     # custom_packs, daily_activity, admin_stats()
-  functions/
-    ai/index.ts
-    fb-data-deletion/index.ts
-    delete-account/index.ts
-  tests/rls.test.mjs         # 2 user giả, thử đọc/ghi chéo
-vendor/supabase.min.js       # supabase-js tự host (CSP 'self')
-chinh-sach.html · dieu-khoan.html · xoa-du-lieu.html · admin.html (sau)
-.github/workflows/backup.yml · keepalive.yml
+    0001_users.sql        # profiles, user_state, user_days, daily_activity, attempts_daily, applied_changes, app_config + RLS + trigger
+    0002_sync.sql         # apply_changes, get_state
+    0003_reports_ai.sql   # content_reports, report_content, ai_usage + hạn mức, admin_stats
+    0004_content.sql      # bảng nội dung, content_revisions, pack_releases
+    0005_release.sql      # quyền publish, bucket packs
+  functions/ai · publish-pack · delete-account
+  seed/import_packs.mjs   # nhập packs_src + gói IT vào DB, kiểm tra khớp 100%
+  tests/rls.test.mjs · sync.test.mjs
+vendor/supabase.min.js
+chinh-sach.html · dieu-khoan.html · xoa-du-lieu.html · admin.html
+.github/workflows/backup.yml · keepalive.yml · cleanup-guests.yml
 ```
 
-Quản lý schema bằng **Supabase CLI** (`supabase db push`, `supabase functions deploy`) — mọi thay đổi DB là file migration trong git, không sửa tay trên dashboard.
+Schema quản lý bằng **Supabase CLI** (`supabase db push`, `supabase functions deploy`); không sửa tay trên dashboard.
 
-## 10. Kế hoạch & ước lượng
+## 11. Kế hoạch triển khai
 
-Đơn vị: **ngày công** của 1 dev quen web (bảng bên phải: số **phiên làm việc với Claude** như các đợt trước).
+Đơn vị: ngày công của 1 dev quen web · số phiên làm việc với Claude.
 
-| Đợt | Nội dung | Ngày công | Phiên Claude |
+### Bước 1 — v4.0: tài khoản + dữ liệu người học trên server + offline (nội dung vẫn là file tĩnh)
+
+| Đợt | Nội dung | Ngày | Phiên |
 |---|---|---|---|
-| **B0 · Nền** | Tạo project (Singapore), Supabase CLI, repo `supabase/`, vendor supabase-js, CSP, `app_config` | 0,5 | 0,3 |
-| **B1 · Đăng nhập** | Google (consent screen, OAuth client), Facebook (app, quyền email, dev mode), nút đăng nhập/đăng xuất, trang Tài khoản, 3 trang chính sách/điều khoản/xoá dữ liệu | 1,5 | 0,5 |
-| **B2 · Schema + RLS** | Migration 0001–0003, trigger tạo profile, test RLS tự động | 1 | 0,5 |
-| **B3 · Đồng bộ** | Rút gọn store, kéo/đẩy, thuật toán gộp (§5), hỏi gộp lần đầu, đồng bộ cả game, xử lý offline/lỗi mạng, test 2 máy | 2 | 1 |
-| **B4 · AI qua server** | Edge Function `ai` (Gemini + ảnh), hạn mức ngày/phút, đếm lượt còn lại trong app, rơi về key riêng / claude.ai | 1 | 0,5 |
-| **B5 · Báo lỗi + xoá tài khoản** | RPC `report_content`, nút ⚑ ghi vào DB (GitHub là dự phòng), `delete-account`, `fb-data-deletion`, saved queries admin | 1 | 0,5 |
-| **B6 · Vận hành** | Backup `pg_dump` hằng tuần, keepalive, cảnh báo gần hết quota, tài liệu CLAUDE.md | 0,5 | 0,3 |
-| **= MVP** | Đăng nhập Google/FB · đồng bộ · AI miễn phí · báo lỗi · xoá tài khoản | **≈ 7,5** | **≈ 3,5** |
-| B7 · Lớp học | classes, mã lớp, bảng xếp hạng (realtime khi mở màn), rời lớp | 1,5 | 0,7 |
-| B8 · Chia sẻ gói nghề | `custom_packs` công khai, link `?pack=CODE`, đếm lượt dùng | 0,5 | 0,3 |
-| B9 · Thống kê + admin.html | `daily_activity`, `admin_stats()`, trang admin duyệt báo lỗi, sửa `app_config` | 1,5 | 0,7 |
-| **Tổng** | | **≈ 11** | **≈ 5** |
+| **P0 · Nền** | Project Singapore, Supabase CLI, thư mục `supabase/`, vendor supabase-js, CSP, `app_config` | 1 | 0,5 |
+| **P1 · Tài khoản** | Khách tự động + Turnstile; Google + `linkIdentity`; màn gộp khi Google đã có tài khoản; trang Tài khoản; `delete-account`; 3 trang chính sách/điều khoản/xoá dữ liệu | 2 | 1 |
+| **P2 · Schema + RLS** | Migration 0001–0003, trigger profile, test RLS tự động | 1 | 0,5 |
+| **P3 · Offline & đồng bộ** | `localStorage` → IndexedDB (state/outbox), `apply_changes` gộp theo thao tác, chống trùng, backoff, chuyển dữ liệu người dùng cũ lên server lần đầu, chấm trạng thái, test offline 2 trình duyệt | 3 | 1,5 |
+| **P4 · AI qua server** | Edge Function `ai` (Gemini + ảnh), hạn mức 10/20, đếm lượt còn lại, rơi về key riêng / claude.ai | 1 | 0,5 |
+| **P5 · Báo lỗi + thống kê** | ⚑ ghi vào `content_reports` (GitHub issue là dự phòng), `daily_activity`, `attempts_daily`, `admin_stats`, saved queries trong Studio | 1 | 0,5 |
+| **P6 · Vận hành** | Backup `pg_dump` hằng tuần, keepalive, dọn khách > 30 ngày, cảnh báo gần hết quota, cập nhật CLAUDE.md | 0,5 | 0,3 |
+| **Cộng Bước 1** | | **≈ 9,5** | **≈ 4,8** |
 
-Thời gian chờ bên ngoài (không tính công): Meta App Review 1–5 ngày làm việc; xác minh thương hiệu Google vài ngày. **Nên nộp Meta review ngay khi xong B1**
-(trong lúc chờ, Facebook chỉ dùng được với tài khoản tester; Google dùng được ngay).
+### Bước 2 — v4.1: nội dung vào database + xuất bản + trình sửa
 
-### Thứ tự đề xuất
-
-1. B0 → B1 (Google trước, Facebook ở chế độ dev) → nộp Meta review.
-2. B2 → B3 (đồng bộ — phần giá trị nhất) → B4 → B5 → B6 = **bản MVP phát hành** (v4.0).
-3. B7 → B8 → B9 khi đã có người dùng thật.
-
-### Việc anh cần chuẩn bị / quyết định
-
-- [ ] Tạo tài khoản Supabase + project (vùng Singapore), gửi **project URL + anon key** (không gửi service role key).
-- [ ] Google Cloud project + consent screen (email hỗ trợ, logo); Meta developer account.
-- [ ] Email liên hệ ghi trong chính sách quyền riêng tư; tên hiển thị (cá nhân hay tổ chức).
-- [ ] Key AI dùng chung (Gemini) + đặt trần chi phí; chốt hạn mức miễn phí/ngày (đề xuất 20).
-- [ ] Có mua tên miền riêng không (đẹp hơn cho màn đăng nhập và trang chính sách; không bắt buộc).
-
-## 11. Phương án server-first (cập nhật theo yêu cầu: dữ liệu lưu trên server)
-
-> Thay đổi so với §1: **server là nguồn dữ liệu chính** cho cả **nội dung bài học** lẫn **dữ liệu người học**.
-> Máy người dùng chỉ còn là **bộ nhớ đệm** để chạy nhanh và dùng tạm khi mất mạng.
-
-### 11.1 Nội dung bài học vào database (quản trị được, không cần sửa code)
-
-**Bảng nội dung** (dùng chung cho mọi người, chỉ admin sửa):
-
-| Bảng | Cột chính | Ghi chú |
-|---|---|---|
-| `tracks` | `id` (office, it, hotel…), nhãn, emoji, mô tả, `persona`, `counterpart`, `context`, `report` (jsonb), `podcast`, `sort`, `is_published` | 9 ngành + thêm ngành mới không cần sửa code |
-| `track_roles` | `track_id`, `key`, nhãn, emoji, `sort` | 39 vai |
-| `phases` | `id`, `track_id`, `idx`, `title`, `core_ref` (chặng lõi dùng chung) | 12 chặng/ngành (IT 37) |
-| `vocab` | `id`, `phase_id`, `term`, `ipa`, `pos`, `vi`, `ex`, `ex_vi`, `ja`, `ja_romaji`, `sort` | ~1.190 từ |
-| `phrase_groups` / `phrases` | nhóm (theo chặng hoặc nhóm chung), `en`, `vi`, `note` | ~1.600 câu (có ~610 câu chung) |
-| `dialogues` / `dialogue_options` | câu người kia nói; 3 lựa chọn (`text`, `is_good`, `feedback`) — thuộc chặng **hoặc** vai | ~590 + ~200 theo vai |
-| `listen_items` | `phase_id`, `sentence`, `blanks` (text[]), `hint`, `is_passage` | ~710 |
-| `ai_scenarios` | `track_id`, `role_id` (tuỳ chọn), `key`, nhãn, `prompt` | tình huống AI |
-| `reading_items`, `reverse_items`, `event_types`, `quips` | bài đọc 30 giây, câu dịch ngược, loại sự kiện, câu Mochi | |
-| `content_revisions` | `table`, `row_id`, `before`, `after`, `by`, `at` | lịch sử sửa (trigger) — ai sửa gì, khôi phục được |
-| `pack_releases` | `track_id`, `version`, `published_at`, `by`, `size`, `checksum`, `notes` | mỗi lần "Xuất bản" |
-
-Dung lượng toàn bộ nội dung: ~7.000 dòng, **~3–5 MB** — không đáng kể so với 500 MB.
-`content_reports` giờ trỏ thẳng tới `item_type` + `item_id` → mở báo lỗi là tới đúng dòng để sửa.
-
-**Phục vụ nội dung cho app: "Xuất bản" thay vì truy vấn trực tiếp**
-
-```
-Admin sửa trong admin.html (hoặc Studio) ──► bảng nội dung (bản nháp)
-        │ bấm "Xuất bản ngành X"
-        ▼
-Edge Function `publish-pack`: kiểm tra (luật như build.py: đủ 10 từ/chặng, 1 đáp án đúng, ô trống có thật…)
-        → dựng JSON đúng định dạng packs/*.gen.js hiện tại → Storage (bucket công khai, qua CDN)
-          packs/<track>/v<N>.json  +  packs/manifest.json {track: version}
-        ▼
-App: mở lên tải manifest (~1 KB) → khác version thì tải gói mới (~150 KB, gzip ~40 KB) → lưu IndexedDB → chạy offline như cũ
-```
-
-- Vì sao không để app truy vấn thẳng ~10 bảng mỗi lần mở: chậm, tốn băng thông DB (giới hạn 5 GB), khó chạy offline.
-  File đã xuất bản đi qua CDN (**băng thông cache 5 GB riêng**) → ~100.000 lượt tải gói/tháng vẫn trong gói Free.
-- Có **bản nháp / đã xuất bản**: sửa thoải mái, người học chỉ thấy khi bấm xuất bản; lỗi thì quay về version trước.
-- `packs_src/*.py` + `build.py` dùng **một lần** để nhập (seed) dữ liệu hiện có vào DB; sau đó DB là bản gốc (có thể giữ script xuất ngược ra file để sao lưu vào git).
-- Gói IT (data/phrases/roles.gen.js) cũng nhập vào cùng schema → mọi ngành quản lý một kiểu.
-
-### 11.2 Dữ liệu người học lưu trên server
-
-- Mọi thay đổi (ôn từ, xong ngày, lưu câu, điểm báo cáo 60s…) **ghi lên server**; máy giữ bản sao + **hàng đợi ghi (outbox)** khi mất mạng, có mạng lại thì đẩy lên.
-- Cách lưu — cân nhắc giữa gọn và dễ truy vấn:
-
-| Cách | Mô tả | Mỗi người (≈500 từ đã ôn) | Gói Free chứa | Hợp khi |
-|---|---|---|---|---|
-| **JSON một dòng** (`progress.store`) | như §4 | ~20 KB | ~20.000 người | chỉ cần đồng bộ |
-| **Tách bảng hoàn toàn** (`user_srs` 1 dòng/từ, `user_days`, `user_saved`…) | chuẩn hoá | ~60–80 KB (dòng + index) | ~6.000 người | cần phân tích sâu từng từ |
-| **Lai (đề xuất)** | JSON cho trạng thái chi tiết (SRS, cài đặt, game) **+** bảng riêng cho thứ cần truy vấn: `daily_activity`, `user_days` (ngày đã xong theo ngành), `attempts_daily` (số câu đúng/sai theo loại bài mỗi ngày), `ai_usage` | ~25 KB | ~15.000 người | đồng bộ + thống kê học tập đủ dùng |
-
-Với phương án lai, admin xem được: ngày học, chặng đang học, tỉ lệ đúng theo loại bài/ngành, lượt AI — mà không phải bóc JSON.
-
-### 11.3 Chế độ đăng nhập — 3 lựa chọn (nghiên cứu)
-
-| | A. Bắt buộc đăng nhập | **B. Khách tự động + nâng cấp (đề xuất)** | C. Đăng nhập tuỳ chọn, máy là gốc (bản §1) |
+| Đợt | Nội dung | Ngày | Phiên |
 |---|---|---|---|
-| Cách chạy | Mở app → phải bấm Google/Facebook mới học | Mở app → app tự tạo **tài khoản khách** (`signInAnonymously`) ngầm → dữ liệu lên server ngay; bấm "Lưu tài khoản bằng Google/Facebook" (`linkIdentity`) để giữ lâu dài, dùng nhiều máy | Không đăng nhập = chỉ lưu trên máy |
-| Dữ liệu trên server | 100% | 100% (cả khách) | Chỉ người đã đăng nhập |
-| Rào cản lần đầu | **Cao** — nhiều người bỏ ngay ở màn đăng nhập | Không có | Không có |
-| Nhiều máy | Có | Có sau khi liên kết Google/FB | Có sau khi đăng nhập |
-| Rủi ro | Mất người dùng mới | Khách xoá trình duyệt/đăng xuất trước khi liên kết → mất tài khoản khách; tạo user rác → cần CAPTCHA (Cloudflare Turnstile) + giới hạn 30 lần/giờ/IP (mặc định Supabase); dọn khách không hoạt động > 30 ngày (SQL định kỳ — Supabase chưa tự dọn); liên kết vào email đã có tài khoản khác → phải tự viết logic gộp | Thống kê thiếu người không đăng nhập |
-| Phân quyền | `authenticated` | Khách cũng là `authenticated`; phân biệt bằng claim `is_anonymous` trong RLS (vd khách không được tạo lớp, không chia sẻ gói công khai, hạn mức AI thấp hơn) | — |
-| Dung lượng | theo số người đăng ký | tăng vì cả khách — nhờ dọn khách 30 ngày nên vẫn trong ~15.000 người hoạt động | ít nhất |
+| **P7 · Nội dung vào DB** | Migration 0004, `seed/import_packs.mjs` nhập 9 gói + IT, kiểm tra khớp 100% với file hiện tại | 1,5 | 0,7 |
+| **P8 · Xuất bản** | `publish-pack`, Storage + manifest, app tải/cache gói theo version, bỏ `document.write` | 1,5 | 0,7 |
+| **P9 · admin.html** | Duyệt báo lỗi (mở thẳng dòng cần sửa), sửa từ/câu/hội thoại/bài nghe, xem trước, lịch sử, xuất bản, sửa `app_config`, thống kê | 2,5 | 1 |
+| **Cộng Bước 2** | | **≈ 5,5** | **≈ 2,4** |
 
-**Đề xuất: B.** Đúng yêu cầu "dữ liệu nằm trên server" mà không làm người mới bỏ đi vì bắt đăng nhập.
-Luồng: mở app → khách (không hỏi gì) → sau 3 ngày học hoặc khi bấm tính năng cần tài khoản (lớp học, chia sẻ gói, dùng máy khác) → gợi ý "Lưu tiến độ bằng Google/Facebook".
-Hạn mức AI gợi ý: khách 10 lượt/ngày, đã liên kết 20 lượt/ngày.
+**Tổng ≈ 15 ngày công ≈ 7 phiên.** Thời gian chờ bên ngoài: chỉ xác minh thương hiệu Google (vài ngày, không chặn — Google dùng được ngay).
 
-Việc cần xác minh thêm trước khi chốt (chưa có câu trả lời chắc chắn trong tài liệu):
-- Người dùng khách có **tính vào MAU** không (ảnh hưởng mốc 50.000 MAU) — tài liệu anonymous sign-in không nói rõ; giả định là **có** để tính an toàn.
-- Hành vi `linkIdentity` khi email Google/FB **đã thuộc** một tài khoản khác → thiết kế màn "Tài khoản này đã có tiến độ — gộp hay dùng tiến độ nào?".
-- iOS Safari có thể **xoá dữ liệu trang web sau 7 ngày không mở** (chính sách chống theo dõi) → khách chưa liên kết trên iPhone dễ mất phiên → nhắc liên kết sớm hơn trên iOS.
+### Backlog (sau v4.1)
 
-### 11.4 Các cách đăng nhập khác (để cân nhắc sau)
+Lớp học + bảng xếp hạng (1,5 ngày) · chia sẻ gói "Nghề của tôi" bằng link `?pack=CODE` (0,5) · đăng nhập email OTP với SMTP riêng (0,5) · Zalo (tự viết OAuth, 1,5–2) · chuyển sang Cloudflare Pages + tên miền riêng.
 
-| Cách | Supabase hỗ trợ sẵn | Ghi chú |
-|---|---|---|
-| Google | Có | làm trước |
-| Facebook | Có | cần Meta App Review |
-| Email OTP / magic link | Có | dự phòng cho người không dùng Google/FB; gói Free gửi email rất hạn chế → cần SMTP riêng (vd Resend) |
-| Apple | Có | chỉ bắt buộc nếu sau này lên App Store có đăng nhập mạng xã hội |
-| **Zalo** | **Không** (không có sẵn) | phổ biến ở VN; muốn có phải tự viết luồng OAuth Zalo trong Edge Function rồi tạo phiên Supabase — khoảng +1,5–2 ngày công, để sau |
+### Việc anh cần chuẩn bị
 
-### 11.5 Ước lượng thêm cho phương án server-first
-
-| Việc thêm | Ngày công | Phiên Claude |
-|---|---|---|
-| Schema nội dung + script nhập 9 gói + IT vào DB, kiểm tra khớp 100% với file hiện tại | 1,5 | 0,7 |
-| `publish-pack` (kiểm tra + dựng JSON + Storage + manifest), app tải/cache gói theo version (IndexedDB), bỏ `document.write` | 1,5 | 0,7 |
-| Trình sửa nội dung trong `admin.html` (danh sách chặng, sửa từ/câu/hội thoại/bài nghe, xem trước, lịch sử, xuất bản) | 2,5 | 1 |
-| Khách tự động + liên kết Google/FB + màn gộp tài khoản + dọn khách 30 ngày + Turnstile | 1 | 0,5 |
-| Hàng đợi ghi offline (outbox) + bảng lai (`user_days`, `attempts_daily`) | 1 | 0,5 |
-| **Cộng thêm** | **≈ 7,5** | **≈ 3,4** |
-
-**MVP server-first** (B0–B6 ở §10 + 11.5) ≈ **15 ngày công ≈ 7 phiên**. Có thể chia 2 bước:
-1. **Bước 1 (≈ 9 ngày):** khách tự động + Google/Facebook + dữ liệu người học trên server + AI qua server + báo lỗi — nội dung vẫn là file tĩnh.
-2. **Bước 2 (≈ 6 ngày):** đưa nội dung vào DB + xuất bản + trình sửa nội dung cho admin.
-
-## 12. Chế độ offline trong phương án server-first
-
-Nguyên tắc: **server là bản gốc, máy là bản sao làm việc**. Mọi thao tác học đọc/ghi vào bản sao trên máy **ngay lập tức** (không chờ mạng),
-rồi một bộ đồng bộ chạy nền đẩy lên / kéo về khi có mạng. Người học không phân biệt online hay offline, trừ vài tính năng bắt buộc cần mạng.
-
-### 12.1 Bốn lớp lưu trên máy
-
-| Lớp | Lưu ở | Nội dung | Cập nhật khi |
-|---|---|---|---|
-| 1. Vỏ app | Service Worker cache (như hiện tại) | `index.html`, `game/`, CSS/JS, `vendor/supabase.min.js`, icon | đổi version app (`CACHE`) |
-| 2. Nội dung bài học | **IndexedDB** `packs` | gói ngành đã xuất bản (JSON theo `version`) + `manifest` | mở app có mạng → so `manifest` → tải gói mới; offline dùng bản đang có |
-| 3. Dữ liệu người học (bản sao) | IndexedDB `state` (thay `localStorage` vì lớn và an toàn hơn) | tiến độ, SRS, câu lưu, game… + `rev` của server lần cuối | mỗi thao tác học (ghi local trước) |
-| 4. Hàng đợi ghi (outbox) | IndexedDB `outbox` | các thay đổi chưa gửi: `{id, ts, op, data}` — vd `srs.grade`, `day.done`, `saved.add`, `report.add`, `activity.touch` | thêm khi thao tác; xoá khi server xác nhận |
-
-Gọi `navigator.storage.persist()` lúc đầu để trình duyệt hạn chế tự xoá dữ liệu (Chrome/Android thường cho; iOS vẫn có thể xoá sau thời gian dài không mở → nhắc liên kết tài khoản, xem §11.3).
-
-### 12.2 Luồng
-
-```
-Thao tác học ──► ghi bản sao (IndexedDB) ──► cập nhật màn hình ngay
-                         └──► thêm vào outbox
-Bộ đồng bộ (chạy khi: mở app · có mạng lại (online) · quay lại tab · mỗi 60s nếu còn outbox · trước khi đóng tab)
-  1. Đẩy outbox theo lô (≤ 50 thay đổi/lần) → RPC `apply_changes(changes, base_rev)`
-     server áp từng thay đổi theo luật gộp (§5), trả `rev` mới → xoá các mục đã nhận
-  2. Kéo về: hỏi `rev` hiện tại; nếu server mới hơn (máy khác đã sửa) → tải bản đầy đủ → gộp vào bản sao
-  3. Lỗi mạng / 5xx → thử lại sau 5s, 15s, 60s, 5 phút (backoff); lỗi 401 (phiên hết hạn) → làm mới phiên rồi gửi lại
-```
-
-- Mỗi thay đổi có **id duy nhất** → server bỏ qua nếu nhận trùng (gửi lại khi mất kết nối giữa chừng không bị cộng đôi).
-- Gửi theo **thao tác nhỏ** (`srs.grade 'deploy' reps=3…`) thay vì cả khối JSON → 2 máy cùng offline rồi cùng online vẫn gộp đúng, không ghi đè nhau.
-- Không dùng Background Sync API (Safari/iOS không hỗ trợ) — đồng bộ khi app mở là đủ.
-
-### 12.3 Tính năng nào chạy offline
-
-| Chạy offline đầy đủ | Chạy offline có giới hạn | Cần mạng |
-|---|---|---|
-| Hôm nay, Lộ trình, ngày học; từ vựng + SRS; câu thường dùng; nghe (đọc bằng giọng máy trên máy); chọn cách đáp; dịch ngược dạng tự gõ; game (trừ Boss AI); streak, thống kê cá nhân | Báo lỗi ⚑ (xếp hàng, gửi sau); đổi ngành (chỉ ngành đã tải gói); nhận giọng nói (Chrome thường cần mạng cho nhận giọng; Safari một số máy chạy trên máy); chấm ngữ pháp offline (luật có sẵn) | Mọi thứ gọi AI (Giao tiếp AI, chấm báo cáo 60s, Ảnh → bài học, tạo gói nghề); đăng nhập / liên kết Google·FB; lớp học & bảng xếp hạng; tải gói ngành chưa có trên máy |
-
-Các nút cần mạng khi offline: làm mờ + ghi "Cần mạng" (đã có dải báo offline `paintOffline()` từ v1.22). Gói ngành: tự tải trước gói đang học + gói Công sở chung.
-
-### 12.4 Trường hợp đặc biệt
-
-- **Mở app lần đầu mà không có mạng**: chưa tạo được tài khoản khách → app chạy chế độ máy (như hiện tại, gói Công sở có sẵn trong Service Worker), ghi mọi thứ vào outbox; lần đầu có mạng → tạo khách → đẩy outbox lên.
-- **Phiên đăng nhập hết hạn khi offline lâu**: không ảnh hưởng việc học (dữ liệu local); có mạng lại → dùng refresh token làm mới phiên → đồng bộ. Refresh token cũng hết hạn → yêu cầu đăng nhập lại, outbox vẫn giữ và gửi sau khi đăng nhập.
-- **Offline trên 2 máy cùng lúc**: gộp theo thao tác + luật §5 (SRS lấy bản ôn nhiều hơn, ngày đã xong hợp lại, streak lấy lớn hơn).
-- **Outbox quá lớn** (offline nhiều tuần): gộp bớt thao tác cùng khoá trước khi gửi (chỉ giữ trạng thái mới nhất của mỗi từ).
-- **Server đang lên version app mới**: RPC có `app_version`; bản app quá cũ → server trả mã yêu cầu cập nhật → app tải vỏ mới (SW) rồi gửi lại outbox.
-
-### 12.5 Hiển thị cho người học
-
-- Chấm trạng thái nhỏ cạnh ảnh đại diện: ✓ đã đồng bộ · ↻ đang đồng bộ · ⏸ offline (N thay đổi chờ gửi).
-- Tôi › Tài khoản: "Lần đồng bộ cuối: 5 phút trước", nút "Đồng bộ ngay".
-- Không bao giờ chặn việc học vì mất mạng.
-
-### 12.6 Kiểm thử & ước lượng
-
-- Playwright: `context.setOffline(true)` → học 1 ngày, ôn 10 từ → online → kiểm tra server nhận đủ, không trùng; 2 trình duyệt cùng offline sửa khác nhau → gộp đúng; tắt mạng giữa lúc gửi → gửi lại không cộng đôi; phiên hết hạn → làm mới.
-- Ước lượng: đã nằm trong "Hàng đợi ghi offline" (§11.5, 1 ngày) **+ 1 ngày** cho chuyển `localStorage` → IndexedDB, RPC `apply_changes` gộp theo thao tác, tải trước gói, test offline
-  → **tổng MVP server-first ≈ 16 ngày công (≈ 7,5 phiên)**.
+- [ ] Tài khoản Supabase + project vùng Singapore → gửi **project URL + anon key** (không gửi service role key; lưu ở `.env` local, không push).
+- [ ] Google Cloud project + consent screen (email hỗ trợ, logo).
+- [ ] Cloudflare Turnstile site key (miễn phí).
+- [ ] Email liên hệ ghi trong chính sách; tên hiển thị (cá nhân hay tổ chức).
+- [ ] Key Gemini dùng chung + đặt trần chi phí; xác nhận hạn mức 10/20 lượt/ngày.
 
 ## Nguồn
 
 - [Supabase — Sign in with Google](https://supabase.com/docs/guides/auth/social-login/auth-google)
-- [Supabase — Sign in with Facebook](https://supabase.com/docs/guides/auth/social-login/auth-facebook)
 - [Supabase — Anonymous sign-ins](https://supabase.com/docs/guides/auth/auth-anonymous)
+- [Supabase — Identity linking](https://supabase.com/docs/guides/auth/auth-identity-linking)
 - [Supabase — PKCE flow](https://supabase.com/docs/guides/auth/sessions/pkce-flow)
-- [Supabase — signInWithOAuth](https://supabase.com/docs/reference/javascript/auth-signinwithoauth)
 - [DesignRevision — Supabase Free Tier Limits 2026](https://designrevision.com/blog/supabase-pricing) · [UI Bakery — Supabase Pricing 2026](https://uibakery.io/blog/supabase-pricing)
 - [Thư viện Pháp luật — NĐ 13/2023 hết hiệu lực từ 01/01/2026](https://thuvienphapluat.vn/chinh-sach-phap-luat-moi/vn/ho-tro-phap-luat/chinh-sach-moi/102230/nghi-dinh-13-2023-nd-cp-ve-bao-ve-du-lieu-ca-nhan-het-hieu-luc-tu-01-01-2026)
-- [EY — Nghị định 356/2025/NĐ-CP hướng dẫn Luật Bảo vệ dữ liệu cá nhân](https://www.ey.com/content/dam/ey-unified-site/ey-com/vi-vn/technical/tax/documents/ey-vietnam-legal-alert-march-2026-decree-no356-2025-nd-cp-providing-detailed-guidance-for-implementation-of-personal-data-protection-law-viet.pdf)
+- [EY — Nghị định 356/2025/NĐ-CP](https://www.ey.com/content/dam/ey-unified-site/ey-com/vi-vn/technical/tax/documents/ey-vietnam-legal-alert-march-2026-decree-no356-2025-nd-cp-providing-detailed-guidance-for-implementation-of-personal-data-protection-law-viet.pdf)
 
 ---
 
-## Phụ lục A — SQL phác thảo (migration 0001)
+## Phụ lục A — SQL phác thảo (migration 0001, rút gọn)
 
 ```sql
--- profiles: tạo tự động khi user đăng ký
 create table public.profiles (
   id uuid primary key references auth.users on delete cascade,
   display_name text, avatar_url text,
   track text default 'office', role text, level text default 'A2',
+  is_anonymous boolean not null default true,
   is_admin boolean not null default false,
-  ai_tier text not null default 'free',
+  ai_tier text not null default 'guest',          -- guest | google
   created_at timestamptz default now(), last_seen_at timestamptz default now()
 );
 alter table public.profiles enable row level security;
-create policy "own profile read"   on public.profiles for select using (auth.uid() = id);
+create policy "own profile read" on public.profiles for select using (auth.uid() = id);
 create policy "own profile update" on public.profiles for update using (auth.uid() = id)
-  with check (auth.uid() = id and is_admin = (select is_admin from public.profiles where id = auth.uid())
-              and ai_tier = (select ai_tier from public.profiles where id = auth.uid()));
+  with check (auth.uid() = id
+    and is_admin = (select p.is_admin from public.profiles p where p.id = auth.uid())
+    and ai_tier  = (select p.ai_tier  from public.profiles p where p.id = auth.uid()));
 
-create function public.handle_new_user() returns trigger language plpgsql security definer set search_path = public as $$
+-- tạo profile khi đăng ký (kể cả khách) và cập nhật khi khách liên kết Google
+create function public.handle_user() returns trigger language plpgsql security definer set search_path = public as $$
 begin
-  insert into public.profiles (id, display_name, avatar_url)
-  values (new.id, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url');
+  insert into public.profiles (id, display_name, avatar_url, is_anonymous, ai_tier)
+  values (new.id, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url',
+          coalesce(new.is_anonymous, false), case when coalesce(new.is_anonymous, false) then 'guest' else 'google' end)
+  on conflict (id) do update set
+    display_name = coalesce(excluded.display_name, profiles.display_name),
+    avatar_url   = coalesce(excluded.avatar_url, profiles.avatar_url),
+    is_anonymous = excluded.is_anonymous,
+    ai_tier      = case when profiles.ai_tier = 'guest' then excluded.ai_tier else profiles.ai_tier end;
   return new;
 end $$;
-create trigger on_auth_user_created after insert on auth.users for each row execute function public.handle_new_user();
+create trigger on_auth_user_ins after insert on auth.users for each row execute function public.handle_user();
+create trigger on_auth_user_upd after update of is_anonymous, raw_user_meta_data on auth.users
+  for each row execute function public.handle_user();
 
--- progress: 1 dòng / người
-create table public.progress (
+-- trạng thái chi tiết: chỉ đọc; ghi qua RPC apply_changes (security definer)
+create table public.user_state (
   user_id uuid primary key references auth.users on delete cascade,
-  store jsonb not null default '{}', game jsonb, rev int not null default 0,
-  device text, updated_at timestamptz not null default now()
+  state jsonb not null default '{}', rev bigint not null default 0,
+  updated_at timestamptz not null default now()
 );
-alter table public.progress enable row level security;
-create policy "own progress" on public.progress for all
-  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+alter table public.user_state enable row level security;
+create policy "own state read" on public.user_state for select using (auth.uid() = user_id);
 
--- cấu hình đọc công khai
 create table public.app_config (key text primary key, value jsonb not null);
 alter table public.app_config enable row level security;
 create policy "config readable" on public.app_config for select using (true);
-insert into public.app_config values ('ai_daily_free', '20'), ('min_app_version', '"3.1.0"');
+insert into public.app_config values
+  ('ai_daily_guest', '10'), ('ai_daily_google', '20'), ('min_app_version', '"3.1.0"');
 ```
