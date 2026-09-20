@@ -6,6 +6,7 @@ Ghi lại các ý tưởng đã bàn nhưng **chưa làm** (cập nhật 20/09/2
 |---|---|---|---|
 | 1 | **Kiểm tra trình độ đầu vào 3 phút** — nghe 3 câu + nói 2 câu, AI chấm và xếp đúng ngày bắt đầu (thay cho tự chọn Mới/Cơ bản/Khá ở bước 3 làm quen) | 0,5 phiên | Dùng `micLong` + `wordMatch` cho nghe/nói; AI chấm tổng. Bỏ qua được như các bước khác |
 | 2 | **Tiếng Nhật công sở làm ngôn ngữ học chính** (không chỉ nghĩa phụ) — lộ trình, hội thoại, TTS `ja-JP`, nhận giọng `ja-JP` | 2–3 phiên | Người Việt làm cho công ty Nhật rất đông; cần schema gói có `lang` đích, đổi `lNorm`/`wordMatch` cho tiếng Nhật (tách theo ký tự) |
+| 2b | **Backend Supabase (đăng nhập Google + Facebook, đồng bộ, AI qua server)** — kế hoạch chi tiết: [`BACKEND-PLAN.md`](BACKEND-PLAN.md) | MVP ≈ 7,5 ngày công (≈ 3,5 phiên) | FE vẫn trên GitHub Pages |
 | 3 | **Lớp học / nhóm doanh nghiệp** — mã lớp, cả nhóm cùng ngành, bảng xếp hạng streak | 1–2 phiên | Không cần server nếu chạy bản claude.ai (capability `db`/`room`); bản Pages cần backend nhẹ |
 | 4 | Ngành tiếp theo: Xây dựng · Kỹ thuật, Giáo dục, Luật · Hành chính công, Hàng không | 0,5–1 phiên/gói | Quy trình sẵn: `packs_src/README.md` → agent viết → agent kiểm duyệt → build |
 | 5 | Nhờ **người làm thật trong từng ngành** đọc duyệt 1–2 chặng mỗi gói; gom báo lỗi từ GitHub issues (nhãn `content`) để sửa theo đợt | liên tục | Nút ⚑ đã có từ v3.1 |

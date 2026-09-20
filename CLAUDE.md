@@ -53,6 +53,7 @@ it-english-app/
 │   ├── design/, bgchooser.html
 │   ├── REVIEW-2026-09-13.md          # review UX/thị trường (mã A1…E16), phần 'Còn lại' đã lạc hậu
 │   ├── DINH-HUONG-DA-NGANH-2026-09-20.md  # định hướng v3.0 đa ngành (đã làm)
+│   ├── BACKEND-PLAN.md               # kế hoạch backend Supabase (Google/FB login, bảng, RLS, ước lượng) — chưa làm
 │   ├── BACKLOG.md                    # ⭐ việc để sau (kiểm tra trình độ, tiếng Nhật chính, lớp học…)
 │   ├── review/*.md                   # nhật ký kiểm duyệt nội dung từng gói (v3.1)
 │   └── REVIEW-2026-09-20.md          # ⭐ rà soát kỹ thuật + tổng hợp hướng cải tiến + kế hoạch 3 đợt — ĐỌC TRƯỚC KHI CHỌN VIỆC
