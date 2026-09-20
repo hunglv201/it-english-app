@@ -276,6 +276,7 @@ function questSelect(n){
 /* ---------- question builders ---------- */
 function pickOthers(pool,notIdx,k,keyFn){const out=[];const seen=new Set([keyFn(pool[notIdx])]);let guard=0;while(out.length<k&&guard++<400){const i=Math.floor(Math.random()*pool.length);const v=keyFn(pool[i]);if(i===notIdx||seen.has(v)||!v)continue;seen.add(v);out.push(pool[i]);}return out;}
 // G1: từ "hay sai" của app (SRS ease ≤ 2 hoặc vừa quên) — ưu tiên đưa vào trận
+function showJa(){return !!((loadApp().cfg||{}).showJa);}
 function weakFromApp(){const a=loadApp();const srs=a.srs||{};const pool=VOCAB.concat((a.myVocab||[]).filter(w=>w&&w.t&&w.vi));
   return pool.filter(w=>{const c=srs[w.t];return c&&(c.ease<=2.0||c.reps===0);});}
 function vocabQs(d){
@@ -285,7 +286,7 @@ function vocabQs(d){
   if(!weak.length){const prevMax=Math.min(...d.v);if(prevMax>3){for(let k=0;k<2;k++){const i=Math.floor(Math.random()*prevMax);if(VOCAB[i])items.push({w:VOCAB[i],i});}}}
   const qs=[];
   items.forEach(({w,i,weak})=>{const tag=weak?'⚠ Hay sai · ':'';
-    const o1=pickOthers(VOCAB,i,3,x=>x.vi).filter(x=>x.vi!==w.vi).map(x=>x.vi);qs.push({kind:tag+'Nghĩa của từ',q:w.t,ipa:w.ipa,sub:w.pos,ans:w.vi,opts:shuffle([w.vi].concat(o1)),say:w.t,weak:!!weak,term:w.t});
+    const o1=pickOthers(VOCAB,i,3,x=>x.vi).filter(x=>x.vi!==w.vi).map(x=>x.vi);qs.push({kind:tag+'Nghĩa của từ',q:w.t,ipa:w.ipa+(showJa()&&w.ja?'  ·  🇯🇵 '+w.ja.split('|')[0]:''),sub:w.pos,ans:w.vi,opts:shuffle([w.vi].concat(o1)),say:w.t,weak:!!weak,term:w.t});
     const o2=pickOthers(VOCAB,i,3,x=>x.t).filter(x=>x.t!==w.t).map(x=>x.t);qs.push({kind:tag+'Từ tiếng Anh là gì?',q:w.vi,sub:w.ex?w.ex.replace(/<b>.*?<\/b>/,'____').replace(/<[^>]+>/g,''):'',ans:w.t,opts:shuffle([w.t].concat(o2)),weak:!!weak,term:w.t});
   });
   // câu hỏi từ hay sai lên đầu trận
@@ -580,7 +581,10 @@ function shadowEnd(){const avg=Math.round(SH.sum/SH.qs.length);const best=Math.m
 
 /* ---- 4) Phản xạ 5 giây ---- */
 let RF=null;
-function reflexStart(){document.body.classList.add('infight');RF={qs:shuffle(DIALOGS).slice(0,8),i:0,score:0};cur='talk';main.classList.add('chatlay');reflexRound();}
+// C3: hội thoại theo vai trò (chọn trong app › Cài đặt) được ưu tiên trong Phản xạ & Chuyện văn phòng
+function roleDialogs(){const r=(loadApp().cfg||{}).role;const R=window.ROLES||{};return (r&&R[r]&&R[r].dialogues)||[];}
+function talkPool(n){const rd=shuffle(roleDialogs().slice());const k=Math.min(rd.length,Math.ceil(n/2));return shuffle(rd.slice(0,k).concat(shuffle(DIALOGS.slice()).slice(0,n-k)));}
+function reflexStart(){document.body.classList.add('infight');RF={qs:talkPool(8),i:0,score:0};cur='talk';main.classList.add('chatlay');reflexRound();}
 function reflexRound(){
   if(!RF)return;if(RF.i>=RF.qs.length){reflexEnd();return;}animIn();
   const d=RF.qs[RF.i];main.innerHTML='';talkHeader('PHẢN XẠ 5 GIÂY','Câu '+(RF.i+1)+'/'+RF.qs.length+' · '+RF.score+' điểm','<div class="bar time mini" style="margin-top:8px"><i id="rfbar" style="width:100%"></i></div>');
@@ -608,7 +612,7 @@ function reflexEnd(){const sc=RF.score,max=RF.qs.length*10;const isBest=sc>(G.ta
 /* ---- 3) Chuyện văn phòng (story mode) ---- */
 let ST=null;
 const ENDINGS=[[85,'🌟 Được khen trước cả team',3],[60,'☕ Một ngày làm việc ổn',2],[0,'📝 Bị PM nhắc nhở nhẹ',1]];
-function storyStart(){const who=['minh','linh','an'];document.body.classList.add('infight');ST={scenes:shuffle(DIALOGS).slice(0,5).map((d,i)=>({d,who:who[i%3]})),i:0,rep:50};cur='talk';main.classList.add('chatlay');storyScene();}
+function storyStart(){const who=['minh','linh','an'];document.body.classList.add('infight');ST={scenes:talkPool(5).map((d,i)=>({d,who:who[i%3]})),i:0,rep:50};cur='talk';main.classList.add('chatlay');storyScene();}
 function storyScene(){
   if(!ST)return;if(ST.i>=ST.scenes.length){storyEnd();return;}animIn();
   const s=ST.scenes[ST.i],c=CAST[s.who];main.innerHTML='';

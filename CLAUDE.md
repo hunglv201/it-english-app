@@ -10,7 +10,7 @@ trình độ cơ bản luyện tiếng Anh IT / môi trường công sở. Chủ
 
 | Sản phẩm | File | URL Pages | Mô tả |
 |---|---|---|---|
-| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Lộ trình 370 ngày, từ vựng SRS, 1000 câu, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **1.18.1** (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
+| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Lộ trình 370 ngày, từ vựng SRS, 1000 câu, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **1.21.0** (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
 | **Trang giới thiệu (showcase)** | `gioi-thieu.html` (≈1.6 MB, ảnh JPEG inline) | `…/gioi-thieu.html` | Landing fullpage scroll-snap, nền particle-net, chữ chạy, 17 ảnh chụp màn hình có caption, tập trung vào tính năng AI. Dark-first, nền đen mặc định |
 | **Game "IT English Quest"** | `game/index.html` + `game/game.js` (+ bản sao `game/data.gen.js`, `game/phrases.gen.js`) | `…/game/` | Bản game anime **mobile-first**: RPG bản đồ ngày → quiz battle → boss visual novel, AFK idle (Mochi tự cày xu), Shop, huy hiệu, tab **Nói** 5 chế độ luyện nói. Dùng chung dữ liệu + AI key với app |
 
@@ -24,13 +24,18 @@ it-english-app/
 ├── data.gen.js           # window.DATA — sinh từ gen_data.py, KHÔNG sửa tay
 ├── phrases.gen.js        # window.PHRASES — sinh từ phrases_data.py, KHÔNG sửa tay
 ├── gen_data.py / phases_extra.py / phrases_data.py   # nguồn sinh dữ liệu (Python 3, không lib ngoài)
+├── roles_data.py         # -> roles.gen.js (window.ROLES: gói QA/DevOps/BA/PM — tình huống AI + hội thoại chọn đáp)
+├── ja_data.py            # thuật ngữ tiếng Nhật; gen_data.py ghép vào vocab[].ja = "日本語|romaji"
+│                         # ⚠ mọi script sinh *.gen.js TỰ copy sang game/ — không copy tay
+├── img/showcase/*.webp   # 17 ảnh của gioi-thieu.html (tách khỏi base64 → HTML 44 KB)
+├── tests/                # Playwright mobile: lib.mjs + a/b/c.mjs theo đợt, run.sh (xem tests/README.md)
 ├── sw.js                 # service worker; CACHE = 'it-english-v<version>' — bump cùng version app
 ├── manifest.webmanifest, icon-192.png, icon-512.png  # PWA
 ├── gioi-thieu.html       # Showcase (standalone, có doctype/head/favicon)
 ├── game/
 │   ├── index.html        # CSS theme anime (Fredoka/Nunito/IBM Plex Mono) + khung HTML
 │   ├── game.js           # Toàn bộ logic game (IIFE, ~100 KB)
-│   └── data.gen.js, phrases.gen.js   # bản sao của root (copy lại khi regen dữ liệu)
+│   └── data.gen.js, phrases.gen.js, roles.gen.js   # bản sao do script sinh tự copy
 ├── docs/
 │   ├── it-english-showcase.html      # bản showcase dùng cho Artifact (không doctype/head/body)
 │   ├── demo/giao-tiep-ai-demo.mp4    # video demo luồng Giao tiếp AI (không tiếng)
@@ -47,11 +52,14 @@ it-english-app/
 
 - `window.DATA`: `vocab[370]{t,ipa,pos,vi,ex,exVi}`, `days[370]{n,phase,title,v[],ph,di,li}`, `phaseTitles[37]`,
   `listen[148]{s[],blank[],hint}`, `dialogues[74]{them,opts[{t,good,fb}]}`, `phrases[185]{en,vi,note}`.
-- `window.PHRASES`: 26 nhóm câu thường dùng.
+- `window.PHRASES`: 26 nhóm câu thường dùng. `window.ROLES`: {dev,qa,devops,ba,pm} → {label,emoji,scenarios[{k:'r_…',l,s}],dialogues[]}.
+- `vocab[].ja` (tuỳ chọn): thuật ngữ Nhật, hiện khi `store.cfg.showJa`.
 - **localStorage**
-  - App: key `it-english-v1` → `store` gồm `ai:{provider,key,model}`, `cfg.level`, `days.cur/done`, SRS, streak…
+  - App: key `it-english-v1` → `store` gồm `ai:{provider,key,model}`, `cfg{level,role,showJa,focus[],domain,jd,jdScenarios}`, `days.cur/done`, `srs` (từ), `psrs` (câu — L1), `standups[]`, `events[]`, `convos[]`, `saved[]`, streak…
+  - Cache AI: key `it-english-aicache` (sp.json theo hash prompt, 150 mục, 30 ngày — N8). Sao lưu/khôi phục: Tôi › Sao lưu (K1).
   - Game: key `it-english-game-v1` → `G` (lv, xp, hp, coins, cleared, badges, items, up, idle, daily, talk{equipped,…}).
-    Game **đọc** `it-english-v1` để lấy AI cfg + ngày đang học, và **ghi ngược** `days.done` khi qua màn.
+    Game **đọc** `it-english-v1` để lấy AI cfg, ngày đang học, `srs` (quái ưu tiên từ hay sai — G1), `cfg.role`/`cfg.showJa`; **ghi ngược** `days.done`.
+    Game lưu `G.talk.log[]` (buổi Đấu thoại AI) → app nhập vào `store.convos` khi mở Lịch sử/Thống kê (G2).
 
 ## 4. AI
 
@@ -99,6 +107,10 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 
 ## 8. Lịch sử tóm tắt (mới → cũ)
 
+- 09/2026 **v1.21.0 (Đợt C)**: thuật ngữ Nhật, SRS câu, chọn đáp theo vai + cá nhân hoá JD, sự kiện, podcast, hỏi nhanh (nút ?), AI phân tích phát âm, ảnh chia sẻ PNG, cache AI + luật ngữ pháp offline, test vào repo, CSP khi tự host.
+- 09/2026 **v1.20.0 (Đợt B)**: Standup 60 giây, Dịch ngược, biểu đồ tiến bộ, game ưu tiên từ hay sai + log đấu thoại, showcase 1.6 MB → 44 KB, badge icon.
+- 09/2026 **v1.19.0 (Đợt A)**: chống chèn HTML (esc/cleanWord), sao lưu/khôi phục, script tự copy data sang game, meta/OG.
+
 - 09/2026 (v1.18.1): app — màn "chào mừng trở lại" khi vắng >24h (tóm tắt thời gian vắng,
   trạng thái streak, nút "Học nhanh 2 phút giữ streak"), thẻ "Mochi đang giữ N xu" ở trang
   Hôm nay đọc từ localStorage game để kéo người dùng sang chơi Game.
@@ -110,15 +122,10 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 
 ## 9. Ý tưởng còn mở (chưa làm)
 
-**Nguồn sự thật: [`docs/REVIEW-2026-09-20.md`](docs/REVIEW-2026-09-20.md)** — có bảng phát hiện kỹ thuật đã kiểm chứng (T1…T6), danh sách cải tiến theo nhóm (R/L/C/G/K) và kế hoạch 3 đợt. Tóm tắt ưu tiên cao nhất:
+Đợt A/B/C trong [`docs/REVIEW-2026-09-20.md`](docs/REVIEW-2026-09-20.md) **đã làm xong** (v1.19–1.21, xem mục "Trạng thái" cuối file đó). Còn lại:
 
-- **T1** 🔴 App chèn text AI/người dùng bằng `innerHTML` không `esc()` (game thì đã an toàn) → bọc `esc()`/`textContent`.
-- **T2** `game/*.gen.js` là copy tay, chưa có script đồng bộ → thêm copy vào `gen_data.py`/`phrases_data.py`.
-- **T3** `gioi-thieu.html` 1.6 MB do ảnh base64 → tách ảnh ra `docs/img/`.
-- **T4** `index.html` thiếu meta description + Open Graph.
-- **K1** Xuất/nhập tiến độ JSON (không backend, mất cache là mất hết).
-- ~~R1/R2~~ đã xong v1.18.1 (chào mừng trở lại + thẻ Mochi/xu ở Hôm nay).
-- **G1** Quái/boss trong game ưu tiên từ "hay sai" của app.
-- **L1/L2** SRS cho câu + AI chấm shadowing chi tiết.
-- **N1/N3/N4** ⭐ chức năng mới: Standup 60 giây · Dịch ngược từ tiếng Việt · Thuật ngữ Anh·Việt·Nhật (N2, N5–N8 xem review).
-- Còn mở từ review 13/09: A4, B7-chart, E6, E7, E12, E15, E16.
+- **G3** thêm boss/nhân vật, kết cục mới cho Chuyện văn phòng.
+- **E7** bài đọc ký hiệu kỹ thuật.
+- **K4 / E16** backend/proxy giữ key + đồng bộ đa thiết bị (chỉ khi có người dùng thật ngoài chủ repo).
+- Podcast: SpeechSynthesis dừng khi khoá màn hình trên iOS — cân nhắc ghi sẵn audio.
+- Mở rộng `ja_data.py` cho câu thường dùng; thêm vai trò (Designer, Data).

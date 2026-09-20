@@ -417,10 +417,16 @@ except Exception as e:
 # Build flat pools + DAYS (index references)
 V=[]; PH=[]; DI=[]; LI=[]
 phaseVocab=[]; phasePhrase=[]; phaseDia=[]; phaseListen=[]
+try:
+    from ja_data import JA
+except Exception:
+    JA={}
 for p in PHASES:
     vi=[]
     for t,ipa,pos,vn,ex,exvi in p["vocab"]:
-        vi.append(len(V)); V.append({"t":t,"ipa":ipa,"pos":pos,"vi":vn,"ex":ex,"exVi":exvi})
+        vi.append(len(V)); _w={"t":t,"ipa":ipa,"pos":pos,"vi":vn,"ex":ex,"exVi":exvi}
+        if t in JA: _w["ja"]=JA[t][0]+"|"+JA[t][1]   # N4: thuật ngữ tiếng Nhật
+        V.append(_w)
     phaseVocab.append(vi)
     pi=[]
     for en,vn,note in p["phrases"]:

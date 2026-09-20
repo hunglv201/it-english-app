@@ -42,6 +42,24 @@ Vào **Từ vựng → ＋ Thêm từ công việc (AI)**: dán một đoạn ti
 
 Nút **Tiến độ & thống kê** ở Hôm nay: streak, số từ đã thuộc, số ngày lộ trình, tổng lượt học, và danh sách **từ hay sai** (dựa trên điểm SRS) kèm nút *Ôn ngay*. Trong Từ vựng có thêm chủ đề **“Hay sai”** để dồn ôn những từ hay quên.
 
+### Luyện nói theo công việc (v1.20–1.21)
+
+- **Standup 60 giây** — ở Hôm nay: nói liền 3 ý (hôm qua · hôm nay · vướng gì), AI chấm 1–10, đưa bản chuẩn, chỉ lỗi và cho *Đọc lại* chấm %.
+- **Dịch ngược** — cho câu tiếng Việt kiểu dev ("anh check giúp em cái PR này với"), bạn nói tiếng Anh, AI chấm theo *nghĩa* và gợi ý 2–3 cách nói tự nhiên.
+- **Ôn câu (SRS)** — câu AI đã sửa cho bạn, câu dịch ngược/đọc theo điểm thấp tự vào hàng ôn cách quãng.
+- **Chọn đáp theo vai trò** — gói QA · DevOps · BA · PM (Cài đặt › Vai trò), kèm tình huống AI riêng; game cũng dùng.
+- **Cá nhân hoá bằng JD** — dán mô tả công việc 1 lần: AI chọn vai, 6 chặng nên ưu tiên (hiện ở Lộ trình) và 3 tình huống luyện nói riêng.
+- **Sự kiện sắp tới** — ghi sprint review/demo/phỏng vấn; trước 1 ngày app nhắc ở Hôm nay và mở tình huống luyện đúng chủ đề.
+- **Podcast dev** — nghe thụ động ~5 phút (2 giọng hỏi–đáp, điều khiển từ màn khoá), cuối tập 3 câu kiểm tra.
+- **Hỏi nhanh (nút ?)** — hỏi nghĩa/so sánh từ hoặc dán tin nhắn đồng nghiệp từ bất kỳ màn nào; lưu từ vào “Của tôi” một chạm.
+- **AI phân tích phát âm** — sau khi đọc theo, AI chỉ từng từ sai + mẹo cho người Việt.
+- **Thuật ngữ tiếng Nhật 🇯🇵** — bật trong Cài đặt › Học tập: 370 từ hiện thêm thuật ngữ Nhật + romaji (app & game).
+- **Biểu đồ tiến bộ nói** + **ảnh chia sẻ PNG** thành tích (Thống kê, Tổng kết tuần, Tôi).
+
+### Sao lưu tiến độ
+
+**Tôi › Sao lưu tiến độ**: xuất một file `.json` gồm cả app và game, khôi phục trên máy khác (chọn file hoặc dán nội dung). Không có server nên nên sao lưu định kỳ.
+
 ### Luyện lại
 
 Cuối mỗi phiên (Từ vựng, Câu, một Ngày trong lộ trình) đều có nút **↻ Luyện lại** (và *Luyện lại tự động* cho Từ vựng/Câu).
@@ -125,7 +143,10 @@ Chỉ cần Python 3, không phụ thuộc thư viện ngoài:
 ```bash
 python3 gen_data.py      # -> data.gen.js     (cần phases_extra.py cùng thư mục)
 python3 phrases_data.py  # -> phrases.gen.js
+python3 roles_data.py    # -> roles.gen.js      (gói nội dung QA/DevOps/BA/PM)
 ```
+
+Mỗi script tự copy file `*.gen.js` sang `game/`. Thuật ngữ tiếng Nhật nằm ở `ja_data.py` (gen_data.py đọc vào trường `ja`).
 
 Muốn thêm/sửa bài học thì sửa các file `*.py` rồi chạy lại — **không sửa tay** file `*.gen.js`.
 
@@ -141,6 +162,10 @@ it-english-app/
 ├── gen_data.py         # Script sinh data.gen.js
 ├── phases_extra.py     # 27 chặng chủ đề mở rộng (nguồn cho gen_data.py)
 ├── phrases_data.py     # Script sinh phrases.gen.js
+├── roles_data.py       # Script sinh roles.gen.js (nội dung theo vai trò)
+├── ja_data.py          # Thuật ngữ tiếng Nhật cho 370 từ
+├── img/showcase/       # Ảnh chụp màn hình (WebP) của trang giới thiệu
+├── tests/              # Test Playwright mobile (tests/run.sh)
 ├── sw.js, manifest.webmanifest, icon-*.png   # PWA
 ├── gioi-thieu.html     # Trang giới thiệu (showcase)
 ├── game/               # IT English Quest: index.html (theme) + game.js (logic) + bản sao *.gen.js

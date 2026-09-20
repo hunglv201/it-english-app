@@ -9,6 +9,8 @@ __pycache__/
 # Screenshots / scratch
 *.png
 *.mjs
+!tests/*.mjs
+tests/shots/
 build_push/
 index.html.bak
 
