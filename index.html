@@ -314,7 +314,7 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="1.19.0", APP_BUILD="2026-09-20";
+const APP_VERSION="1.20.0", APP_BUILD="2026-09-20";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -527,8 +527,8 @@ function attachSwipe(node,onLeft,onRight){
 const TABS=[["home","Hôm nay",ICO.home],["roadmap","Lộ trình",ICO.route],["practice","Luyện",ICO.dumbbell],["me","Tôi",ICO.user]];
 let cur="home";
 // Mỗi màn thuộc về một tab (để làm sáng đúng tab); tab bar đóng vai trò "về gốc"
-const TAB_OF={home:'home',roadmap:'roadmap',practice:'practice',vocab:'practice',phrase:'practice',listen:'practice',talk:'practice',rewrite:'practice',reading:'practice',me:'me',progress:'me',history:'me',settings:'me'};
-function tabRender(k){return {home:vHome,roadmap:vRoadmap,practice:vPractice,vocab:vVocab,phrase:vPhrase,listen:vListen,talk:vTalk,rewrite:vRewrite,reading:vReading,me:vMe,progress:vProgress,history:vHistory,settings:openSettings}[k]||vHome;}
+const TAB_OF={standup:'home',reverse:'practice',home:'home',roadmap:'roadmap',practice:'practice',vocab:'practice',phrase:'practice',listen:'practice',talk:'practice',rewrite:'practice',reading:'practice',me:'me',progress:'me',history:'me',settings:'me'};
+function tabRender(k){return {standup:vStandup,reverse:vReverse,home:vHome,roadmap:vRoadmap,practice:vPractice,vocab:vVocab,phrase:vPhrase,listen:vListen,talk:vTalk,rewrite:vRewrite,reading:vReading,me:vMe,progress:vProgress,history:vHistory,settings:openSettings}[k]||vHome;}
 function renderTabs(){
   const n=$("#tabs");n.innerHTML="";
   TABS.forEach(([k,label,ic])=>{
@@ -558,6 +558,12 @@ function vPractice(){
     c.onclick=it[3];grid.appendChild(c);
   });
   v.appendChild(grid);
+  var sp2=el('div');sp2.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:12px';
+  [['🎙️','Standup 60 giây','Nói như họp sáng, AI chấm',standupStart],['🔁','Dịch ngược','Câu Việt → nói tiếng Anh',revStart]].forEach(function(it){
+    var c=el('button','card');c.style.cssText='align-items:flex-start;gap:10px;text-align:left;cursor:pointer;min-height:112px;justify-content:space-between';
+    c.innerHTML='<span style="font-size:24px;line-height:1">'+it[0]+'</span><span><b style="font-size:15.5px;font-weight:700">'+it[1]+'</b><br><small class="muted" style="font-size:12px;line-height:1.35">'+it[2]+'</small></span>';
+    c.onclick=it[3];sp2.appendChild(c);});
+  v.appendChild(sp2);
   var rw=el('button','card');rw.style.cssText='flex-direction:row;align-items:center;gap:12px;text-align:left;cursor:pointer';
   rw.innerHTML='<span class="pt-ic" style="width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto">✍️</span><span class="grow"><b style="font-size:16px;font-weight:700">Viết tin nhắn công việc</b><br><small class="muted" style="font-size:12px">AI sửa giọng: lịch sự / ngắn gọn</small></span><span style="color:var(--faint);display:inline-flex">'+ICO.chev+'</span>';
   rw.onclick=function(){go('rewrite');};v.appendChild(rw);
@@ -750,7 +756,7 @@ function vSunday(){
   v.appendChild(nc);main.appendChild(v);
 }
 function maybeSunday(){try{if(new Date().getDay()===0&&store.stats.sundayShown!==weekKeyStr()&&Object.keys(store.days.done||{}).length>0){cur='me';renderTabs();vSunday();return true;}}catch(e){}return false;}
-function vHistory(){
+function vHistory(){importGameBattles();
   main.innerHTML="";const v=el('div','view');
   const back=el('button','btn ghost sm');back.style.alignSelf='flex-start';back.textContent='‹ Tôi';back.onclick=function(){go('me');};v.appendChild(back);
   v.appendChild(el('div',null,'<div class="eyebrow">Giao tiếp</div><div style="font-size:22px;font-weight:800;font-family:var(--disp);letter-spacing:-.01em;margin-top:4px">Lịch sử hội thoại</div>'));
@@ -1015,12 +1021,15 @@ function vHome(){
   head.appendChild(htx);head.appendChild(ringNode(total?dc/total:0,String(dc),'/'+total));
   v.appendChild(head);
 
-  // 1b) Ôn nhanh 5 phút (E4)
-  if(!allDone){
-    const qb=el('button','btn block');qb.style.cssText='background:var(--accent-soft);color:var(--accent-ink);height:50px;font-weight:700;gap:8px';
-    qb.innerHTML='⚡ Ôn nhanh 5 phút <span class="muted" style="font-weight:500;font-size:12.5px;color:var(--accent-ink);opacity:.85">· thẻ · câu · nghe · chat</span>';
-    qb.onclick=quickStart;v.appendChild(qb);
-  }
+  // 1a) N1 Standup 60 giây + 1b) Ôn nhanh 5 phút (E4) — một hàng 2 nút
+  (function(){var sd=standupDoneToday();var last=(store.standups||[])[0];
+    var row=el('div');row.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px';
+    var sb=el('button','btn');sb.style.cssText='height:auto;min-height:52px;padding:8px 12px;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;'+(sd?'background:var(--surface2);color:var(--ink)':'background:var(--accent);color:#fff');
+    sb.innerHTML='<b style="font-size:14.5px">'+(sd?'✅':'🎙️')+' Standup 60s</b><small style="font-size:11.5px;opacity:.85;font-weight:500">'+(sd?('Xong'+(last&&last.score!=null?' · '+last.score+'/10':'')+' · nói lại'):'Hôm qua · hôm nay · vướng')+'</small>';
+    sb.onclick=standupStart;row.appendChild(sb);
+    var qb=el('button','btn');qb.style.cssText='height:auto;min-height:52px;padding:8px 12px;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;background:var(--accent-soft);color:var(--accent-ink)';
+    qb.innerHTML='<b style="font-size:14.5px">⚡ Ôn nhanh 5′</b><small style="font-size:11.5px;opacity:.85;font-weight:500">thẻ · câu · nghe · chat</small>';
+    qb.onclick=quickStart;row.appendChild(qb);v.appendChild(row);})();
 
   // 2) Danh sách 4 việc hôm nay (việc hiện tại được làm nổi bật)
   const list=el('div','card');list.style.cssText='gap:0;padding:6px 10px';
@@ -1099,6 +1108,7 @@ function vHome(){
   fab.innerHTML=ICO.talk+'<span class="fab-dot">AI</span>';
   fab.onclick=function(){go('talk');};
   fw.appendChild(fab);main.appendChild(fw);
+  updateBadge();
 }
 function vnDate(key){var d=new Date(key+'T00:00:00');var wd=['CN','T2','T3','T4','T5','T6','T7'][d.getDay()];return wd+' '+d.getDate()+'/'+(d.getMonth()+1);}
 function homeTasks(){ // A4: nội dung lấy từ ngày lộ trình hiện tại
@@ -1269,6 +1279,7 @@ function vProgress(){
   tiles.appendChild(statTile(daysDone+'/'+DAYS.length,'ngày lộ trình'));
   tiles.appendChild(statTile((store.stats.done||0),'tổng lượt học'));
   v.appendChild(tiles);
+  importGameBattles();v.appendChild(progressChart());
   // progress bars
   const pc=el('div','card');
   pc.appendChild(el('div','eyebrow','Tổng quan'));
@@ -2985,4 +2996,258 @@ document.addEventListener('visibilitychange',function(){if(!document.hidden)chec
     }
   }catch(e){}
 })();
+
+// ================= ĐỢT B (v1.20.0) =================
+// ---- tiện ích chung: so từ, mic nhiều câu, chip điểm ----
+function wmNorm(w){return String(w).toLowerCase().replace(/[’`]/g,"'").replace(/[^a-z0-9']/g,'');}
+function wordMatch(target,heard){ // % từ của câu mẫu xuất hiện (theo thứ tự) trong câu nói
+  var T=String(target).split(/\s+/).filter(Boolean),H=String(heard||'').split(/\s+/).map(wmNorm).filter(Boolean);
+  var j=0,res=T.map(function(w){var n=wmNorm(w);if(!n)return {w:w,hit:true};for(var k=j;k<Math.min(H.length,j+4);k++){if(H[k]===n){j=k+1;return {w:w,hit:true};}}return {w:w,hit:false};});
+  var real=res.filter(function(r){return wmNorm(r.w);});var hit=real.filter(function(r){return r.hit;}).length;
+  return {pct:real.length?Math.round(hit/real.length*100):0,words:res};
+}
+function wordsHtml(m){return m.words.map(function(r){return '<span style="padding:1px 6px;border-radius:6px;margin:1px;display:inline-block;background:'+(r.hit?'color-mix(in srgb,#22a55b 16%,transparent)':'var(--danger-soft)')+';color:'+(r.hit?'inherit':'var(--danger)')+(r.hit?'':';text-decoration:line-through')+'">'+esc(r.w)+'</span>';}).join(' ');}
+function scorePill(n,max){max=max||10;var p=n/max;var c=p>=.7?'#1f9d55':p>=.4?'var(--amber)':'var(--danger)';return '<span style="display:inline-flex;align-items:center;justify-content:center;min-width:54px;height:34px;padding:0 12px;border-radius:999px;font-family:var(--disp);font-weight:800;font-size:17px;color:#fff;background:'+c+'">'+n+'/'+max+'</span>';}
+function hasSR(){return !!(window.SpeechRecognition||window.webkitSpeechRecognition);}
+// mic nói dài (continuous, tự nối câu) — onText(fullText), onEnd(); trả về hàm stop()
+function micLong(onText,onEnd,maxMs){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){onEnd&&onEnd('nosr');return function(){};}
+  var r=new SR();r.lang='en-US';r.continuous=true;r.interimResults=true;var fin='',stopped=false,got=false;
+  r.onresult=function(e){var inter='';for(var i=e.resultIndex;i<e.results.length;i++){var t=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=(fin?' ':'')+t.trim();else inter+=t;}got=true;onText((fin+' '+inter).trim());};
+  r.onerror=function(){};
+  r.onend=function(){if(!stopped&&maxMs&&Date.now()-t0<maxMs-500){try{r.start();return;}catch(e){}}stopped=true;clearTimeout(to);onEnd&&onEnd(got?'ok':'empty');};
+  var t0=Date.now();var to=setTimeout(function(){stopped=true;try{r.stop();}catch(e){}},maxMs||60000);
+  try{r.start();}catch(e){onEnd&&onEnd('err');}
+  return function(){stopped=true;clearTimeout(to);try{r.stop();}catch(e){}};
+}
+function micOnce(onText,onEnd){ // một câu, watchdog 7s
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){onEnd&&onEnd('nosr');return;}
+  var r=new SR();r.lang='en-US';r.interimResults=false;var done=false;
+  var to=setTimeout(function(){if(done)return;done=true;try{r.stop();}catch(e){}onEnd&&onEnd('timeout');},7000);
+  r.onresult=function(e){if(done)return;done=true;clearTimeout(to);onText(e.results[0][0].transcript);onEnd&&onEnd('ok');};
+  r.onerror=function(){if(done)return;done=true;clearTimeout(to);onEnd&&onEnd('err');};
+  try{r.start();}catch(e){clearTimeout(to);onEnd&&onEnd('err');}
+}
+function backBtn(label,to){var b=el('button','btn ghost sm');b.style.alignSelf='flex-start';b.textContent='‹ '+label;b.onclick=function(){go(to);};return b;}
+function viewHead(eyebrow,title,sub){return el('div',null,'<div class="eyebrow">'+eyebrow+'</div><div style="font-size:22px;font-weight:800;font-family:var(--disp);letter-spacing:-.01em;margin-top:4px">'+title+'</div>'+(sub?'<div class="muted" style="font-size:13.5px;margin-top:5px;line-height:1.45">'+sub+'</div>':''));}
+
+// ---- N1: Standup 60 giây ----
+let su={text:'',busy:false,res:null,rec:false,stop:null,t0:0,timer:null,redo:null};
+function standupDoneToday(){var s=store.standups||[];return s.length&&s[0].date===todayStr();}
+function standupStart(){su={text:'',busy:false,res:null,rec:false,stop:null,t0:0,timer:null,redo:null};go('standup');}
+function vStandup(){
+  main.innerHTML='';var v=el('div','view');
+  v.appendChild(backBtn('Hôm nay','home'));
+  if(su.res){
+    v.appendChild(viewHead('Standup 60 giây','Kết quả buổi nói'));
+    v.appendChild(suResultCard());
+    var yc=el('details','card');yc.style.cssText='gap:8px;display:block';yc.innerHTML='<summary style="cursor:pointer;font-weight:700;font-size:14px">Bạn đã nói</summary>';var yt=el('div','muted');yt.style.cssText='font-size:14px;line-height:1.5;margin-top:8px';yt.textContent=su.text;yc.appendChild(yt);v.appendChild(yc);
+    var again=el('button','btn accent block');again.textContent='↻ Nói lại';again.onclick=standupStart;
+    var home=el('button','btn ghost');home.textContent='Xong';home.onclick=function(){go('home');};
+    var r2=el('div','row');r2.appendChild(home);again.classList.add('grow');r2.appendChild(again);v.appendChild(pinBar(r2));
+    main.appendChild(v);return;
+  }
+  v.appendChild(viewHead('Standup 60 giây','Nói như họp sáng 🎙️'));
+  var g=el('div','card');g.style.cssText='gap:6px;padding:12px 14px';
+  [['1','Yesterday','I finished / worked on …'],['2','Today','I’m going to …'],['3','Blockers','No blockers. / I’m blocked by …']].forEach(function(q){
+    var r=el('div','row');r.style.cssText='gap:8px';
+    r.innerHTML='<span style="width:20px;height:20px;border-radius:6px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;background:var(--accent-soft);color:var(--accent-ink);font-family:var(--mono);font-size:11px;font-weight:700">'+q[0]+'</span><span style="font-size:13.5px"><b>'+q[1]+'</b> <span class="muted">'+q[2]+'</span></span>';
+    g.appendChild(r);});
+  v.appendChild(g);
+  var mc=el('div','row');mc.style.cssText='gap:14px;align-items:center;padding:4px 2px';
+  var left=su.rec?Math.max(0,60-Math.floor((Date.now()-su.t0)/1000)):60;
+  var mb=el('button');mb.id='suMic';mb.setAttribute('aria-label',su.rec?'Dừng':'Bắt đầu nói');
+  mb.style.cssText='width:72px;height:72px;flex:0 0 auto;border-radius:50%;border:none;color:#fff;font-size:28px;display:flex;align-items:center;justify-content:center;background:'+(su.rec?'var(--danger)':'var(--accent)')+';box-shadow:0 10px 24px color-mix(in srgb,var(--accent) 32%,transparent)'+(su.rec?';animation:pulse 1s ease-in-out infinite':'');
+  mb.textContent=su.rec?'■':'🎤';mb.onclick=suToggle;mc.appendChild(mb);
+  var tl=el('div','grow');tl.innerHTML='<b style="font-size:15px" id="suTime">'+(su.rec?('Đang nghe… còn '+left+'s'):(hasSR()?'Bấm mic, nói liền 3 ý':'Gõ bài standup bên dưới'))+'</b><br><small class="muted" style="font-size:12.5px">'+(su.rec?'Bấm ■ khi nói xong':'Tối đa 60 giây · AI chấm & đưa bản chuẩn')+'</small>';mc.appendChild(tl);
+  v.appendChild(mc);
+  var ta=el('textarea','input');ta.id='suText';ta.rows=3;ta.style.cssText='min-height:92px;height:auto;resize:vertical;line-height:1.5;padding:12px 14px';ta.placeholder='Lời bạn nói hiện ở đây (sửa hoặc gõ thẳng được)…';ta.value=su.text;ta.oninput=function(){su.text=ta.value;};v.appendChild(ta);
+  var hist=(store.standups||[]).slice(0,3);
+  if(hist.length){var hr=el('div','muted');hr.style.cssText='font-size:12.5px;font-family:var(--mono)';hr.textContent='Gần đây: '+hist.map(function(h){return vnDate(h.date).replace(/^[^,]*, /,'')+' '+(h.score!=null?h.score+'/10':'—');}).join(' · ');v.appendChild(hr);}
+  var btn=el('button','btn accent block');btn.textContent=su.busy?'AI đang chấm…':'Chấm điểm';btn.disabled=su.busy||su.rec;btn.onclick=suGrade;v.appendChild(pinBar(btn));
+  main.appendChild(v);
+}
+function suToggle(){
+  if(su.rec){if(su.stop)su.stop();return;}
+  if(!hasSR()){toast('Không có mic nhận diện — hãy gõ');var t=$('#suText');if(t)t.focus();return;}
+  su.rec=true;su.t0=Date.now();su.text='';su.res=null;vStandup();
+  su.stop=micLong(function(t){su.text=t;var ta=$('#suText');if(ta)ta.value=t;},function(st){su.rec=false;clearInterval(su.timer);if(st!=='ok'&&!su.text)toast('Chưa nghe được — thử lại hoặc gõ');vStandup();},60000);
+  su.timer=setInterval(function(){var tl=$('#suTime');if(!tl||!su.rec){clearInterval(su.timer);return;}tl.textContent='Đang nghe… còn '+Math.max(0,60-Math.floor((Date.now()-su.t0)/1000))+'s';},500);window.scrollTo(0,0);
+}
+async function suGrade(){
+  var t=(($('#suText')||{}).value||su.text||'').trim();su.text=t;
+  if(t.split(/\s+/).length<4){toast('Nói/gõ ít nhất 1 câu nhé');return;}
+  var sp=await aiInit();
+  if(!sp){su.res={score:null,polished:'Yesterday I finished the login API and fixed two bugs. Today I\'m going to write unit tests for the payment module. No blockers right now.',fixes:[],tip:'Chưa cấu hình AI nên đây là bản mẫu — mở Giao tiếp › Cài đặt AI để được chấm bài của bạn.'};suSave(null);vStandup();return;}
+  su.busy=true;vStandup();
+  try{
+    var r=await sp.json('You are an English coach for a Vietnamese software developer (CEFR '+(store.cfg.level||'A2')+'). This is their spoken daily standup (speech-to-text, may lack punctuation): """'+t.slice(0,900)+'""". Reply ONLY JSON {"score": integer 1-10 for clarity, grammar and standup structure (yesterday/today/blockers), "polished": "their SAME content rewritten as a natural, simple standup of 3-5 short sentences, first person", "fixes": [up to 3 objects {"wrong":"exact short phrase they said","right":"corrected phrase","note":"very short Vietnamese explanation with full diacritics"}], "tip": "one short Vietnamese tip to sound better next time"}',{modelTier:'quick'});
+    if(!r||!r.polished)throw new Error('empty');
+    su.res={score:Math.max(1,Math.min(10,Math.round(+r.score||5))),polished:String(r.polished),fixes:(r.fixes||[]).filter(function(f){return f&&(f.wrong||f.right);}).slice(0,3),tip:String(r.tip||'')};
+    suSave(su.res.score);
+  }catch(e){toast('Lỗi AI, thử lại');}
+  su.busy=false;vStandup();
+}
+function suSave(score){
+  if(!store.standups)store.standups=[];
+  var rec={date:todayStr(),text:su.text.slice(0,600),score:score,polished:su.res?su.res.polished:''};
+  if(store.standups.length&&store.standups[0].date===rec.date)store.standups[0]=rec;else store.standups.unshift(rec);
+  store.standups=store.standups.slice(0,60);store.stats.done=(store.stats.done||0)+1;bumpActivity();advanceStreak();save(store);updateBadge();
+}
+function suResultCard(){
+  var r=su.res;var c=el('div','card');c.style.gap='12px';
+  var hd=el('div','row between');hd.innerHTML='<span class="eyebrow">Kết quả</span>'+(r.score!=null?scorePill(r.score):'');c.appendChild(hd);
+  c.appendChild(el('div','eyebrow','Bản chuẩn — đọc lại cho quen miệng'));
+  var p=el('div');p.style.cssText='font-size:15.5px;line-height:1.55';p.textContent=r.polished;c.appendChild(p);
+  var row=el('div','row');row.style.cssText='gap:8px;flex-wrap:wrap';
+  var pl=el('button','btn ghost sm');pl.innerHTML=ICO.play+' Nghe';pl.onclick=function(){speak(r.polished,pl);};row.appendChild(pl);
+  if(hasSR()){var rd=el('button','btn ghost sm');rd.innerHTML=ICO.mic2+' Đọc lại';rd.onclick=function(){rd.textContent='● Đang nghe…';var stop=micLong(function(t){su.redo={heard:t};},function(){su.redo=su.redo||{heard:''};su.redo.m=wordMatch(r.polished,su.redo.heard);vStandup();},30000);rd.onclick=function(){stop();};};row.appendChild(rd);}
+  var sv=el('button','btn ghost sm');sv.textContent=isSaved(r.polished)?'★ Đã lưu':'☆ Lưu câu';sv.onclick=function(){toggleSaved(r.polished,'Standup');sv.textContent=isSaved(r.polished)?'★ Đã lưu':'☆ Lưu câu';};row.appendChild(sv);
+  c.appendChild(row);
+  if(su.redo&&su.redo.m){var rm=el('div');rm.style.cssText='font-size:14px;line-height:1.9';rm.innerHTML='<b>Đọc lại: '+su.redo.m.pct+'%</b><br>'+wordsHtml(su.redo.m);c.appendChild(rm);}
+  if(r.fixes&&r.fixes.length){c.appendChild(fixCard(r.fixes.map(function(f){return '"'+(f.wrong||'')+'" => "'+(f.right||'')+'"'+(f.note?' ~ '+f.note:'');}).join('\n')));}
+  if(r.tip){var tp=el('div','muted');tp.style.fontSize='13.5px';tp.textContent='💡 '+r.tip;c.appendChild(tp);}
+  return c;
+}
+
+// ---- N3: Dịch ngược Việt → Anh ----
+const REV_DEV=[
+ ['Anh check giúp em cái PR này với.','Could you take a look at my PR, please?'],
+ ['Deploy xong rồi nhưng staging vẫn lỗi.','The deploy is done, but staging is still broken.'],
+ ['Em đang bị block vì chưa có quyền truy cập DB.','I\'m blocked because I don\'t have database access yet.'],
+ ['Task này chắc mất thêm hai ngày nữa.','This task will probably take two more days.'],
+ ['Em chưa hiểu yêu cầu chỗ này lắm.','I don\'t fully understand this requirement yet.'],
+ ['Mình họp lại sau 15 phút được không?','Can we meet again in 15 minutes?'],
+ ['Bug này chỉ xảy ra trên iOS thôi.','This bug only happens on iOS.'],
+ ['Em fix rồi, anh test lại giúp em nhé.','I\'ve fixed it — could you test it again?'],
+ ['Cái này không nằm trong scope sprint này.','This is out of scope for this sprint.'],
+ ['Log không có lỗi gì nhưng API trả về chậm.','There are no errors in the logs, but the API responds slowly.'],
+ ['Em sẽ viết unit test trước khi merge.','I\'ll write unit tests before merging.'],
+ ['Hôm nay em làm tiếp phần thanh toán.','Today I\'ll keep working on the payment part.'],
+ ['Anh có thể giải thích lại flow này không?','Could you explain this flow again?'],
+ ['Em nghĩ mình nên rollback trước đã.','I think we should roll back first.'],
+ ['Server bị quá tải từ tối qua.','The server has been overloaded since last night.'],
+ ['Em cần thêm thời gian để điều tra nguyên nhân.','I need more time to investigate the root cause.'],
+ ['Tài liệu API này đã cũ rồi.','This API documentation is out of date.'],
+ ['Mai em nghỉ phép, có gì nhắn Slack cho em.','I\'m on leave tomorrow — message me on Slack if needed.'],
+ ['Em đã cập nhật ticket trên Jira.','I\'ve updated the ticket on Jira.'],
+ ['Code này chạy được nhưng hơi khó đọc.','This code works, but it\'s a bit hard to read.'],
+ ['Khách hàng muốn đổi màu nút này.','The client wants to change the color of this button.'],
+ ['Em không tái hiện được lỗi trên máy em.','I can\'t reproduce the bug on my machine.'],
+ ['Mình nên tách hàm này ra cho gọn.','We should split this function to keep it clean.'],
+ ['Build bị fail vì thiếu biến môi trường.','The build failed because an environment variable is missing.'],
+ ['Em sẽ báo lại kết quả trước 5 giờ chiều.','I\'ll report back before 5 p.m.'],
+ ['Phần này em làm xong khoảng 80% rồi.','I\'m about 80% done with this part.'],
+ ['Anh ơi, em hỏi chút được không?','Hi, do you have a minute for a quick question?'],
+ ['Cái estimate này hơi lạc quan quá.','This estimate is a bit too optimistic.'],
+ ['Em đề xuất mình dùng cache ở đây.','I suggest we use a cache here.'],
+ ['Test trên môi trường dev thì ổn rồi.','It works fine on the dev environment.']
+];
+let rv={on:false,q:[],i:0,sum:0,heard:'',busy:false,res:null,typing:false};
+function revPool(){var all=REV_DEV.map(function(x){return {vi:x[0],en:x[1],dev:true};});PHRASES.forEach(function(g){g.items.forEach(function(it){if(it.vi&&it.en.split(' ').length<=12)all.push({vi:it.vi,en:it.en});});});return all;}
+function revStart(){var pool=revPool();var dev=shuffleArr(pool.filter(function(x){return x.dev;})).slice(0,5),rest=shuffleArr(pool.filter(function(x){return !x.dev;})).slice(0,5);rv={on:true,q:shuffleArr(dev.concat(rest)),i:0,sum:0,heard:'',busy:false,res:null,typing:!hasSR()};go('reverse');}
+function vReverse(){
+  if(!rv.on){revStart();return;}
+  main.innerHTML='';var v=el('div','view');
+  v.appendChild(backBtn('Luyện','practice'));
+  if(rv.i>=rv.q.length){
+    var avg=Math.round(rv.sum/rv.q.length*10)/10;
+    var c=el('div','card');c.style.cssText='text-align:center;gap:12px;padding:30px 18px';
+    c.innerHTML='<div style="font-size:40px">🔁</div><div style="font-size:21px;font-weight:800;font-family:var(--disp)">Xong 10 câu dịch ngược</div><div>'+scorePill(avg)+'</div><div class="muted">Điểm trung bình. Câu điểm thấp đã được lưu vào “Câu đã lưu” để ôn.</div>';
+    var a=el('button','btn accent block');a.textContent='↻ 10 câu khác';a.onclick=revStart;c.appendChild(a);
+    var h=el('button','btn ghost block');h.textContent='Về Luyện';h.onclick=function(){rv.on=false;go('practice');};c.appendChild(h);
+    v.appendChild(c);main.appendChild(v);return;
+  }
+  var q=rv.q[rv.i];
+  v.appendChild(viewHead('Dịch ngược · câu '+(rv.i+1)+'/'+rv.q.length,'Nói câu này bằng tiếng Anh','Đừng dịch từng chữ — nói như bạn sẽ nói với đồng nghiệp.'));
+  var qc=el('div','card');qc.style.cssText='gap:10px';
+  qc.innerHTML='<div class="eyebrow">Tiếng Việt'+(q.dev?' · kiểu dev':'')+'</div><div style="font-size:20px;font-weight:700;line-height:1.4">'+esc(q.vi)+'</div>';
+  v.appendChild(qc);
+  if(!rv.res){
+    var rr=null;
+    if(!rv.typing&&hasSR()){
+      var mb=el('button','btn accent block');mb.id='rvMic';mb.innerHTML=ICO.mic2+' Bấm rồi nói';mb.onclick=function(){mb.textContent='● Đang nghe…';mb.disabled=true;micOnce(function(t){rv.heard=t;},function(st){if(st==='ok'&&rv.heard){revGrade();}else{toast('Chưa nghe được — thử lại hoặc gõ');vReverse();}});};
+      var ty=el('button','btn ghost');ty.textContent='⌨️ Gõ';ty.onclick=function(){rv.typing=true;vReverse();};mb.classList.add('grow');mb.classList.remove('block');var rr=el('div','row');rr.appendChild(ty);rr.appendChild(mb);
+    }else{
+      var inp=el('input','input');inp.id='rvIn';inp.placeholder='Gõ câu tiếng Anh…';inp.autocomplete='off';inp.onkeydown=function(e){if(e.key==='Enter')go2();};v.appendChild(inp);
+      var go2=function(){var t=inp.value.trim();if(!t){toast('Gõ câu tiếng Anh');return;}rv.heard=t;revGrade();};
+      var sb=el('button','btn accent block');sb.textContent=rv.busy?'AI đang chấm…':'Kiểm tra';sb.disabled=rv.busy;sb.onclick=go2;rr=sb;
+      setTimeout(function(){inp.focus();},50);
+    }
+    var sk=el('button','btn ghost sm');sk.style.alignSelf='center';sk.textContent='Bỏ qua · xem đáp án';sk.onclick=function(){rv.heard='';rv.res={score:0,natural:[q.en],note:'',heard:''};rv.sum+=0;vReverse();};v.appendChild(sk);
+    if(rr)v.appendChild(pinBar(rr));
+  }else{
+    var r=rv.res;var rc=el('div','card');rc.style.gap='10px';
+    var hd=el('div','row between');hd.innerHTML='<span class="eyebrow">Bạn nói</span>'+scorePill(r.score);rc.appendChild(hd);
+    var hs=el('div');hs.style.cssText='font-size:15px;line-height:1.5';hs.textContent=r.heard?('“'+r.heard+'”'):'(bỏ qua)';rc.appendChild(hs);
+    if(r.note){var nt=el('div');nt.style.cssText='background:var(--amber-soft);color:var(--amber);border-radius:10px;padding:9px 12px;font-size:13.5px;line-height:1.5';nt.textContent='✎ '+r.note;rc.appendChild(nt);}
+    rc.appendChild(el('div','eyebrow','Cách nói tự nhiên'));
+    r.natural.forEach(function(s){var row=el('div','row');row.style.gap='8px';var t=el('div','grow');t.style.cssText='font-size:15px;line-height:1.45';t.textContent=s;row.appendChild(t);row.appendChild(playBtn(s));rc.appendChild(row);});
+    v.appendChild(rc);
+    var nb=el('button','btn accent block');nb.textContent=rv.i+1<rv.q.length?'Câu tiếp ›':'Xem kết quả';nb.onclick=function(){rv.i++;rv.res=null;rv.heard='';rv.typing=!hasSR();vReverse();};v.appendChild(pinBar(nb));
+  }
+  main.appendChild(v);
+}
+async function revGrade(){
+  var q=rv.q[rv.i],heard=rv.heard;rv.busy=true;
+  var sp=await aiInit(),res=null;
+  if(sp){
+    vReverse();
+    try{
+      var r=await sp.json('A Vietnamese developer (English level '+(store.cfg.level||'A2')+') was asked to SAY this Vietnamese workplace sentence in English: "'+q.vi+'". Reference answer: "'+q.en+'". They said (speech-to-text): "'+heard+'". Judge meaning and naturalness, not exact wording. Reply ONLY JSON {"score": integer 0-10, "note": "one short Vietnamese comment with full diacritics: what was wrong or unnatural, or empty string if good", "natural": [2 or 3 natural, simple English ways to say it; include the reference if suitable]}',{modelTier:'quick'});
+      res={score:Math.max(0,Math.min(10,Math.round(+r.score||0))),note:String(r.note||''),natural:(r.natural||[]).map(String).filter(Boolean).slice(0,3)};
+      if(!res.natural.length)res.natural=[q.en];
+    }catch(e){res=null;toast('Lỗi AI — chấm theo câu mẫu');}
+  }
+  if(!res){var m=wordMatch(q.en,heard);res={score:Math.round(m.pct/10),note:sp?'':'Chưa cấu hình AI — đang so với câu mẫu (AI sẽ chấm theo nghĩa, linh hoạt hơn).',natural:[q.en]};}
+  res.heard=heard;rv.res=res;rv.sum+=res.score;rv.busy=false;
+  if(res.score<6)toggleSavedQuiet(res.natural[0],'Dịch ngược · '+q.vi);
+  store.stats.done=(store.stats.done||0)+1;bumpActivity();save(store);
+  vReverse();
+}
+function toggleSavedQuiet(en,note){if(!store.saved)store.saved=[];if(!store.saved.some(function(x){return x.en===en;}))store.saved.unshift({en:en,note:note||'',ts:Date.now()});}
+
+// ---- L3: biểu đồ tiến bộ (chat + standup) ----
+function progressChart(){
+  var pts=[];
+  (store.convos||[]).forEach(function(c){if(c.score!=null)pts.push({d:c.date||'',v:c.score,k:'chat',f:c.fixCount||0});});
+  (store.standups||[]).forEach(function(s){if(s.score!=null)pts.push({d:s.date,v:s.score*10,k:'standup',f:0});});
+  pts.sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:0;});pts=pts.slice(-14);
+  var c=el('div','card');c.style.gap='10px';
+  c.appendChild(el('div','eyebrow','Tiến bộ nói · '+pts.length+' buổi gần nhất'));
+  if(pts.length<2){c.appendChild(el('div','muted','Cần ít nhất 2 buổi Trò chuyện AI (đã lưu) hoặc Standup để vẽ biểu đồ.'));return c;}
+  var W=320,H=140,pl=26,pr=8,pt=10,pb=22,iw=W-pl-pr,ih=H-pt-pb,n=pts.length;
+  var X=function(i){return pl+(n===1?iw/2:i*iw/(n-1));},Y=function(v){return pt+ih-(v/100)*ih;};
+  var maxF=Math.max(1,Math.max.apply(null,pts.map(function(p){return p.f;})));
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Biểu đồ điểm các buổi nói" style="display:block">';
+  [0,50,100].forEach(function(g){svg+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(g)+'" y2="'+Y(g)+'" stroke="var(--line)" stroke-width="1"/><text x="'+(pl-5)+'" y="'+(Y(g)+3)+'" text-anchor="end" font-size="9" fill="var(--faint)" font-family="IBM Plex Mono,monospace">'+g+'</text>';});
+  var bw=Math.max(3,Math.min(10,iw/n*.35));
+  pts.forEach(function(p,i){if(p.f){var h=p.f/maxF*ih*.45;svg+='<rect x="'+(X(i)-bw/2)+'" y="'+(pt+ih-h)+'" width="'+bw+'" height="'+h+'" rx="2" fill="var(--amber)" opacity=".45"><title>'+p.f+' lỗi</title></rect>';}});
+  svg+='<polyline fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" points="'+pts.map(function(p,i){return X(i)+','+Y(p.v);}).join(' ')+'"/>';
+  pts.forEach(function(p,i){svg+='<circle cx="'+X(i)+'" cy="'+Y(p.v)+'" r="'+(i===n-1?4:3)+'" fill="'+(p.k==='standup'?'var(--surface)':'var(--accent)')+'" stroke="var(--accent)" stroke-width="2"><title>'+(p.k==='standup'?'Standup':'Chat')+' '+p.d+': '+p.v+'</title></circle>';});
+  [0,n-1].forEach(function(i){svg+='<text x="'+X(i)+'" y="'+(H-6)+'" text-anchor="'+(i===0?'start':'end')+'" font-size="9" fill="var(--faint)" font-family="IBM Plex Mono,monospace">'+String(pts[i].d).slice(5).split('-').reverse().join('/')+'</text>';});
+  svg+='</svg>';
+  var box=el('div');box.innerHTML=svg;c.appendChild(box);
+  var first=pts.slice(0,Math.ceil(n/2)),last=pts.slice(Math.floor(n/2));var av=function(a){return Math.round(a.reduce(function(s,p){return s+p.v;},0)/a.length);};
+  var d=av(last)-av(first);
+  c.appendChild(el('div','muted','<span style="font-size:12.5px">● điểm chat (0–100) · ○ standup (×10) · cột cam = số lỗi AI sửa. '+(d>0?'Nửa sau cao hơn nửa đầu <b style="color:#1f9d55">+'+d+'</b> điểm 👏':d<0?'Nửa sau thấp hơn <b>'+d+'</b> — thử tình huống dễ hơn nhé.':'Điểm đang ổn định.')+'</span>'));
+  return c;
+}
+
+// ---- G2: nhập buổi Đấu thoại từ game vào lịch sử ----
+function importGameBattles(){
+  try{var g=gameSave();if(!g||!g.talk||!g.talk.log||!g.talk.log.length)return;
+    if(!store.convos)store.convos=[];var have={};store.convos.forEach(function(c){have[c.id]=1;});var n=0;
+    g.talk.log.forEach(function(b){if(have[b.id])return;store.convos.unshift({id:b.id,name:'🎮 Đấu thoại (game)',scKey:'game',scLabel:'Đấu thoại (game)',scPrompt:b.sc||'',custom:false,score:b.score,fixCount:b.fixCount||0,userTurns:b.userTurns||0,turns:b.turns||[],date:b.date});n++;});
+    if(n){store.convos.sort(function(a,b){return (b.id||0)-(a.id||0);});save(store);}
+  }catch(e){}
+}
+
+// ---- R3: badge số việc còn lại trên icon app ----
+function updateBadge(){
+  try{if(!('setAppBadge' in navigator))return;var t=todayStr();var done=(store.today&&store.today.date===t)?store.today.done:{};
+    var n=homeTasks().filter(function(x){return !done[x.key];}).length+(standupDoneToday()?0:1);
+    if(n>0)navigator.setAppBadge(n).catch(function(){});else navigator.clearAppBadge().catch(function(){});}catch(e){}
+}
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')updateBadge();});
 </script>

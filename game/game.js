@@ -275,14 +275,21 @@ function questSelect(n){
 
 /* ---------- question builders ---------- */
 function pickOthers(pool,notIdx,k,keyFn){const out=[];const seen=new Set([keyFn(pool[notIdx])]);let guard=0;while(out.length<k&&guard++<400){const i=Math.floor(Math.random()*pool.length);const v=keyFn(pool[i]);if(i===notIdx||seen.has(v)||!v)continue;seen.add(v);out.push(pool[i]);}return out;}
+// G1: từ "hay sai" của app (SRS ease ≤ 2 hoặc vừa quên) — ưu tiên đưa vào trận
+function weakFromApp(){const a=loadApp();const srs=a.srs||{};const pool=VOCAB.concat((a.myVocab||[]).filter(w=>w&&w.t&&w.vi));
+  return pool.filter(w=>{const c=srs[w.t];return c&&(c.ease<=2.0||c.reps===0);});}
 function vocabQs(d){
-  let idx=d.v.slice();const prevMax=Math.min(...d.v);if(prevMax>3){for(let k=0;k<2;k++)idx.push(Math.floor(Math.random()*prevMax));}
+  let items=d.v.map(i=>({w:VOCAB[i],i})).filter(x=>x.w);
+  const weak=shuffle(weakFromApp().filter(w=>!items.some(x=>x.w.t===w.t))).slice(0,3);
+  weak.forEach(w=>items.push({w,i:VOCAB.indexOf(w),weak:true}));
+  if(!weak.length){const prevMax=Math.min(...d.v);if(prevMax>3){for(let k=0;k<2;k++){const i=Math.floor(Math.random()*prevMax);if(VOCAB[i])items.push({w:VOCAB[i],i});}}}
   const qs=[];
-  idx.forEach(i=>{const w=VOCAB[i];if(!w)return;
-    const o1=pickOthers(VOCAB,i,3,x=>x.vi).map(x=>x.vi);qs.push({kind:'Nghĩa của từ',q:w.t,ipa:w.ipa,sub:w.pos,ans:w.vi,opts:shuffle([w.vi].concat(o1)),say:w.t});
-    const o2=pickOthers(VOCAB,i,3,x=>x.t).map(x=>x.t);qs.push({kind:'Từ tiếng Anh là gì?',q:w.vi,sub:w.ex?w.ex.replace(/<b>.*?<\/b>/,'____').replace(/<[^>]+>/g,''):'',ans:w.t,opts:shuffle([w.t].concat(o2))});
+  items.forEach(({w,i,weak})=>{const tag=weak?'⚠ Hay sai · ':'';
+    const o1=pickOthers(VOCAB,i,3,x=>x.vi).filter(x=>x.vi!==w.vi).map(x=>x.vi);qs.push({kind:tag+'Nghĩa của từ',q:w.t,ipa:w.ipa,sub:w.pos,ans:w.vi,opts:shuffle([w.vi].concat(o1)),say:w.t,weak:!!weak,term:w.t});
+    const o2=pickOthers(VOCAB,i,3,x=>x.t).filter(x=>x.t!==w.t).map(x=>x.t);qs.push({kind:tag+'Từ tiếng Anh là gì?',q:w.vi,sub:w.ex?w.ex.replace(/<b>.*?<\/b>/,'____').replace(/<[^>]+>/g,''):'',ans:w.t,opts:shuffle([w.t].concat(o2)),weak:!!weak,term:w.t});
   });
-  return shuffle(qs);
+  // câu hỏi từ hay sai lên đầu trận
+  return shuffle(qs.filter(q=>q.weak)).concat(shuffle(qs.filter(q=>!q.weak)));
 }
 function phraseQs(d){
   const base=PHR.slice(d.phase*5,d.phase*5+5);const qs=[];
@@ -628,7 +635,7 @@ function parseBattle(t){const s=(t.match(/SCORE:\s*(\d+)/)||[])[1];const fi=t.in
 function talkBattleStart(){animIn();
   if(!aiConfigured()){openModal((m,close)=>{m.innerHTML='<div class="h" style="font-size:20px">Cần AI</div><div class="mascot-row" style="margin-top:12px"><div class="mascot">'+mascot('think')+'</div><div class="bubble grow"><span class="who">Mochi</span>Chế độ này cần AI chấm câu. Nhập key (Gemini miễn phí) ngay tại đây — dùng chung với app IT English.</div></div>';const r=el('div','row');r.style.cssText='gap:10px;margin-top:14px';const a=el('button','btn ghost grow','Đóng');a.onclick=close;const k=el('button','btn grow','Nhập key');k.onclick=()=>{close();aiSetupSheet();};r.appendChild(a);r.appendChild(k);m.appendChild(r);});return;}
   if(G.hp<=0)G.hp=Math.ceil(G.maxHp/2);
-  document.body.classList.add('infight');TB={sc:rnd(SCEN),turns:[],user:0,bossHp:300,combo:0,busy:false};cur='talk';main.innerHTML='';tipHist=[];main.classList.add('chatlay');
+  document.body.classList.add('infight');TB={sc:rnd(SCEN),turns:[],user:0,bossHp:300,combo:0,busy:false,scores:[],fixes:0};cur='talk';main.innerHTML='';tipHist=[];main.classList.add('chatlay');
   talkHeader('ĐẤU THOẠI · AI','Minh-senpai · 6 lượt','<div class="row" style="gap:8px;margin-top:8px"><small class="mono">HP</small><div class="bar hp mini grow" id="tbhp"><i style="width:'+Math.round(G.hp/G.maxHp*100)+'%"></i></div><small class="mono">BOSS</small><div class="bar mon mini grow" id="tbboss"><i style="width:100%"></i></div><span class="combo inl" id="tbcombo">x0</span></div>');
   const vn=el('div','vn compact');vn.innerHTML='<div class="scene"><div class="npc" id="npc">'+npc('minh')+'</div></div><div class="box"><span class="name">Minh-senpai <small id="tbturn" style="opacity:.8">· lượt 0/6</small></span><div class="txt" id="vtxt"><span class="muted">…</span></div></div>';main.appendChild(vn);
   const tips=el('div');tips.id='tips';tips.className='tips';main.appendChild(tips);
@@ -638,7 +645,7 @@ function talkBattleStart(){animIn();
 async function tbSend(t){
   if(!TB||TB.busy||!t)return;TB.busy=true;TB.user++;TB.turns.push({role:'user',content:t});$('#vtxt').innerHTML='<span class="muted">Senpai đang nghĩ…</span>';
   try{const out=await aiCall(battleRules(TB.sc),TB.turns);const p=parseBattle(out);TB.turns.push({role:'assistant',content:out});
-    const sc=p.score==null?5:p.score;const npcEl=$('#npc');
+    const sc=p.score==null?5:p.score;const npcEl=$('#npc');TB.scores.push(sc);if(p.fix&&p.fix.replace(/[.\s]/g,'')!=='OK')TB.fixes+=p.fix.split('\n').filter(l=>l.trim()).length;
     if(sc>=7){TB.combo++;}else TB.combo=0;
     const dmg=sc*10+Math.min(TB.combo,5)*5;TB.bossHp=Math.max(0,TB.bossHp-dmg);
     const bb=$('#tbboss');bb.querySelector('i').style.width=Math.round(TB.bossHp/300*100)+'%';const tt=$('#tbturn');if(tt)tt.textContent='· lượt '+TB.user+'/6 · boss '+TB.bossHp;
@@ -654,8 +661,14 @@ async function tbSend(t){
   }catch(e){toast('AI lỗi, thử lại');TB.user--;TB.turns.pop();}
   TB.busy=false;
 }
-function tbEnd(){const win=TB.bossHp<=0;const dealt=300-TB.bossHp;const stars=win?(TB.user<=4?3:2):1;TB=null;if(win){G.talk.battleWins++;G.bossWins++;daily().boss++;gainXp(160+stars*40,80);sfx.win();confetti();}else{sfx.bad();if(G.hp<=0)G.hp=Math.ceil(G.maxHp/2);}saveG();checkBadges();
+function tbEnd(){const win=TB.bossHp<=0;const dealt=300-TB.bossHp;const stars=win?(TB.user<=4?3:2):1;logBattle(TB);TB=null;if(win){G.talk.battleWins++;G.bossWins++;daily().boss++;gainXp(160+stars*40,80);sfx.win();confetti();}else{sfx.bad();if(G.hp<=0)G.hp=Math.ceil(G.maxHp/2);}saveG();checkBadges();
   openModal((m,close)=>{m.innerHTML='<div class="eyebrow" style="text-align:center">'+(win?'THẮNG ĐẤU THOẠI':'CHƯA THẮNG')+'</div>'+(win?'<div class="stars3">'+'★'.repeat(stars)+'<span style="opacity:.25">'+'★'.repeat(3-stars)+'</span></div>':'')+'<div class="big" style="font-size:24px">Gây '+dealt+'/300 sát thương</div><div class="mascot-row" style="margin-top:12px"><div class="mascot">'+mascot(win?'cheer':'think')+'</div><div class="bubble grow"><span class="who">Mochi</span>'+(win?'Nói chuẩn là boss ngã ngay!':'Câu ≥7 điểm mới đau. Nói câu đầy đủ, đúng thì, có từ khoá nhé.')+'</div></div>';const r=el('div','row');r.style.cssText='gap:10px;margin-top:14px';const a=el('button','btn ghost grow','Đấu lại');a.onclick=()=>{close();talkBattleStart();};const k=el('button','btn yellow grow','Về Nói');k.onclick=()=>{close();go('talk');};r.appendChild(a);r.appendChild(k);m.appendChild(r);},{closable:false});}
+
+// G2: lưu buổi đấu thoại để app hiện trong Lịch sử & biểu đồ tiến bộ
+function logBattle(tb){try{if(!tb||!tb.scores.length)return;const avg=tb.scores.reduce((a,b)=>a+b,0)/tb.scores.length;
+  const turns=tb.turns.map(m=>{if(m.role!=='assistant')return {role:'user',content:m.content};const p=parseBattle(m.content);return {role:'assistant',content:p.reply+(p.fix?'\nFIX: '+p.fix:'')};});
+  G.talk.log=G.talk.log||[];G.talk.log.unshift({id:Date.now(),date:new Date().toISOString().slice(0,10),sc:tb.sc,score:Math.round(avg*10),fixCount:tb.fixes,userTurns:tb.user,turns});
+  G.talk.log=G.talk.log.slice(0,30);saveG();}catch(e){}}
 
 /* ---- 5) Trang bị cho Mochi ---- */
 function vEquip(){
