@@ -120,4 +120,5 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 - ~~R1/R2~~ đã xong v1.18.1 (chào mừng trở lại + thẻ Mochi/xu ở Hôm nay).
 - **G1** Quái/boss trong game ưu tiên từ "hay sai" của app.
 - **L1/L2** SRS cho câu + AI chấm shadowing chi tiết.
+- **N1/N3/N4** ⭐ chức năng mới: Standup 60 giây · Dịch ngược từ tiếng Việt · Thuật ngữ Anh·Việt·Nhật (N2, N5–N8 xem review).
 - Còn mở từ review 13/09: A4, B7-chart, E6, E7, E12, E15, E16.
