@@ -1,6 +1,7 @@
 # Kế hoạch backend cho Nói Nghề (Supabase · đăng nhập Google + Facebook)
 
 > Nghiên cứu 20/09/2026 · app v3.1.1 · tài liệu kế hoạch, **chưa triển khai**.
+> ⚠️ **Cập nhật:** chủ repo muốn **dữ liệu lưu trên server** → xem **§11 Phương án server-first** (nội dung bài học vào DB + xuất bản, khách tự động + liên kết Google/FB). §1–§10 là phương án local-first ban đầu, vẫn dùng cho phần đăng nhập, bảo mật, pháp lý, ngân sách.
 > Mục tiêu: người học **tuỳ chọn** đăng nhập bằng Google/Facebook để đồng bộ tiến độ nhiều máy, dùng AI miễn phí có hạn mức,
 > vào lớp học, chia sẻ gói "Nghề của tôi"; chủ app xem báo lỗi nội dung và thống kê. Chạy trong **gói Free** của Supabase càng lâu càng tốt.
 
@@ -230,10 +231,115 @@ Thời gian chờ bên ngoài (không tính công): Meta App Review 1–5 ngày 
 - [ ] Key AI dùng chung (Gemini) + đặt trần chi phí; chốt hạn mức miễn phí/ngày (đề xuất 20).
 - [ ] Có mua tên miền riêng không (đẹp hơn cho màn đăng nhập và trang chính sách; không bắt buộc).
 
+## 11. Phương án server-first (cập nhật theo yêu cầu: dữ liệu lưu trên server)
+
+> Thay đổi so với §1: **server là nguồn dữ liệu chính** cho cả **nội dung bài học** lẫn **dữ liệu người học**.
+> Máy người dùng chỉ còn là **bộ nhớ đệm** để chạy nhanh và dùng tạm khi mất mạng.
+
+### 11.1 Nội dung bài học vào database (quản trị được, không cần sửa code)
+
+**Bảng nội dung** (dùng chung cho mọi người, chỉ admin sửa):
+
+| Bảng | Cột chính | Ghi chú |
+|---|---|---|
+| `tracks` | `id` (office, it, hotel…), nhãn, emoji, mô tả, `persona`, `counterpart`, `context`, `report` (jsonb), `podcast`, `sort`, `is_published` | 9 ngành + thêm ngành mới không cần sửa code |
+| `track_roles` | `track_id`, `key`, nhãn, emoji, `sort` | 39 vai |
+| `phases` | `id`, `track_id`, `idx`, `title`, `core_ref` (chặng lõi dùng chung) | 12 chặng/ngành (IT 37) |
+| `vocab` | `id`, `phase_id`, `term`, `ipa`, `pos`, `vi`, `ex`, `ex_vi`, `ja`, `ja_romaji`, `sort` | ~1.190 từ |
+| `phrase_groups` / `phrases` | nhóm (theo chặng hoặc nhóm chung), `en`, `vi`, `note` | ~1.600 câu (có ~610 câu chung) |
+| `dialogues` / `dialogue_options` | câu người kia nói; 3 lựa chọn (`text`, `is_good`, `feedback`) — thuộc chặng **hoặc** vai | ~590 + ~200 theo vai |
+| `listen_items` | `phase_id`, `sentence`, `blanks` (text[]), `hint`, `is_passage` | ~710 |
+| `ai_scenarios` | `track_id`, `role_id` (tuỳ chọn), `key`, nhãn, `prompt` | tình huống AI |
+| `reading_items`, `reverse_items`, `event_types`, `quips` | bài đọc 30 giây, câu dịch ngược, loại sự kiện, câu Mochi | |
+| `content_revisions` | `table`, `row_id`, `before`, `after`, `by`, `at` | lịch sử sửa (trigger) — ai sửa gì, khôi phục được |
+| `pack_releases` | `track_id`, `version`, `published_at`, `by`, `size`, `checksum`, `notes` | mỗi lần "Xuất bản" |
+
+Dung lượng toàn bộ nội dung: ~7.000 dòng, **~3–5 MB** — không đáng kể so với 500 MB.
+`content_reports` giờ trỏ thẳng tới `item_type` + `item_id` → mở báo lỗi là tới đúng dòng để sửa.
+
+**Phục vụ nội dung cho app: "Xuất bản" thay vì truy vấn trực tiếp**
+
+```
+Admin sửa trong admin.html (hoặc Studio) ──► bảng nội dung (bản nháp)
+        │ bấm "Xuất bản ngành X"
+        ▼
+Edge Function `publish-pack`: kiểm tra (luật như build.py: đủ 10 từ/chặng, 1 đáp án đúng, ô trống có thật…)
+        → dựng JSON đúng định dạng packs/*.gen.js hiện tại → Storage (bucket công khai, qua CDN)
+          packs/<track>/v<N>.json  +  packs/manifest.json {track: version}
+        ▼
+App: mở lên tải manifest (~1 KB) → khác version thì tải gói mới (~150 KB, gzip ~40 KB) → lưu IndexedDB → chạy offline như cũ
+```
+
+- Vì sao không để app truy vấn thẳng ~10 bảng mỗi lần mở: chậm, tốn băng thông DB (giới hạn 5 GB), khó chạy offline.
+  File đã xuất bản đi qua CDN (**băng thông cache 5 GB riêng**) → ~100.000 lượt tải gói/tháng vẫn trong gói Free.
+- Có **bản nháp / đã xuất bản**: sửa thoải mái, người học chỉ thấy khi bấm xuất bản; lỗi thì quay về version trước.
+- `packs_src/*.py` + `build.py` dùng **một lần** để nhập (seed) dữ liệu hiện có vào DB; sau đó DB là bản gốc (có thể giữ script xuất ngược ra file để sao lưu vào git).
+- Gói IT (data/phrases/roles.gen.js) cũng nhập vào cùng schema → mọi ngành quản lý một kiểu.
+
+### 11.2 Dữ liệu người học lưu trên server
+
+- Mọi thay đổi (ôn từ, xong ngày, lưu câu, điểm báo cáo 60s…) **ghi lên server**; máy giữ bản sao + **hàng đợi ghi (outbox)** khi mất mạng, có mạng lại thì đẩy lên.
+- Cách lưu — cân nhắc giữa gọn và dễ truy vấn:
+
+| Cách | Mô tả | Mỗi người (≈500 từ đã ôn) | Gói Free chứa | Hợp khi |
+|---|---|---|---|---|
+| **JSON một dòng** (`progress.store`) | như §4 | ~20 KB | ~20.000 người | chỉ cần đồng bộ |
+| **Tách bảng hoàn toàn** (`user_srs` 1 dòng/từ, `user_days`, `user_saved`…) | chuẩn hoá | ~60–80 KB (dòng + index) | ~6.000 người | cần phân tích sâu từng từ |
+| **Lai (đề xuất)** | JSON cho trạng thái chi tiết (SRS, cài đặt, game) **+** bảng riêng cho thứ cần truy vấn: `daily_activity`, `user_days` (ngày đã xong theo ngành), `attempts_daily` (số câu đúng/sai theo loại bài mỗi ngày), `ai_usage` | ~25 KB | ~15.000 người | đồng bộ + thống kê học tập đủ dùng |
+
+Với phương án lai, admin xem được: ngày học, chặng đang học, tỉ lệ đúng theo loại bài/ngành, lượt AI — mà không phải bóc JSON.
+
+### 11.3 Chế độ đăng nhập — 3 lựa chọn (nghiên cứu)
+
+| | A. Bắt buộc đăng nhập | **B. Khách tự động + nâng cấp (đề xuất)** | C. Đăng nhập tuỳ chọn, máy là gốc (bản §1) |
+|---|---|---|---|
+| Cách chạy | Mở app → phải bấm Google/Facebook mới học | Mở app → app tự tạo **tài khoản khách** (`signInAnonymously`) ngầm → dữ liệu lên server ngay; bấm "Lưu tài khoản bằng Google/Facebook" (`linkIdentity`) để giữ lâu dài, dùng nhiều máy | Không đăng nhập = chỉ lưu trên máy |
+| Dữ liệu trên server | 100% | 100% (cả khách) | Chỉ người đã đăng nhập |
+| Rào cản lần đầu | **Cao** — nhiều người bỏ ngay ở màn đăng nhập | Không có | Không có |
+| Nhiều máy | Có | Có sau khi liên kết Google/FB | Có sau khi đăng nhập |
+| Rủi ro | Mất người dùng mới | Khách xoá trình duyệt/đăng xuất trước khi liên kết → mất tài khoản khách; tạo user rác → cần CAPTCHA (Cloudflare Turnstile) + giới hạn 30 lần/giờ/IP (mặc định Supabase); dọn khách không hoạt động > 30 ngày (SQL định kỳ — Supabase chưa tự dọn); liên kết vào email đã có tài khoản khác → phải tự viết logic gộp | Thống kê thiếu người không đăng nhập |
+| Phân quyền | `authenticated` | Khách cũng là `authenticated`; phân biệt bằng claim `is_anonymous` trong RLS (vd khách không được tạo lớp, không chia sẻ gói công khai, hạn mức AI thấp hơn) | — |
+| Dung lượng | theo số người đăng ký | tăng vì cả khách — nhờ dọn khách 30 ngày nên vẫn trong ~15.000 người hoạt động | ít nhất |
+
+**Đề xuất: B.** Đúng yêu cầu "dữ liệu nằm trên server" mà không làm người mới bỏ đi vì bắt đăng nhập.
+Luồng: mở app → khách (không hỏi gì) → sau 3 ngày học hoặc khi bấm tính năng cần tài khoản (lớp học, chia sẻ gói, dùng máy khác) → gợi ý "Lưu tiến độ bằng Google/Facebook".
+Hạn mức AI gợi ý: khách 10 lượt/ngày, đã liên kết 20 lượt/ngày.
+
+Việc cần xác minh thêm trước khi chốt (chưa có câu trả lời chắc chắn trong tài liệu):
+- Người dùng khách có **tính vào MAU** không (ảnh hưởng mốc 50.000 MAU) — tài liệu anonymous sign-in không nói rõ; giả định là **có** để tính an toàn.
+- Hành vi `linkIdentity` khi email Google/FB **đã thuộc** một tài khoản khác → thiết kế màn "Tài khoản này đã có tiến độ — gộp hay dùng tiến độ nào?".
+- iOS Safari có thể **xoá dữ liệu trang web sau 7 ngày không mở** (chính sách chống theo dõi) → khách chưa liên kết trên iPhone dễ mất phiên → nhắc liên kết sớm hơn trên iOS.
+
+### 11.4 Các cách đăng nhập khác (để cân nhắc sau)
+
+| Cách | Supabase hỗ trợ sẵn | Ghi chú |
+|---|---|---|
+| Google | Có | làm trước |
+| Facebook | Có | cần Meta App Review |
+| Email OTP / magic link | Có | dự phòng cho người không dùng Google/FB; gói Free gửi email rất hạn chế → cần SMTP riêng (vd Resend) |
+| Apple | Có | chỉ bắt buộc nếu sau này lên App Store có đăng nhập mạng xã hội |
+| **Zalo** | **Không** (không có sẵn) | phổ biến ở VN; muốn có phải tự viết luồng OAuth Zalo trong Edge Function rồi tạo phiên Supabase — khoảng +1,5–2 ngày công, để sau |
+
+### 11.5 Ước lượng thêm cho phương án server-first
+
+| Việc thêm | Ngày công | Phiên Claude |
+|---|---|---|
+| Schema nội dung + script nhập 9 gói + IT vào DB, kiểm tra khớp 100% với file hiện tại | 1,5 | 0,7 |
+| `publish-pack` (kiểm tra + dựng JSON + Storage + manifest), app tải/cache gói theo version (IndexedDB), bỏ `document.write` | 1,5 | 0,7 |
+| Trình sửa nội dung trong `admin.html` (danh sách chặng, sửa từ/câu/hội thoại/bài nghe, xem trước, lịch sử, xuất bản) | 2,5 | 1 |
+| Khách tự động + liên kết Google/FB + màn gộp tài khoản + dọn khách 30 ngày + Turnstile | 1 | 0,5 |
+| Hàng đợi ghi offline (outbox) + bảng lai (`user_days`, `attempts_daily`) | 1 | 0,5 |
+| **Cộng thêm** | **≈ 7,5** | **≈ 3,4** |
+
+**MVP server-first** (B0–B6 ở §10 + 11.5) ≈ **15 ngày công ≈ 7 phiên**. Có thể chia 2 bước:
+1. **Bước 1 (≈ 9 ngày):** khách tự động + Google/Facebook + dữ liệu người học trên server + AI qua server + báo lỗi — nội dung vẫn là file tĩnh.
+2. **Bước 2 (≈ 6 ngày):** đưa nội dung vào DB + xuất bản + trình sửa nội dung cho admin.
+
 ## Nguồn
 
 - [Supabase — Sign in with Google](https://supabase.com/docs/guides/auth/social-login/auth-google)
 - [Supabase — Sign in with Facebook](https://supabase.com/docs/guides/auth/social-login/auth-facebook)
+- [Supabase — Anonymous sign-ins](https://supabase.com/docs/guides/auth/auth-anonymous)
 - [Supabase — PKCE flow](https://supabase.com/docs/guides/auth/sessions/pkce-flow)
 - [Supabase — signInWithOAuth](https://supabase.com/docs/reference/javascript/auth-signinwithoauth)
 - [DesignRevision — Supabase Free Tier Limits 2026](https://designrevision.com/blog/supabase-pricing) · [UI Bakery — Supabase Pricing 2026](https://uibakery.io/blog/supabase-pricing)
