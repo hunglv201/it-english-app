@@ -335,6 +335,66 @@ Việc cần xác minh thêm trước khi chốt (chưa có câu trả lời ch�
 1. **Bước 1 (≈ 9 ngày):** khách tự động + Google/Facebook + dữ liệu người học trên server + AI qua server + báo lỗi — nội dung vẫn là file tĩnh.
 2. **Bước 2 (≈ 6 ngày):** đưa nội dung vào DB + xuất bản + trình sửa nội dung cho admin.
 
+## 12. Chế độ offline trong phương án server-first
+
+Nguyên tắc: **server là bản gốc, máy là bản sao làm việc**. Mọi thao tác học đọc/ghi vào bản sao trên máy **ngay lập tức** (không chờ mạng),
+rồi một bộ đồng bộ chạy nền đẩy lên / kéo về khi có mạng. Người học không phân biệt online hay offline, trừ vài tính năng bắt buộc cần mạng.
+
+### 12.1 Bốn lớp lưu trên máy
+
+| Lớp | Lưu ở | Nội dung | Cập nhật khi |
+|---|---|---|---|
+| 1. Vỏ app | Service Worker cache (như hiện tại) | `index.html`, `game/`, CSS/JS, `vendor/supabase.min.js`, icon | đổi version app (`CACHE`) |
+| 2. Nội dung bài học | **IndexedDB** `packs` | gói ngành đã xuất bản (JSON theo `version`) + `manifest` | mở app có mạng → so `manifest` → tải gói mới; offline dùng bản đang có |
+| 3. Dữ liệu người học (bản sao) | IndexedDB `state` (thay `localStorage` vì lớn và an toàn hơn) | tiến độ, SRS, câu lưu, game… + `rev` của server lần cuối | mỗi thao tác học (ghi local trước) |
+| 4. Hàng đợi ghi (outbox) | IndexedDB `outbox` | các thay đổi chưa gửi: `{id, ts, op, data}` — vd `srs.grade`, `day.done`, `saved.add`, `report.add`, `activity.touch` | thêm khi thao tác; xoá khi server xác nhận |
+
+Gọi `navigator.storage.persist()` lúc đầu để trình duyệt hạn chế tự xoá dữ liệu (Chrome/Android thường cho; iOS vẫn có thể xoá sau thời gian dài không mở → nhắc liên kết tài khoản, xem §11.3).
+
+### 12.2 Luồng
+
+```
+Thao tác học ──► ghi bản sao (IndexedDB) ──► cập nhật màn hình ngay
+                         └──► thêm vào outbox
+Bộ đồng bộ (chạy khi: mở app · có mạng lại (online) · quay lại tab · mỗi 60s nếu còn outbox · trước khi đóng tab)
+  1. Đẩy outbox theo lô (≤ 50 thay đổi/lần) → RPC `apply_changes(changes, base_rev)`
+     server áp từng thay đổi theo luật gộp (§5), trả `rev` mới → xoá các mục đã nhận
+  2. Kéo về: hỏi `rev` hiện tại; nếu server mới hơn (máy khác đã sửa) → tải bản đầy đủ → gộp vào bản sao
+  3. Lỗi mạng / 5xx → thử lại sau 5s, 15s, 60s, 5 phút (backoff); lỗi 401 (phiên hết hạn) → làm mới phiên rồi gửi lại
+```
+
+- Mỗi thay đổi có **id duy nhất** → server bỏ qua nếu nhận trùng (gửi lại khi mất kết nối giữa chừng không bị cộng đôi).
+- Gửi theo **thao tác nhỏ** (`srs.grade 'deploy' reps=3…`) thay vì cả khối JSON → 2 máy cùng offline rồi cùng online vẫn gộp đúng, không ghi đè nhau.
+- Không dùng Background Sync API (Safari/iOS không hỗ trợ) — đồng bộ khi app mở là đủ.
+
+### 12.3 Tính năng nào chạy offline
+
+| Chạy offline đầy đủ | Chạy offline có giới hạn | Cần mạng |
+|---|---|---|
+| Hôm nay, Lộ trình, ngày học; từ vựng + SRS; câu thường dùng; nghe (đọc bằng giọng máy trên máy); chọn cách đáp; dịch ngược dạng tự gõ; game (trừ Boss AI); streak, thống kê cá nhân | Báo lỗi ⚑ (xếp hàng, gửi sau); đổi ngành (chỉ ngành đã tải gói); nhận giọng nói (Chrome thường cần mạng cho nhận giọng; Safari một số máy chạy trên máy); chấm ngữ pháp offline (luật có sẵn) | Mọi thứ gọi AI (Giao tiếp AI, chấm báo cáo 60s, Ảnh → bài học, tạo gói nghề); đăng nhập / liên kết Google·FB; lớp học & bảng xếp hạng; tải gói ngành chưa có trên máy |
+
+Các nút cần mạng khi offline: làm mờ + ghi "Cần mạng" (đã có dải báo offline `paintOffline()` từ v1.22). Gói ngành: tự tải trước gói đang học + gói Công sở chung.
+
+### 12.4 Trường hợp đặc biệt
+
+- **Mở app lần đầu mà không có mạng**: chưa tạo được tài khoản khách → app chạy chế độ máy (như hiện tại, gói Công sở có sẵn trong Service Worker), ghi mọi thứ vào outbox; lần đầu có mạng → tạo khách → đẩy outbox lên.
+- **Phiên đăng nhập hết hạn khi offline lâu**: không ảnh hưởng việc học (dữ liệu local); có mạng lại → dùng refresh token làm mới phiên → đồng bộ. Refresh token cũng hết hạn → yêu cầu đăng nhập lại, outbox vẫn giữ và gửi sau khi đăng nhập.
+- **Offline trên 2 máy cùng lúc**: gộp theo thao tác + luật §5 (SRS lấy bản ôn nhiều hơn, ngày đã xong hợp lại, streak lấy lớn hơn).
+- **Outbox quá lớn** (offline nhiều tuần): gộp bớt thao tác cùng khoá trước khi gửi (chỉ giữ trạng thái mới nhất của mỗi từ).
+- **Server đang lên version app mới**: RPC có `app_version`; bản app quá cũ → server trả mã yêu cầu cập nhật → app tải vỏ mới (SW) rồi gửi lại outbox.
+
+### 12.5 Hiển thị cho người học
+
+- Chấm trạng thái nhỏ cạnh ảnh đại diện: ✓ đã đồng bộ · ↻ đang đồng bộ · ⏸ offline (N thay đổi chờ gửi).
+- Tôi › Tài khoản: "Lần đồng bộ cuối: 5 phút trước", nút "Đồng bộ ngay".
+- Không bao giờ chặn việc học vì mất mạng.
+
+### 12.6 Kiểm thử & ước lượng
+
+- Playwright: `context.setOffline(true)` → học 1 ngày, ôn 10 từ → online → kiểm tra server nhận đủ, không trùng; 2 trình duyệt cùng offline sửa khác nhau → gộp đúng; tắt mạng giữa lúc gửi → gửi lại không cộng đôi; phiên hết hạn → làm mới.
+- Ước lượng: đã nằm trong "Hàng đợi ghi offline" (§11.5, 1 ngày) **+ 1 ngày** cho chuyển `localStorage` → IndexedDB, RPC `apply_changes` gộp theo thao tác, tải trước gói, test offline
+  → **tổng MVP server-first ≈ 16 ngày công (≈ 7,5 phiên)**.
+
 ## Nguồn
 
 - [Supabase — Sign in with Google](https://supabase.com/docs/guides/auth/social-login/auth-google)
