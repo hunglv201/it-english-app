@@ -6,7 +6,7 @@ không cần tài khoản.
 
 **Live demo:** https://hunglv201.github.io/it-english-app/
 · 🎮 **Game:** https://hunglv201.github.io/it-english-app/game/
-· 📖 **Trang giới thiệu:** https://hunglv201.github.io/it-english-app/gioi-thieu.html
+· 📖 **Trang giới thiệu (v2.0):** https://hunglv201.github.io/it-english-app/gioi-thieu.html · [bản v1 lưu trữ](https://hunglv201.github.io/it-english-app/gioi-thieu-v1.html) · [lịch sử phiên bản](./CHANGELOG.md)
 
 > Đang dùng Claude/Cowork để phát triển? Đọc [`CLAUDE.md`](./CLAUDE.md) — ngữ cảnh dự án, pipeline deploy, quy ước.
 
@@ -15,11 +15,11 @@ không cần tài khoản.
 ## Tính năng
 
 - **Hôm nay** — bài học thích ứng mỗi ngày (4 việc ngắn, ~5 phút): ôn từ, nghe, trò chuyện AI, luyện câu. Có streak (chuỗi ngày) và thanh tiến độ.
-- **Lộ trình 370 ngày** — chia theo chặng chủ đề; mỗi ngày gồm từ vựng, mẫu câu, hội thoại, bài nghe và phần luyện thêm với AI.
+- **Lộ trình 370 ngày** — chia theo chặng chủ đề; mỗi ngày gồm từ vựng, mẫu câu, hội thoại (185 bài chọn đáp), bài nghe (222 bài) và phần luyện thêm với AI.
 - **Từ vựng** — 3 chế độ: *thẻ lật* (phát âm + ví dụ), *kiểm tra* (trắc nghiệm 2 chiều Anh↔Việt), *danh sách* (tìm kiếm, lọc chủ đề). Ôn tập theo thuật toán **SRS (SM-2 rút gọn)**.
 - **Câu thường dùng** — 1000 câu chia 25 nhóm; lưu câu yêu thích để ôn lại.
 - **Giao tiếp** — trò chuyện với AI theo tình huống công việc (standup, báo blocker, code review, deploy…). AI đóng vai đồng nghiệp, nói tiếng Anh đơn giản và **sửa lỗi** sau mỗi lượt. Có thể mô tả lĩnh vực của bạn để AI gợi ý tình huống riêng.
-- **Nghe** — 2 chế độ: *chép chính tả* (điền từ trống) và *shadowing* (nhại lại, chấm phát âm qua mic theo %).
+- **Nghe** — 2 chế độ: *chép chính tả* (điền từ trống) và *shadowing* (nhại lại, chấm phát âm qua mic theo %). Có 74 **đoạn họp dài 2–3 câu** (điền nhiều ô cùng lúc) giống cuộc họp thật.
 - **Tự động chạy (autoplay)** — nút *Tự động* trong Từ vựng, Câu, Nghe: app tự đọc và tự chuyển sau số giây bạn đặt, học rảnh tay không cần bấm.
 - **Cấu hình** — màn cài đặt (nút bánh răng ở header): chỉnh thời gian autoplay từng chức năng, bật/tắt tự đọc, chọn giao diện, và cấu hình AI.
 - **Sáng / Tối / Theo hệ thống** — đổi ở header hoặc trong Cấu hình.
@@ -47,7 +47,7 @@ Nút **Tiến độ & thống kê** ở Hôm nay: streak, số từ đã thuộc
 - **Standup 60 giây** — ở Hôm nay: nói liền 3 ý (hôm qua · hôm nay · vướng gì), AI chấm 1–10, đưa bản chuẩn, chỉ lỗi và cho *Đọc lại* chấm %.
 - **Dịch ngược** — cho câu tiếng Việt kiểu dev ("anh check giúp em cái PR này với"), bạn nói tiếng Anh, AI chấm theo *nghĩa* và gợi ý 2–3 cách nói tự nhiên.
 - **Ôn câu (SRS)** — câu AI đã sửa cho bạn, câu dịch ngược/đọc theo điểm thấp tự vào hàng ôn cách quãng.
-- **Chọn đáp theo vai trò** — gói QA · DevOps · BA · PM (Cài đặt › Vai trò), kèm tình huống AI riêng; game cũng dùng.
+- **Chọn đáp theo vai trò** — 7 vai Dev · QA · DevOps · BA · PM · Designer · Data (Cài đặt › Vai trò), kèm tình huống AI riêng; game cũng dùng.
 - **Cá nhân hoá bằng JD** — dán mô tả công việc 1 lần: AI chọn vai, 6 chặng nên ưu tiên (hiện ở Lộ trình) và 3 tình huống luyện nói riêng.
 - **Sự kiện sắp tới** — ghi sprint review/demo/phỏng vấn; trước 1 ngày app nhắc ở Hôm nay và mở tình huống luyện đúng chủ đề.
 - **Podcast dev** — nghe thụ động ~5 phút (2 giọng hỏi–đáp, điều khiển từ màn khoá), cuối tập 3 câu kiểm tra.
@@ -132,7 +132,7 @@ Mở từ app (Luyện tập → *IT English Quest*) hoặc trực tiếp `/game
 
 ## 📖 Trang giới thiệu
 
-`gioi-thieu.html` — landing page fullpage (mỗi lần cuộn = 1 trang), nền particle chạy theo con trỏ, chữ chạy, 17 ảnh chụp màn hình có chú thích, tập trung giới thiệu tính năng AI. Tự chứa (ảnh inline), deploy cùng Pages.
+`gioi-thieu.html` — landing page fullpage (mỗi lần cuộn = 1 trang), nền particle chạy theo con trỏ, chữ chạy, 25 ảnh chụp màn hình (`img/showcase/v2/`), mục "Mới trong v2.0" và **Lịch sử phiên bản**. Mỗi version lớn giữ lại trang cũ làm bản lưu trữ (`gioi-thieu-v1.html`…). Deploy cùng Pages.
 
 ---
 
@@ -143,7 +143,7 @@ Chỉ cần Python 3, không phụ thuộc thư viện ngoài:
 ```bash
 python3 gen_data.py      # -> data.gen.js     (cần phases_extra.py cùng thư mục)
 python3 phrases_data.py  # -> phrases.gen.js
-python3 roles_data.py    # -> roles.gen.js      (gói nội dung QA/DevOps/BA/PM)
+python3 roles_data.py    # -> roles.gen.js      (gói nội dung 7 vai)
 ```
 
 Mỗi script tự copy file `*.gen.js` sang `game/`. Thuật ngữ tiếng Nhật nằm ở `ja_data.py` (gen_data.py đọc vào trường `ja`).
@@ -163,11 +163,14 @@ it-english-app/
 ├── phases_extra.py     # 27 chặng chủ đề mở rộng (nguồn cho gen_data.py)
 ├── phrases_data.py     # Script sinh phrases.gen.js
 ├── roles_data.py       # Script sinh roles.gen.js (nội dung theo vai trò)
+├── content_extra.py    # Hội thoại + đoạn họp bổ sung (v2.0), gen_data.py ghép vào
 ├── ja_data.py          # Thuật ngữ tiếng Nhật cho 370 từ
 ├── img/showcase/       # Ảnh chụp màn hình (WebP) của trang giới thiệu
 ├── tests/              # Test Playwright mobile (tests/run.sh)
 ├── sw.js, manifest.webmanifest, icon-*.png   # PWA
-├── gioi-thieu.html     # Trang giới thiệu (showcase)
+├── gioi-thieu.html     # Trang giới thiệu v2.0 (showcase)
+├── gioi-thieu-v1.html  # Trang giới thiệu v1 (lưu trữ)
+├── CHANGELOG.md        # Lịch sử phiên bản
 ├── game/               # IT English Quest: index.html (theme) + game.js (logic) + bản sao *.gen.js
 ├── docs/               # showcase bản artifact, video demo, review
 ├── push.sh             # push bằng token trong .env (không commit .env)

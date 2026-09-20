@@ -303,11 +303,13 @@ function phraseQs(d){
   return shuffle(qs);
 }
 function listenQs(d){
-  const li=d.li;const items=[LISTEN[li]].concat(pickOthers(LISTEN,li,3,x=>x.s.join(' ')));const qs=[];
-  items.forEach(it=>{const s=it.s.join(' ');const idx=LISTEN.indexOf(it);
-    const o1=pickOthers(LISTEN,idx,3,x=>x.s.join(' ')).map(x=>x.s.join(' '));qs.push({kind:'Nghe rồi chọn đúng câu',q:'🔊',sub:it.hint?'gợi ý: '+it.hint:'',ans:s,opts:shuffle([s].concat(o1)),say:s,listen:true});
-    if(it.blank&&it.blank.length){const bi=it.blank[0];const w=it.s[bi];const shown=it.s.map((x,i)=>it.blank.includes(i)?'____':x).join(' ');
-      const pool=LISTEN.map(x=>x.s).flat().filter(x=>x.length>2&&x.toLowerCase()!==w.toLowerCase());const o2=shuffle(Array.from(new Set(pool))).slice(0,3);
+  // v2.0: đáp án nhiễu cùng loại (câu ngắn với câu ngắn, đoạn với đoạn) để không đoán được theo độ dài
+  const same=it=>LISTEN.filter(x=>!!x.p===!!it.p);
+  const li=d.li;const base=LISTEN[li];const pool0=same(base);const items=[base].concat(pickOthers(pool0,pool0.indexOf(base),3,x=>x.s.join(' ')));const qs=[];
+  items.forEach(it=>{const s=it.s.join(' ');const pool=same(it);const idx=pool.indexOf(it);
+    const o1=pickOthers(pool,idx,3,x=>x.s.join(' ')).map(x=>x.s.join(' '));qs.push({kind:'Nghe rồi chọn đúng câu',q:'🔊',sub:it.hint?'gợi ý: '+it.hint:'',ans:s,opts:shuffle([s].concat(o1)),say:s,listen:true});
+    if(it.blank&&it.blank.length){const bi=it.blank[0];const w=it.s[bi].replace(/[.,]+$/,'');const shown=it.s.map((x,i)=>it.blank.includes(i)?'____'+(x.match(/[.,]+$/)||[''])[0]:x).join(' ');
+      const pool=LISTEN.map(x=>x.s).flat().map(x=>x.replace(/[.,?!:;]+$/,'')).filter(x=>x.length>2&&/^[a-z]+$/i.test(x)&&x.toLowerCase()!==w.toLowerCase());const o2=shuffle(Array.from(new Set(pool))).slice(0,3);
       qs.push({kind:'Nghe và điền từ thiếu',q:shown,ans:w,opts:shuffle([w].concat(o2)),say:s,listen:true});}
   });
   return shuffle(qs);

@@ -421,6 +421,16 @@ try:
     from ja_data import JA
 except Exception:
     JA={}
+# v2.0: nội dung bổ sung theo chặng (hội thoại + bài nghe dạng đoạn)
+try:
+    from content_extra import C as CEXTRA
+except Exception:
+    CEXTRA={}
+for _i,_p in enumerate(PHASES):
+    _x=CEXTRA.get(_i)
+    if _x:
+        _p["dialogues"]=list(_p["dialogues"])+list(_x.get("dialogues",[]))
+        _p["listen"]=list(_p["listen"])+list(_x.get("listen",[]))
 for p in PHASES:
     vi=[]
     for t,ipa,pos,vn,ex,exvi in p["vocab"]:
@@ -434,7 +444,10 @@ for p in PHASES:
     phasePhrase.append(pi)
     di=[]
     for them,opts in p["dialogues"]:
-        di.append(len(DI)); DI.append({"them":them,"opts":[{"t":t,"good":g,"fb":f} for t,g,f in opts]})
+        _o=[{"t":t,"good":g,"fb":f} for t,g,f in opts]
+        # xáo vị trí đáp án đúng theo chỉ số (ổn định giữa các lần sinh) — trước đây đáp án đúng luôn ở ô đầu
+        _gi=next(k for k,o in enumerate(_o) if o["good"]); _g=_o.pop(_gi); _o.insert(len(DI)%3,_g)
+        di.append(len(DI)); DI.append({"them":them,"opts":_o})
     phaseDia.append(di)
     li=[]
     for sent,blanks,hint in p["listen"]:
@@ -446,7 +459,11 @@ for p in PHASES:
                 if i in used: continue
                 if w.lower().strip(".,").replace("'","")==bw.lower():
                     bidx.append(i); used.add(i); break
-        li.append(len(LI)); LI.append({"s":words,"blank":bidx,"hint":hint})
+        _it={"s":words,"blank":bidx,"hint":hint}
+        if sum(1 for w in words if w[-1:] in ".?!")>=2 or len(words)>=15: _it["p"]=1   # bài nghe dạng đoạn (2–3 câu)
+        missing=[bw for bw in blanks if not any(words[i].lower().strip(".,").replace("'","")==bw.lower() for i in bidx)]
+        if missing: raise SystemExit("blank not found: %r in %r"%(missing,sent))
+        li.append(len(LI)); LI.append(_it)
     phaseListen.append(li)
 
 DAYS=[]

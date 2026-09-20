@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# C3: gói nội dung theo vai trò (QA, DevOps, BA, PM) -> roles.gen.js (window.ROLES), copy sang game/
+# C3: gói nội dung theo vai trò (QA, DevOps, BA, PM, Designer, Data) -> roles.gen.js (window.ROLES), copy sang game/
 # Mỗi vai: 4 tình huống AI (k, nhãn VN, prompt EN) + 6 hội thoại chọn đáp (câu đồng nghiệp + 3 lựa chọn: câu, đúng?, phản hồi VN)
 import json, os, shutil
 
@@ -137,13 +137,83 @@ ROLES = {
      ("OK cancel.", False, "Bỏ mất kênh đồng bộ."),
      ("Standup is not use.", False, "Sai ngữ pháp.")]),
   ]},
+ "designer": {"label": "UI/UX Designer", "emoji": "🎨",
+  "scenarios": [
+   ("ds_handoff", "Bàn giao thiết kế cho dev", "You are a frontend developer receiving my design in Figma. Ask about spacing, states, and what happens on small screens."),
+   ("ds_critique", "Góp ý thiết kế", "You are a product manager giving feedback on my new screen design. Ask why I made some choices and suggest one change."),
+   ("ds_research", "Phỏng vấn người dùng", "You are a user of our app in a short interview. I am the designer asking about your experience. Answer honestly, sometimes vaguely."),
+   ("ds_system", "Design system", "You are a developer. We are discussing whether to add a new button style to the design system. Push back a little."),
+  ],
+  "dialogues": [
+   ("What happens when the list is empty?", [
+     ("We show an empty state with a short message and a button to add the first item.", True, "Nghĩ tới trạng thái rỗng — dev rất cần."),
+     ("It will never be empty.", False, "Bỏ sót trường hợp thực tế."),
+     ("Empty is nothing show.", False, "Sai ngữ pháp, không rõ.")]),
+   ("The design doesn't fit on small phones.", [
+     ("Good catch. I'll add a layout for 360-pixel screens.", True, "Tiếp nhận + giải pháp cụ thể."),
+     ("Users should buy bigger phones.", False, "Không đặt người dùng làm trung tâm."),
+     ("Small phone not my problem.", False, "Thái độ không hợp tác.")]),
+   ("Why did you choose this color?", [
+     ("It has better contrast, so it's easier to read for everyone.", True, "Lý do dựa trên khả năng tiếp cận."),
+     ("Because I like it.", False, "Lý do cảm tính."),
+     ("Color is beautiful very.", False, "Sai trật tự từ.")]),
+   ("Can you share the Figma link?", [
+     ("Sure. I've shared it in the channel with edit access for the team.", True, "Chia sẻ + phân quyền rõ."),
+     ("Figma is secret.", False, "Không hợp tác."),
+     ("I share you link later maybe.", False, "Mơ hồ, sai ngữ pháp.")]),
+   ("Users can't find the settings button.", [
+     ("Let's move it to the top bar and test it with five users.", True, "Giải pháp + kiểm chứng."),
+     ("They should look harder.", False, "Đổ lỗi cho người dùng."),
+     ("Settings button is there, see.", False, "Phủ nhận vấn đề.")]),
+   ("Is this component in the design system?", [
+     ("Not yet. I'll add it after we test it on this page.", True, "Trả lời rõ + kế hoạch."),
+     ("Every component is different.", False, "Làm hỏng tính nhất quán."),
+     ("Component is design maybe.", False, "Khó hiểu.")]),
+  ]},
+ "data": {"label": "Data / Analyst", "emoji": "📊",
+  "scenarios": [
+   ("da_request", "Nhận yêu cầu báo cáo", "You are a marketing manager asking me for a new report. Be vague at first so I must ask clarifying questions about metrics and time range."),
+   ("da_explain", "Giải thích số liệu", "You are a non-technical manager. Ask me to explain why a key number went down last month, in simple words."),
+   ("da_quality", "Dữ liệu sai lệch", "You are a data engineer. I found wrong numbers in the dashboard. Discuss the possible causes with me."),
+   ("da_model", "Trình bày mô hình", "You are a product owner. I am presenting a simple prediction model. Ask about accuracy, risks, and how we will use it."),
+  ],
+  "dialogues": [
+   ("Can you pull the numbers for last month?", [
+     ("Sure. Do you need daily numbers or just the monthly total?", True, "Hỏi làm rõ trước khi làm."),
+     ("Numbers are in the database.", False, "Không giúp người hỏi."),
+     ("I pull tomorrow maybe.", False, "Mơ hồ, sai thì.")]),
+   ("Why is this number different from the finance report?", [
+     ("Finance counts refunds, but our dashboard doesn't. I'll add a note.", True, "Giải thích nguyên nhân khác biệt."),
+     ("Finance is wrong.", False, "Đổ lỗi khi chưa đối chiếu."),
+     ("Different because different.", False, "Vô nghĩa.")]),
+   ("Is this trend real or just noise?", [
+     ("It lasted six weeks and the sample is large, so it's likely real.", True, "Lập luận dựa trên thời gian và cỡ mẫu."),
+     ("Definitely real, trust me.", False, "Thiếu căn cứ."),
+     ("Trend is maybe noise real.", False, "Khó hiểu.")]),
+   ("Can you make this dashboard load faster?", [
+     ("Yes, I'll pre-aggregate the data every night.", True, "Giải pháp kỹ thuật cụ thể."),
+     ("Dashboards are always slow.", False, "Không cải thiện."),
+     ("Faster make I try.", False, "Sai trật tự từ.")]),
+   ("Can we trust this data?", [
+     ("Mostly. About 3% of rows have missing dates, so I excluded them.", True, "Minh bạch về chất lượng dữ liệu."),
+     ("Yes, data is always correct.", False, "Chủ quan."),
+     ("Trust yes no.", False, "Không rõ ràng.")]),
+   ("What should we do with this insight?", [
+     ("I suggest we test a shorter sign-up form with 10% of users.", True, "Biến insight thành hành động có kiểm chứng."),
+     ("Nothing, it's just a chart.", False, "Bỏ phí phân tích."),
+     ("Insight is good, do.", False, "Không cụ thể.")]),
+  ]},
 }
+
+def _shuffle(o, n):
+    g = [x for x in o if x['good']][0]; rest = [x for x in o if not x['good']]
+    rest.insert(n % 3, g); return rest
 
 out = {}
 for k, r in ROLES.items():
     out[k] = {"label": r["label"], "emoji": r["emoji"],
               "scenarios": [{"k": "r_" + a, "l": b, "s": c} for a, b, c in r["scenarios"]],
-              "dialogues": [{"them": t, "opts": [{"t": x, "good": g, "fb": f} for x, g, f in o]} for t, o in r["dialogues"]]}
+              "dialogues": [{"them": t, "opts": _shuffle([{"t": x, "good": g, "fb": f} for x, g, f in o], n)} for n, (t, o) in enumerate(r["dialogues"])]}
 js = "window.ROLES=" + json.dumps(out, ensure_ascii=False, separators=(",", ":")) + ";\n"
 here = os.path.dirname(os.path.abspath(__file__))
 open(os.path.join(here, "roles.gen.js"), "w", encoding="utf-8").write(js)

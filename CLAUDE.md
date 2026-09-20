@@ -10,8 +10,8 @@ trình độ cơ bản luyện tiếng Anh IT / môi trường công sở. Chủ
 
 | Sản phẩm | File | URL Pages | Mô tả |
 |---|---|---|---|
-| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Lộ trình 370 ngày, từ vựng SRS, 1000 câu, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **1.22.0** (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
-| **Trang giới thiệu (showcase)** | `gioi-thieu.html` (≈1.6 MB, ảnh JPEG inline) | `…/gioi-thieu.html` | Landing fullpage scroll-snap, nền particle-net, chữ chạy, 17 ảnh chụp màn hình có caption, tập trung vào tính năng AI. Dark-first, nền đen mặc định |
+| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Lộ trình 370 ngày, từ vựng SRS, 1000 câu, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **2.0.0** (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
+| **Trang giới thiệu (showcase)** | `gioi-thieu.html` (**v2.0**, ảnh `img/showcase/v2/`) + bản lưu trữ `gioi-thieu-v1.html` | `…/gioi-thieu.html` | Landing fullpage scroll-snap, nền particle-net, mục "Mới trong v2.0", mục **Lịch sử phiên bản** (`#versions`). Dark-first. Quy ước version lớn: xem mục 7 |
 | **Game "IT English Quest"** | `game/index.html` + `game/game.js` (+ bản sao `game/data.gen.js`, `game/phrases.gen.js`) | `…/game/` | Bản game anime **mobile-first**: RPG bản đồ ngày → quiz battle → boss visual novel, AFK idle (Mochi tự cày xu), Shop, huy hiệu, tab **Nói** 5 chế độ luyện nói. Dùng chung dữ liệu + AI key với app |
 
 Ngoài Pages, cả 3 còn được publish làm **claude.ai Artifact** (xem mục 6).
@@ -24,14 +24,18 @@ it-english-app/
 ├── data.gen.js           # window.DATA — sinh từ gen_data.py, KHÔNG sửa tay
 ├── phrases.gen.js        # window.PHRASES — sinh từ phrases_data.py, KHÔNG sửa tay
 ├── gen_data.py / phases_extra.py / phrases_data.py   # nguồn sinh dữ liệu (Python 3, không lib ngoài)
-├── roles_data.py         # -> roles.gen.js (window.ROLES: gói QA/DevOps/BA/PM — tình huống AI + hội thoại chọn đáp)
+├── roles_data.py         # -> roles.gen.js (window.ROLES: 7 vai Dev/QA/DevOps/BA/PM/Designer/Data — tình huống AI + hội thoại chọn đáp)
+├── content_extra.py      # nội dung bổ sung v2.0: +3 hội thoại & +2 đoạn họp nghe cho mỗi chặng (gen_data.py ghép vào)
 ├── ja_data.py            # thuật ngữ tiếng Nhật; gen_data.py ghép vào vocab[].ja = "日本語|romaji"
 │                         # ⚠ mọi script sinh *.gen.js TỰ copy sang game/ — không copy tay
-├── img/showcase/*.webp   # 17 ảnh của gioi-thieu.html (tách khỏi base64 → HTML 44 KB)
+├── img/showcase/*.webp   # 17 ảnh của gioi-thieu-v1.html (bản lưu trữ)
+├── img/showcase/v2/*.webp # 25 ảnh của gioi-thieu.html v2.0 (540×1169, chụp bằng Playwright + AI giả)
 ├── tests/                # Playwright mobile: lib.mjs + a/b/c.mjs theo đợt, run.sh (xem tests/README.md)
 ├── sw.js                 # service worker; CACHE = 'it-english-v<version>' — bump cùng version app
 ├── manifest.webmanifest, icon-192.png, icon-512.png  # PWA
-├── gioi-thieu.html       # Showcase (standalone, có doctype/head/favicon)
+├── gioi-thieu.html       # Showcase v2.0 (standalone, có doctype/head/favicon)
+├── gioi-thieu-v1.html    # Showcase v1 lưu trữ (noindex, thanh "Bản lưu trữ" ở đáy)
+├── CHANGELOG.md          # lịch sử phiên bản đầy đủ (showcase link tới)
 ├── game/
 │   ├── index.html        # CSS theme anime (Fredoka/Nunito/IBM Plex Mono) + khung HTML
 │   ├── game.js           # Toàn bộ logic game (IIFE, ~100 KB)
@@ -51,8 +55,8 @@ it-english-app/
 ## 3. Dữ liệu & lưu trữ
 
 - `window.DATA`: `vocab[370]{t,ipa,pos,vi,ex,exVi}`, `days[370]{n,phase,title,v[],ph,di,li}`, `phaseTitles[37]`,
-  `listen[148]{s[],blank[],hint}`, `dialogues[74]{them,opts[{t,good,fb}]}`, `phrases[185]{en,vi,note}`.
-- `window.PHRASES`: 26 nhóm câu thường dùng. `window.ROLES`: {dev,qa,devops,ba,pm} → {label,emoji,scenarios[{k:'r_…',l,s}],dialogues[]}.
+  `listen[222]{s[],blank[],hint,p?}` (`p:1` = đoạn họp 2–3 câu, 74 đoạn → app hiện nhiều ô điền), `dialogues[185]{them,opts[{t,good,fb}]}` (đáp án đúng đã xáo vị trí khi sinh), `phrases[185]{en,vi,note}`.
+- `window.PHRASES`: 26 nhóm câu thường dùng. `window.ROLES`: {dev,qa,devops,ba,pm,designer,data} → {label,emoji,scenarios[{k:'r_…',l,s}],dialogues[]}.
 - `vocab[].ja` (tuỳ chọn): thuật ngữ Nhật, hiện khi `store.cfg.showJa`.
 - **localStorage**
   - App: key `it-english-v1` → `store` gồm `ai:{provider,key,model}`, `cfg{level,role,showJa,focus[],domain,jd,jdScenarios}`, `days.cur/done`, `srs` (từ), `psrs` (câu — L1), `standups[]`, `events[]`, `convos[]`, `saved[]`, streak…
@@ -113,10 +117,12 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 - Không thêm framework/build tool; giữ 1 file cho app, 2 file cho game.
 - Không commit `.env`, `*.png` chụp màn hình, `*.mjs` test (đã gitignore).
 - Commit có attribution: `Co-Authored-By: Claude … <noreply@anthropic.com>` + `Claude-Session: <link>` (theo reminder của phiên).
+- **Version lớn (major, vd 2.0 → 3.0)**: (1) chép `gioi-thieu.html` hiện tại thành `gioi-thieu-v<N>.html` (thêm `noindex` + thanh `.archive-bar`), (2) chụp ảnh mới vào `img/showcase/v<N+1>/` (script mẫu: chụp bằng Playwright với store nạp sẵn + AI giả, ẩn toast), giữ nguyên ảnh cũ để bản lưu trữ không vỡ, (3) thêm mục vào timeline `#versions` của showcase + `CHANGELOG.md`, (4) bump `APP_VERSION` + `CACHE`. Version nhỏ chỉ cần ghi `CHANGELOG.md`.
 - Người dùng hay xem trên **điện thoại** và **Claude desktop**: ưu tiên bố cục gọn, chữ không quá to, không cuộn thừa, animation nhẹ (đã có `prefers-reduced-motion`).
 
 ## 8. Lịch sử tóm tắt (mới → cũ)
 
+- 09/2026 **v2.0.0 (major)**: nội dung ×2 — 185 hội thoại chọn đáp (trước 74, sửa lỗi đáp án đúng luôn ở vị trí 1), 222 bài nghe gồm 74 đoạn họp 2–3 câu (điền nhiều ô, shadowing dài), thêm vai Designer & Data (7 vai); showcase v2.0 chụp lại 25 ảnh + mục Standup/Dịch ngược/Theo vai/Tiếng Nhật + lịch sử phiên bản, v1 lưu trữ ở `gioi-thieu-v1.html`; `CHANGELOG.md`.
 - 09/2026 **v1.22.0**: nâng cấp UI/UX — bỏ nút AI nổi, Luyện 4 nhóm ô gọn, Lộ trình lưới 37 chặng, danh sách từ tải dần, Giao tiếp đưa chip tình huống lên đầu, Câu thường dùng gọn, thanh ghim nền đặc, báo offline, khung chờ AI, rung, vùng chạm 44px, bàn phím không che ô nhập.
 - 09/2026 **v1.21.1**: cập nhật tại chỗ mượt — không chạy lại hiệu ứng/không nhảy đầu trang (`viewTop`, `onceCls`, `.main.enter`).
 - 09/2026 **v1.21.0 (Đợt C)**: thuật ngữ Nhật, SRS câu, chọn đáp theo vai + cá nhân hoá JD, sự kiện, podcast, hỏi nhanh (nút ?), AI phân tích phát âm, ảnh chia sẻ PNG, cache AI + luật ngữ pháp offline, test vào repo, CSP khi tự host.
