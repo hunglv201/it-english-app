@@ -1121,3 +1121,9 @@ data=[{"name":n,"items":[{"en":e,"vi":v} for e,v in ps]} for n,ps in GROUPS]
 total=sum(len(g["items"]) for g in data)
 open("phrases.gen.js","w",encoding="utf-8").write("window.PHRASES="+json.dumps(data,ensure_ascii=False,separators=(",",":"))+";\n")
 print("groups",len(data),"total",total)
+# T2: game dùng bản sao cùng dữ liệu — luôn đồng bộ khi sinh lại
+import os, shutil
+_here=os.path.dirname(os.path.abspath(__file__))
+if os.path.isdir(os.path.join(_here,"game")):
+    shutil.copyfile(os.path.join(_here,"phrases.gen.js"),os.path.join(_here,"game","phrases.gen.js"))
+    print("copied -> game/phrases.gen.js")

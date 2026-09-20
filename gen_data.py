@@ -466,3 +466,9 @@ out="window.DATA="+json.dumps({
 open("data.gen.js","w",encoding="utf-8").write(out)
 print("vocab",len(V),"phrases",len(PH),"dialogues",len(DI),"listen",len(LI),"days",len(DAYS))
 print("bytes",len(out))
+# T2: game dùng bản sao cùng dữ liệu — luôn đồng bộ khi sinh lại
+import os, shutil
+_here=os.path.dirname(os.path.abspath(__file__))
+if os.path.isdir(os.path.join(_here,"game")):
+    shutil.copyfile(os.path.join(_here,"data.gen.js"),os.path.join(_here,"game","data.gen.js"))
+    print("copied -> game/data.gen.js")
