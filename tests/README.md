@@ -6,6 +6,7 @@ Chạy toàn bộ: `tests/run.sh` (tự bật server tĩnh cổng 8765). Ảnh c
 |---|---|
 | `a.mjs` | Đợt A — T1 chống chèn HTML từ AI/người dùng, làm sạch “Của tôi”, K1 sao lưu/khôi phục |
 | `b.mjs` | Đợt B — Standup 60s, Dịch ngược, biểu đồ tiến bộ, game ưu tiên từ hay sai, log đấu thoại, showcase tải ảnh |
+| `e.mjs` | UI/UX v1.22: bỏ nút AI nổi, báo offline, khung chờ AI, danh sách từ tải dần, lưới chặng |
 | `d.mjs` | Cập nhật tại chỗ không chạy lại hiệu ứng / không nhảy lên đầu trang; chỉ khi vào màn mới |
 | `c.mjs` | Đợt C — tiếng Nhật, SRS câu, chọn đáp theo vai, cá nhân hoá JD, sự kiện, podcast, hỏi nhanh, ảnh chia sẻ, cache AI + luật ngữ pháp offline, game theo vai |
 
