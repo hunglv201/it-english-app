@@ -117,7 +117,7 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 - Không thêm framework/build tool; giữ 1 file cho app, 2 file cho game.
 - Không commit `.env`, `*.png` chụp màn hình, `*.mjs` test (đã gitignore).
 - Commit có attribution: `Co-Authored-By: Claude … <noreply@anthropic.com>` + `Claude-Session: <link>` (theo reminder của phiên).
-- **Version lớn (major, vd 2.0 → 3.0)**: (1) chép `gioi-thieu.html` hiện tại thành `gioi-thieu-v<N>.html` (thêm `noindex` + thanh `.archive-bar`), (2) chụp ảnh mới vào `img/showcase/v<N+1>/` (script mẫu: chụp bằng Playwright với store nạp sẵn + AI giả, ẩn toast), giữ nguyên ảnh cũ để bản lưu trữ không vỡ, (3) thêm mục vào timeline `#versions` của showcase + `CHANGELOG.md`, (4) bump `APP_VERSION` + `CACHE`. Version nhỏ chỉ cần ghi `CHANGELOG.md`.
+- **Version lớn (major, vd 2.0 → 3.0)**: (1) chép `gioi-thieu.html` hiện tại thành `gioi-thieu-v<N>.html` (thêm `noindex` + thanh `.archive-bar`), (2) chụp ảnh mới vào `img/showcase/v<N+1>/` (script mẫu: chụp bằng Playwright với store nạp sẵn + AI giả, ẩn toast), giữ nguyên ảnh cũ để bản lưu trữ không vỡ, (3) thêm mục vào timeline `#versions` của showcase + `CHANGELOG.md`, và thêm dòng mới vào menu chọn phiên bản `#vsel .vmenu` ở đầu **mọi** file `gioi-thieu*.html` (bản đang xem gắn `aria-current`), (4) bump `APP_VERSION` + `CACHE`. Version nhỏ chỉ cần ghi `CHANGELOG.md`.
 - Người dùng hay xem trên **điện thoại** và **Claude desktop**: ưu tiên bố cục gọn, chữ không quá to, không cuộn thừa, animation nhẹ (đã có `prefers-reduced-motion`).
 
 ## 8. Lịch sử tóm tắt (mới → cũ)
