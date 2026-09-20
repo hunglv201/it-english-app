@@ -45,6 +45,7 @@ it-english-app/
 │   ├── demo/giao-tiep-ai-demo.mp4    # video demo luồng Giao tiếp AI (không tiếng)
 │   ├── design/, bgchooser.html
 │   ├── REVIEW-2026-09-13.md          # review UX/thị trường (mã A1…E16), phần 'Còn lại' đã lạc hậu
+│   ├── DINH-HUONG-DA-NGANH-2026-09-20.md  # ⭐ định hướng v3.0 đa ngành
 │   └── REVIEW-2026-09-20.md          # ⭐ rà soát kỹ thuật + tổng hợp hướng cải tiến + kế hoạch 3 đợt — ĐỌC TRƯỚC KHI CHỌN VIỆC
 ├── push.sh               # push bằng token trong .env (gitignored)
 ├── README.md             # tài liệu người dùng
@@ -139,6 +140,8 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 - App v1.17.x: "Nghe hết" hội thoại có xướng vai, header Giao tiếp 1 hàng, video demo.
 
 ## 9. Ý tưởng còn mở (chưa làm)
+
+⭐ **Định hướng lớn tiếp theo (v3.0): đa ngành + cá nhân hoá**, người bỏ qua thì vào gói *Công sở chung* — xem [`docs/DINH-HUONG-DA-NGANH-2026-09-20.md`](docs/DINH-HUONG-DA-NGANH-2026-09-20.md) (đợt D0–D5, ~5–6 phiên).
 
 Đợt A/B/C trong [`docs/REVIEW-2026-09-20.md`](docs/REVIEW-2026-09-20.md) **đã làm xong** (v1.19–1.21, xem mục "Trạng thái" cuối file đó). Còn lại:
 
