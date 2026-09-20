@@ -10,7 +10,7 @@ trình độ cơ bản luyện tiếng Anh IT / môi trường công sở. Chủ
 
 | Sản phẩm | File | URL Pages | Mô tả |
 |---|---|---|---|
-| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Lộ trình 370 ngày, từ vựng SRS, 1000 câu, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **1.18.0** |
+| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Lộ trình 370 ngày, từ vựng SRS, 1000 câu, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **1.18.1** (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
 | **Trang giới thiệu (showcase)** | `gioi-thieu.html` (≈1.6 MB, ảnh JPEG inline) | `…/gioi-thieu.html` | Landing fullpage scroll-snap, nền particle-net, chữ chạy, 17 ảnh chụp màn hình có caption, tập trung vào tính năng AI. Dark-first, nền đen mặc định |
 | **Game "IT English Quest"** | `game/index.html` + `game/game.js` (+ bản sao `game/data.gen.js`, `game/phrases.gen.js`) | `…/game/` | Bản game anime **mobile-first**: RPG bản đồ ngày → quiz battle → boss visual novel, AFK idle (Mochi tự cày xu), Shop, huy hiệu, tab **Nói** 5 chế độ luyện nói. Dùng chung dữ liệu + AI key với app |
 
@@ -34,7 +34,9 @@ it-english-app/
 ├── docs/
 │   ├── it-english-showcase.html      # bản showcase dùng cho Artifact (không doctype/head/body)
 │   ├── demo/giao-tiep-ai-demo.mp4    # video demo luồng Giao tiếp AI (không tiếng)
-│   ├── design/, bgchooser.html, REVIEW-*.md
+│   ├── design/, bgchooser.html
+│   ├── REVIEW-2026-09-13.md          # review UX/thị trường (mã A1…E16), phần 'Còn lại' đã lạc hậu
+│   └── REVIEW-2026-09-20.md          # ⭐ rà soát kỹ thuật + tổng hợp hướng cải tiến + kế hoạch 3 đợt — ĐỌC TRƯỚC KHI CHỌN VIỆC
 ├── push.sh               # push bằng token trong .env (gitignored)
 ├── README.md             # tài liệu người dùng
 ├── ARCHITECTURE.md       # kiến trúc chi tiết của APP (state, SRS, module)
@@ -108,29 +110,14 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 
 ## 9. Ý tưởng còn mở (chưa làm)
 
-Sắp theo impact/độ khó (xem thảo luận đầy đủ trong lịch sử hội thoại 2026-09-19):
+**Nguồn sự thật: [`docs/REVIEW-2026-09-20.md`](docs/REVIEW-2026-09-20.md)** — có bảng phát hiện kỹ thuật đã kiểm chứng (T1…T6), danh sách cải tiến theo nhóm (R/L/C/G/K) và kế hoạch 3 đợt. Tóm tắt ưu tiên cao nhất:
 
-**Giữ chân người học**
-- Web Push nhắc học hằng ngày — đã có `checkReminder()` (Notification API + `sw.js`) nhưng chỉ chạy
-  khi app đang mở trong tab; còn thiếu bản dùng Periodic Background Sync / server push để nhắc cả khi
-  app đóng (hạn chế trên iOS, cân nhắc có đáng làm không).
-- [XONG v1.18.1] Màn "chào mừng trở lại" khi vắng >24h + thẻ Mochi/xu ở trang Hôm nay.
-
-**Học hiệu quả hơn**
-- Mở rộng SRS (SM-2 rút gọn hiện chỉ áp dụng cho `vocab`) sang **câu thường dùng** và **mẫu hội thoại hay sai** — hiện "Hay sai" chỉ tính từ vựng.
-- Chấm shadowing/dictation bằng AI thay vì chỉ so khớp chuỗi (gửi transcript SR cho AI chấm ngữ điệu, chỉ rõ từ phát âm sai kiểu gì).
-
-**Nội dung**
-- Onboarding: cho dán JD/mô tả công việc **một lần**, AI phân tích và ưu tiên lại thứ tự 370 ngày theo mức liên quan (mạnh hơn tính năng "AI rút từ" hiện chỉ thêm từ rời rạc vào "Của tôi").
-- Thêm dialogues theo ngành cụ thể (QA, DevOps, BA…) — hiện dialogues khá generic "dev nói chuyện với dev".
-
-**Game**
-- Boss/quái trong game ưu tiên câu hỏi từ đúng những từ người dùng SRS đánh giá "hay sai", thay vì random toàn pool — biến game thành công cụ ôn tập có mục đích.
-- Thêm boss/nhân vật, nhiều kết cục hơn cho Chuyện văn phòng; bảng xếp hạng.
-
-**Kỹ thuật / vận hành**
-- Kiểm tra `sw.js` tự update đúng cache khi bump version (tránh PWA kẹt bản cũ).
-- Cập nhật `icon-192.png`/`icon-512.png` cho khớp theme mới (favicon SVG đã đổi nhưng icon PWA thì chưa chắc).
-- **Xuất/Nhập tiến độ** (JSON từ localStorage) — rủi ro thực tế vì không có backend, đổi máy/xoá cache là mất sạch tiến độ 370 ngày.
-- Backend/proxy giữ API key (thay vì key phía client).
-- Đồng bộ tiến độ đa thiết bị (hiện chỉ localStorage).
+- **T1** 🔴 App chèn text AI/người dùng bằng `innerHTML` không `esc()` (game thì đã an toàn) → bọc `esc()`/`textContent`.
+- **T2** `game/*.gen.js` là copy tay, chưa có script đồng bộ → thêm copy vào `gen_data.py`/`phrases_data.py`.
+- **T3** `gioi-thieu.html` 1.6 MB do ảnh base64 → tách ảnh ra `docs/img/`.
+- **T4** `index.html` thiếu meta description + Open Graph.
+- **K1** Xuất/nhập tiến độ JSON (không backend, mất cache là mất hết).
+- ~~R1/R2~~ đã xong v1.18.1 (chào mừng trở lại + thẻ Mochi/xu ở Hôm nay).
+- **G1** Quái/boss trong game ưu tiên từ "hay sai" của app.
+- **L1/L2** SRS cho câu + AI chấm shadowing chi tiết.
+- Còn mở từ review 13/09: A4, B7-chart, E6, E7, E12, E15, E16.
