@@ -1,12 +1,32 @@
-# Lịch sử phiên bản — IT English
+# Lịch sử phiên bản — Nói Nghề (trước đây IT English)
 
 Ghi theo thứ tự mới → cũ. **Version lớn** (x.0.0) đi kèm một trang giới thiệu riêng; trang của version lớn cũ được giữ lại
 làm bản lưu trữ (`gioi-thieu-v<N>.html`) để xem lại app từng trông thế nào.
 
 | Version lớn | Trang giới thiệu | Ảnh chụp |
 |---|---|---|
-| **v2.0** (hiện tại) | [`gioi-thieu.html`](https://hunglv201.github.io/it-english-app/gioi-thieu.html) | `img/showcase/v2/` |
+| **v3.0** (hiện tại) | [`gioi-thieu.html`](https://hunglv201.github.io/it-english-app/gioi-thieu.html) | `img/showcase/v3/` |
+| v2.0 | [`gioi-thieu-v2.html`](https://hunglv201.github.io/it-english-app/gioi-thieu-v2.html) (lưu trữ) | `img/showcase/v2/` |
 | v1.x | [`gioi-thieu-v1.html`](https://hunglv201.github.io/it-english-app/gioi-thieu-v1.html) (lưu trữ 13/09/2026) | `img/showcase/` |
+
+---
+
+## v3.0.0 — 20/09/2026 · Đổi tên thành **Nói Nghề**, đa ngành, cá nhân hoá
+
+**Đa ngành** — mỗi ngành có lộ trình 12 chặng · 120 ngày, từ vựng (IPA, nhiều từ có tiếng Nhật), câu mẫu, hội thoại chọn đáp, bài nghe (có đoạn 2–3 câu), tình huống AI, vai trò, bài đọc hiểu, dịch ngược, sự kiện:
+- 🏢 **Công sở chung** (mặc định khi không chọn ngành): 4 vai (Nhân viên văn phòng, Hành chính – Nhân sự, Trưởng nhóm, Sinh viên – ứng viên).
+- 💻 **IT · Phần mềm**: giữ nguyên toàn bộ nội dung v2.0 (370 ngày, 7 vai) — người dùng cũ tự vào gói này, không mất tiến độ.
+- 🏨 **Khách sạn · Du lịch**, 🎧 **Bán hàng · CSKH**, 🏭 **Sản xuất · Nhà máy**: mỗi gói 4 vai; 3 chặng lõi (Email, Nghỉ phép & hành chính, Phỏng vấn) dùng chung từ gói Công sở.
+- Mỗi gói còn có ~610 câu công sở chung trong "Câu thường dùng".
+
+**Cá nhân hoá**
+- Làm quen 3 bước khi mở app lần đầu: ngành → vị trí → trình độ; **bước nào cũng bỏ qua được**, bỏ qua = gói Công sở chung. Sau 3 ngày học mới hỏi nhẹ "Bạn làm ngành gì?".
+- Chip ngành dưới tên app để đổi ngành bất cứ lúc nào; **tiến độ lộ trình giữ riêng từng ngành**, từ vựng SRS · câu đã lưu · streak dùng chung. Link `?track=hotel` mở sẵn một ngành.
+- "Báo cáo 60 giây" theo nghề: Standup (IT), Báo cáo nhanh (công sở), Giao ca (khách sạn), Báo cáo sale, Báo cáo ca (nhà máy).
+- Cá nhân hoá bằng mô tả công việc cho **mọi ngành**: AI chọn ngành + vai, gợi ý chuyển gói hợp hơn, tạo 3 tình huống và **12 từ vựng riêng của nghề** (thêm vào "Của tôi" một chạm). Chọn "Ngành khác" ở màn làm quen sẽ vào thẳng bước này.
+- Mọi lời nhắc AI dùng đúng nghề của bạn (không còn cố định "software developer").
+
+**Khác**: game *Nói Nghề Quest* theo ngành (quái, câu Mochi nói, Boss AI); trang giới thiệu v3.0 với 34 ảnh mới, bản v2.0 lưu trữ ở `gioi-thieu-v2.html`; service worker cache sẵn cả 4 gói mới.
 
 ---
 

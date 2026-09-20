@@ -1,8 +1,10 @@
-/* IT English Quest — game logic (anime RPG × quiz battle × visual novel) */
+/* Nói Nghề Quest (trước: IT English Quest) — game logic (anime RPG × quiz battle × visual novel) */
 (function(){
 'use strict';
 const D=window.DATA, VOCAB=D.vocab, DAYS=D.days, PHASES=D.phaseTitles, LISTEN=D.listen, DIALOGS=D.dialogues, PHR=D.phrases;
 const GKEY='it-english-game-v1', APPKEY='it-english-v1';
+// v3.0: gói ngành (nạp ở game/index.html theo store.cfg.track của app). PACK=null → gói IT gốc
+const PACK=window.PACK||null, BUG=PACK?'Quái':'Bug', bugL=PACK?'quái':'bug', APPN='Nói Nghề';
 const $=s=>document.querySelector(s);
 const main=$('#main');
 function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;}
@@ -28,7 +30,7 @@ function idlePending(){const e=Math.max(0,Math.min(Date.now()-(G.idle.last||Date
 function fmtDur(ms){const h=Math.floor(ms/3600e3),m=Math.floor(ms%3600e3/60e3);return h?h+' giờ '+m+' phút':m+' phút';}
 function collectIdle(){const p=idlePending();G.idle.last=Date.now();G.idle.bugs=(G.idle.bugs||0)+p.bugs;if(p.coins>0){gainXp(p.xp,p.coins);toast('🪙 +'+p.coins+' xu · ✨ +'+p.xp+' XP');}saveG();}
 function daily(){const t=todayStr();if(G.daily.date!==t){G.daily={date:t,wins:0,combo:0,boss:0,claimed:{},chest:false};saveG();}return G.daily;}
-const DQ=[['wins','Thắng 3 trận Bug',3,60,'⚔️'],['combo','Đạt combo x5 trong trận',5,40,'🔥'],['boss','Hạ 1 Boss',1,100,'👑']];
+const DQ=[['wins','Thắng 3 trận '+BUG,3,60,'⚔️'],['combo','Đạt combo x5 trong trận',5,40,'🔥'],['boss','Hạ 1 Boss',1,100,'👑']];
 const SHOP=[
  ['hp','❤️','Máu tối đa +10','Chịu đòn tốt hơn',k=>100+k*80,99,()=>{G.maxHp+=10;G.hp=Math.min(G.maxHp,G.hp+10);}],
  ['timer','⏱️','Thêm 2 giây trả lời','Thêm thời gian mỗi câu',k=>150+k*120,5,null],
@@ -118,7 +120,7 @@ function speak(t){if(!('speechSynthesis'in window))return;try{speechSynthesis.ca
 function gainXp(n,coins){G.xp+=n;G.coins+=(coins||0);let ups=0;while(G.xp>=xpNeed(G.lv)){G.xp-=xpNeed(G.lv);G.lv++;G.maxHp+=10;G.hp=G.maxHp;ups++;}saveG();paintCoins();if(ups)levelUp();}
 function levelUp(){sfx.lv();confetti();openModal((m,close)=>{m.innerHTML='<div class="lvup">LEVEL UP!</div><div class="big" style="margin-top:6px">Lv '+G.lv+'</div><div class="mascot-row" style="margin-top:14px"><div class="mascot">'+mascot('cheer')+'</div><div class="bubble grow"><span class="who">Mochi</span>Tuyệt vời! HP tối đa +10 và hồi đầy máu. Tiến lên nào!</div></div>';const b=el('button','btn yellow block','Tiếp tục');b.style.marginTop='14px';b.onclick=close;m.appendChild(b);},{closable:false});}
 const BADGES=[
- ['first','🐛','Bug đầu tiên',g=>g.wins>=1],['ten','⚔️','10 trận thắng',g=>g.wins>=10],['combo5','🔥','Combo x5',g=>g.bestCombo>=5],['combo10','💥','Combo x10',g=>g.bestCombo>=10],
+ ['first','🐛',BUG+' đầu tiên',g=>g.wins>=1],['ten','⚔️','10 trận thắng',g=>g.wins>=10],['combo5','🔥','Combo x5',g=>g.bestCombo>=5],['combo10','💥','Combo x10',g=>g.bestCombo>=10],
  ['day1','🗓️','Xong 1 ngày',g=>Object.keys(g.cleared).some(n=>dayCleared(+n))],['day7','📅','Xong 7 ngày',g=>Object.keys(g.cleared).filter(n=>dayCleared(+n)).length>=7],
  ['boss','👑','Hạ boss',g=>g.bossWins>=1],['boss5','🏆','Hạ 5 boss',g=>g.bossWins>=5],['lv5','⭐','Đạt Lv 5',g=>g.lv>=5],['lv10','🌟','Đạt Lv 10',g=>g.lv>=10],
  ['acc','🎯','200 câu đúng',g=>g.correct>=200],['streak3','🔥','Chuỗi 3 ngày',g=>g.streak>=3]
@@ -148,7 +150,7 @@ function matchWords(target,heard){const T=normW(target),H=normW(heard);let j=0;c
 const STOP=new Set('i you he she it we they the a an to of in on at for and or but is are am was were be been do did does have has had will would can could should my your our this that yes no not'.split(' '));
 function keywordScore(heard,sample){const H=new Set(normW(heard));const K=normW(sample).filter(w=>!STOP.has(w)&&w.length>2);const hit=K.filter(w=>H.has(w)).length;const n=normW(heard).length;let s=n>=4?4:n>=2?2:n?1:0;s+=Math.min(6,hit*2);return Math.min(10,s);}
 /* ---------- NPC cast ---------- */
-const CAST={minh:{name:'Minh-senpai',role:'Senior dev',hair:'#2b2a55',glasses:true,shirt:'#f4f6ff',acc:'lanyard'},linh:{name:'Linh',role:'PM',hair:'#c46b8a',glasses:false,shirt:'#ffd7e6',acc:'bun'},an:{name:'An',role:'QA',hair:'#3fbf8f',glasses:false,shirt:'#d9f6ff',acc:'band'}};
+const CAST={minh:{name:'Minh-senpai',role:PACK?'Senpai':'Senior dev',hair:'#2b2a55',glasses:true,shirt:'#f4f6ff',acc:'lanyard'},linh:{name:'Linh',role:PACK?'Quản lý':'PM',hair:'#c46b8a',glasses:false,shirt:'#ffd7e6',acc:'bun'},an:{name:'An',role:PACK?'Đồng nghiệp':'QA',hair:'#3fbf8f',glasses:false,shirt:'#d9f6ff',acc:'band'}};
 function npc(who,mood){const c=CAST[who]||CAST.minh;
   const mouth=mood==='angry'?'<path d="M42 70q8-5 16 0" stroke="#7a2e2e" stroke-width="3" fill="none" stroke-linecap="round"/>':mood==='glad'?'<path d="M40 66q10 10 20 0z" fill="#7a2e2e"/>':'<path d="M42 68q8 5 16 0" stroke="#7a2e2e" stroke-width="3" fill="none" stroke-linecap="round"/>';
   const brow=mood==='angry'?'<path d="M28 42l14 4M72 42l-14 4" stroke="#0d0826" stroke-width="3.5" stroke-linecap="round"/>':'<path d="M28 44q7-4 14-1M72 44q-7-4-14-1" stroke="#0d0826" stroke-width="3.5" fill="none" stroke-linecap="round"/>';
@@ -168,7 +170,7 @@ function playerCard(){
 }
 
 /* ---------- MAP (mobile-first) ---------- */
-const TIPS=['Đánh vài con Bug từ vựng lấy XP nhé!','Combo càng cao, XP và xu càng nhiều!','Hạ Boss bằng cách chọn đúng câu trả lời!','Sai câu nào mất HP đó — cẩn thận!','Hết HP thì nghỉ chút, HP hồi 50% khi chơi lại.','Xong đủ 3 quest là mở ngày tiếp theo!','Ghé tab Nói để luyện mic — nói thật mới lên trình!'];
+const TIPS=['Đánh vài con '+BUG+' từ vựng lấy XP nhé!','Combo càng cao, XP và xu càng nhiều!','Hạ Boss bằng cách chọn đúng câu trả lời!','Sai câu nào mất HP đó — cẩn thận!','Hết HP thì nghỉ chút, HP hồi 50% khi chơi lại.','Xong đủ 3 quest là mở ngày tiếp theo!','Ghé tab Nói để luyện mic — nói thật mới lên trình!'];
 function hud(){
   const h=el('div','hud');
   h.innerHTML='<div class="avatar sm">'+mascot(G.hp<=30?'sad':'happy')+'</div><div class="grow" style="min-width:0"><div class="row" style="gap:6px"><b class="h" style="font-size:14.5px">'+esc(G.name)+'</b><span class="lv">Lv '+G.lv+'</span><span class="kbd" style="margin-left:auto">🔥 '+(G.streak||0)+'</span></div>'+
@@ -211,7 +213,7 @@ function vMap(){
       if(amHp<=0){bugEl.classList.add('dead');poof.classList.remove('go');void poof.offsetWidth;poof.classList.add('go');const c=el('span','am-dmg coin','+xu');c.style.left='72%';c.style.top='-4px';fx.appendChild(c);setTimeout(()=>c.remove(),900);
         setTimeout(()=>{if(!bugEl.isConnected)return;amHp=100;hp.style.width='100%';bugEl.classList.remove('dead');bugEl.classList.add('spawn');setTimeout(()=>bugEl.classList.remove('spawn'),600);const k=$('#amKills');if(k)k.textContent=(+k.textContent||0)+1;},700);}
     },520);}
-  const QUIPS=['Fixing bugs…','Deploying to prod!','Let me check the logs.','Could you review my PR?','It works on my machine!','Running the tests…','Refactoring this module.','Merge conflict again?!','Coffee first, then code.','One more bug to squash!'];
+  const QUIPS=(PACK&&PACK.quips&&PACK.quips.length)?PACK.quips:['Fixing bugs…','Deploying to prod!','Let me check the logs.','Could you review my PR?','It works on my machine!','Running the tests…','Refactoring this module.','Merge conflict again?!','Coffee first, then code.','One more bug to squash!'];
   function amSay(){const sb=$('#amSay');if(!sb)return;const pool=G.talk.equipped.length?G.talk.equipped:QUIPS;const t=rnd(pool);sb.textContent=t;sb.classList.remove('on');void sb.offsetWidth;sb.classList.add('on');}
   const sizeArena=()=>{const ar=afk.querySelector('.arena2');if(!ar)return;const h=ar.clientHeight;ar.classList.toggle('tall',h>=100);ar.classList.toggle('xl',h>=170);};
   if(window.ResizeObserver){const ro=new ResizeObserver(sizeArena);ro.observe(afk.querySelector('.arena2'));}else{sizeArena();window.addEventListener('resize',sizeArena);}
@@ -265,7 +267,7 @@ function questSelect(n){
   openModal((m,close)=>{
     m.innerHTML='<div class="eyebrow">Ngày '+n+' · chặng '+(d.phase+1)+'</div><div class="h" style="font-size:22px;margin-top:4px">'+esc(d.title)+'</div>';
     const list=el('div');list.style.cssText='display:flex;flex-direction:column;gap:10px;margin-top:14px';
-    const Q=[['v','📘','Bug từ vựng','Đánh bại bằng nghĩa từ','#5ec8ff'],['p','💬','Bug ngữ pháp','Chọn câu tiếng Anh đúng','#a78bfa'],['l','🎧','Bug tai nghe','Nghe rồi chọn đúng câu','#5eead4'],['b','👑','BOSS: Minh-senpai','Đối thoại công sở (visual novel)','#ffd166']];
+    const Q=[['v','📘',BUG+' từ vựng','Đánh bại bằng nghĩa từ','#5ec8ff'],['p','💬',BUG+' ngữ pháp','Chọn câu tiếng Anh đúng','#a78bfa'],['l','🎧',BUG+' tai nghe','Nghe rồi chọn đúng câu','#5eead4'],['b','👑','BOSS: Minh-senpai','Đối thoại công sở (visual novel)','#ffd166']];
     Q.forEach(q=>{const b=el('button','quest');b.innerHTML='<span class="qi" style="background:'+q[4]+'">'+q[1]+'</span><span><b>'+q[2]+'</b><small>'+q[3]+'</small></span><span class="ok">'+(st[q[0]]?'★'.repeat(st[q[0]]):'')+'</span>';
       b.onclick=()=>{close();if(q[0]==='b')bossStart(n);else battleStart(n,q[0]);};list.appendChild(b);});
     m.appendChild(list);
@@ -317,7 +319,7 @@ function listenQs(d){
 
 /* ---------- BATTLE ---------- */
 let B=null;
-const MON={v:['Bug Từ Vựng','#5ec8ff'],p:['Bug Ngữ Pháp','#a78bfa'],l:['Bug Tai Nghe','#5eead4']};
+const MON={v:[BUG+' Từ Vựng','#5ec8ff'],p:[BUG+' Ngữ Pháp','#a78bfa'],l:[BUG+' Tai Nghe','#5eead4']};
 function battleStart(n,type){animIn();
   const d=dayInfo(n);const qs=type==='v'?vocabQs(d):type==='p'?phraseQs(d):listenQs(d);
   if(!qs.length){toast('Chưa có dữ liệu cho quest này');return;}
@@ -478,8 +480,8 @@ async function aiCall(system,msgs){
   return aiCallWith(c,system,msgs);
 }
 function parseJSON(t){try{const m=String(t).match(/\{[\s\S]*\}|\[[\s\S]*\]/);return m?JSON.parse(m[0]):null;}catch(e){return null;}}
-function aiRules(sc){const lvl=(loadApp().cfg||{}).level||'A2';return 'You are Minh, a friendly senior developer and English conversation partner for a Vietnamese junior developer (CEFR '+lvl+'). Roleplay this work scenario: '+sc+' Reply IN CHARACTER in 1-2 short simple sentences (about 20 words) ending with a question. Your English must be grammatically correct. Then, on a NEW line starting exactly with "FIX:", list up to 2 corrections of the user\'s last message as: wrong => right ~ short Vietnamese note (with full diacritics). If the user\'s English was fine, write exactly "FIX: OK".';}
-const SCEN=['We are in a daily standup. Ask what I did yesterday, what I do today, and blockers.','I am reporting a blocker to you, my team lead. React and ask short follow-up questions.','You are reviewing my pull request. Give short feedback and ask why I made some choices.','We are about to deploy to production. Talk about the plan and the risks.'];
+function aiRules(sc){const lvl=(loadApp().cfg||{}).level||'A2';return 'You are Minh, a friendly '+(PACK?'senior colleague':'senior developer')+' and English conversation partner for '+(PACK?PACK.persona+' in '+PACK.context:'a Vietnamese junior developer')+' (CEFR '+lvl+'). Roleplay this work scenario: '+sc+' Reply IN CHARACTER in 1-2 short simple sentences (about 20 words) ending with a question. Your English must be grammatically correct. Then, on a NEW line starting exactly with "FIX:", list up to 2 corrections of the user\'s last message as: wrong => right ~ short Vietnamese note (with full diacritics). If the user\'s English was fine, write exactly "FIX: OK".';}
+const SCEN=(PACK&&PACK.ai)?PACK.ai.map(x=>x.s):['We are in a daily standup. Ask what I did yesterday, what I do today, and blockers.','I am reporting a blocker to you, my team lead. React and ask short follow-up questions.','You are reviewing my pull request. Give short feedback and ask why I made some choices.','We are about to deploy to production. Talk about the plan and the risks.'];
 function parseReply(t){const i=t.indexOf('FIX:');return i<0?{reply:t.trim(),fix:''}:{reply:t.slice(0,i).trim(),fix:t.slice(i+4).trim()};}
 function aiBossStart(n){animIn();
   document.body.classList.add('infight');const sc=rnd(SCEN);V={n,ai:true,sc,turns:[],user:0,bossHp:60};cur='boss';renderTabs();window.scrollTo(0,0);
@@ -639,7 +641,7 @@ let TB=null;
 function battleRules(sc){const lvl=(loadApp().cfg||{}).level||'A2';return 'You are Minh, a friendly senior developer, doing an English speaking battle with a Vietnamese junior developer (CEFR '+lvl+'). Scenario: '+sc+' Each turn: (1) reply IN CHARACTER in 1-2 short simple sentences ending with a question; (2) on a new line write exactly "SCORE: n" where n is 0-10 rating the user\'s LAST message for clarity, grammar and relevance (be fair, 7+ means good); (3) on a new line starting with "FIX:", up to 2 corrections as: wrong => right ~ short Vietnamese note (full diacritics), or exactly "FIX: OK". For the very first turn (no user message yet) write SCORE: 0 and FIX: OK.';}
 function parseBattle(t){const s=(t.match(/SCORE:\s*(\d+)/)||[])[1];const fi=t.indexOf('FIX:');const si=t.search(/SCORE:/);let reply=t;if(si>=0)reply=t.slice(0,si);else if(fi>=0)reply=t.slice(0,fi);return {reply:reply.trim(),score:s!=null?Math.max(0,Math.min(10,+s)):null,fix:fi>=0?t.slice(fi+4).trim():''};}
 function talkBattleStart(){animIn();
-  if(!aiConfigured()){openModal((m,close)=>{m.innerHTML='<div class="h" style="font-size:20px">Cần AI</div><div class="mascot-row" style="margin-top:12px"><div class="mascot">'+mascot('think')+'</div><div class="bubble grow"><span class="who">Mochi</span>Chế độ này cần AI chấm câu. Nhập key (Gemini miễn phí) ngay tại đây — dùng chung với app IT English.</div></div>';const r=el('div','row');r.style.cssText='gap:10px;margin-top:14px';const a=el('button','btn ghost grow','Đóng');a.onclick=close;const k=el('button','btn grow','Nhập key');k.onclick=()=>{close();aiSetupSheet();};r.appendChild(a);r.appendChild(k);m.appendChild(r);});return;}
+  if(!aiConfigured()){openModal((m,close)=>{m.innerHTML='<div class="h" style="font-size:20px">Cần AI</div><div class="mascot-row" style="margin-top:12px"><div class="mascot">'+mascot('think')+'</div><div class="bubble grow"><span class="who">Mochi</span>Chế độ này cần AI chấm câu. Nhập key (Gemini miễn phí) ngay tại đây — dùng chung với app Nói Nghề.</div></div>';const r=el('div','row');r.style.cssText='gap:10px;margin-top:14px';const a=el('button','btn ghost grow','Đóng');a.onclick=close;const k=el('button','btn grow','Nhập key');k.onclick=()=>{close();aiSetupSheet();};r.appendChild(a);r.appendChild(k);m.appendChild(r);});return;}
   if(G.hp<=0)G.hp=Math.ceil(G.maxHp/2);
   document.body.classList.add('infight');TB={sc:rnd(SCEN),turns:[],user:0,bossHp:300,combo:0,busy:false,scores:[],fixes:0};cur='talk';main.innerHTML='';tipHist=[];main.classList.add('chatlay');
   talkHeader('ĐẤU THOẠI · AI','Minh-senpai · 6 lượt','<div class="row" style="gap:8px;margin-top:8px"><small class="mono">HP</small><div class="bar hp mini grow" id="tbhp"><i style="width:'+Math.round(G.hp/G.maxHp*100)+'%"></i></div><small class="mono">BOSS</small><div class="bar mon mini grow" id="tbboss"><i style="width:100%"></i></div><span class="combo inl" id="tbcombo">x0</span></div>');
@@ -706,7 +708,7 @@ const PROV={gemini:['Gemini (Google) · miễn phí','gemini-flash-lite-latest',
 function aiSetupSheet(){
   openModal((m,close)=>{
     const a=loadApp();const cur0=a.ai||{};let prov=cur0.provider||'gemini';
-    m.innerHTML='<div class="eyebrow">Boss AI</div><b class="h" style="font-size:18px">Cài đặt AI</b>'+(inClaude()?'<p class="tip" style="margin-top:8px">Đang chạy trong Claude — AI được dùng sẵn, không cần key. Nhập key chỉ khi muốn dùng bên ngoài.</p>':'<p class="muted" style="font-size:13px;margin-top:6px">Key lưu trên máy bạn, dùng chung với app IT English.</p>');
+    m.innerHTML='<div class="eyebrow">Boss AI</div><b class="h" style="font-size:18px">Cài đặt AI</b>'+(inClaude()?'<p class="tip" style="margin-top:8px">Đang chạy trong Claude — AI được dùng sẵn, không cần key. Nhập key chỉ khi muốn dùng bên ngoài.</p>':'<p class="muted" style="font-size:13px;margin-top:6px">Key lưu trên máy bạn, dùng chung với app Nói Nghề.</p>');
     const seg=el('div','seg');Object.keys(PROV).forEach(k=>{const b=el('button','segb'+(k===prov?' on':''),PROV[k][0].split(' ·')[0]);b.onclick=()=>{prov=k;seg.querySelectorAll('.segb').forEach(x=>x.classList.toggle('on',x===b));mi.placeholder='mặc định: '+PROV[k][1];lk.href=PROV[k][2];lk.textContent='Lấy key '+PROV[k][0].split(' ·')[0]+' ›';};seg.appendChild(b);});
     m.appendChild(seg);
     const ki=el('input','input');ki.type='password';ki.placeholder='Dán API key vào đây';ki.value=cur0.key||'';ki.autocomplete='off';ki.style.marginTop='10px';m.appendChild(ki);
@@ -760,17 +762,17 @@ function vProfile(){
     toggleRow('🔊','Âm thanh',G.sound!==false,v=>{G.sound=v;saveG();main.classList.remove('vin');vProfile();}),
     toggleRow('🌸','Hoa rơi & hiệu ứng nền',G.fx!==false,v=>{G.fx=v;saveG();document.body.classList.toggle('nofx',!v);main.classList.remove('vin');vProfile();}),
     setRow('📖','Xem lại hướng dẫn','',tutorial),
-    setRow('📱','Mở app học IT English','',openApp),
+    setRow('📱','Mở app học '+APPN,'',openApp),
     setRow('🗑️','Đặt lại tiến trình game','',()=>openModal((m,close)=>{m.innerHTML='<div class="h" style="font-size:20px">Đặt lại?</div><p class="muted">Xoá toàn bộ XP, xu, huy hiệu, sao. Không ảnh hưởng app học.</p>';const r=el('div','row');r.style.cssText='gap:10px;margin-top:12px';const a=el('button','btn ghost grow','Huỷ');a.onclick=close;const b2=el('button','btn grow','Đặt lại');b2.onclick=()=>{localStorage.removeItem(GKEY);location.reload();};r.appendChild(a);r.appendChild(b2);m.appendChild(r);}),'danger')
   ]));
-  main.appendChild(el('p','muted','<small style="font-family:var(--mono);font-size:11px">IT English Quest · dữ liệu lưu trên máy này</small>')).style.textAlign='center';
+  main.appendChild(el('p','muted','<small style="font-family:var(--mono);font-size:11px">'+APPN+' Quest · '+(PACK?PACK.short:'IT')+' · dữ liệu lưu trên máy này</small>')).style.textAlign='center';
 }
 /* ---------- tutorial + offline welcome ---------- */
 function tutorial(){
-  const steps=[['wink','Chào! Mình là <b>Mochi</b>, bạn đồng hành của bạn. Đây là <b>IT English Quest</b> — học tiếng Anh IT bằng cách… đánh quái!'],
-   ['happy','Trên <b>bản đồ</b>, mỗi ngày trong lộ trình là một màn. Mỗi màn có 3 con <b>Bug</b> (từ vựng · ngữ pháp · nghe) và 1 <b>Boss</b>.'],
-   ['cheer','Trả lời đúng = gây sát thương + <b>combo</b>. Sai = mất HP. Xong đủ 3 Bug là mở ngày tiếp theo!'],
-   ['think','Khi bạn vắng, mình <b>tự cày</b> bug kiếm xu (AFK). Nhớ về <b>thu hoạch</b>, mở <b>rương ngày</b> và ghé <b>Shop</b> nâng cấp nhé!']];
+  const steps=[['wink','Chào! Mình là <b>Mochi</b>, bạn đồng hành của bạn. Đây là <b>'+APPN+' Quest</b> — học tiếng Anh '+(PACK?PACK.short.toLowerCase():'IT')+' bằng cách… đánh quái!'],
+   ['happy','Trên <b>bản đồ</b>, mỗi ngày trong lộ trình là một màn. Mỗi màn có 3 con <b>'+BUG+'</b> (từ vựng · ngữ pháp · nghe) và 1 <b>Boss</b>.'],
+   ['cheer','Trả lời đúng = gây sát thương + <b>combo</b>. Sai = mất HP. Xong đủ 3 '+BUG+' là mở ngày tiếp theo!'],
+   ['think','Khi bạn vắng, mình <b>tự cày</b> '+bugL+' kiếm xu (AFK). Nhớ về <b>thu hoạch</b>, mở <b>rương ngày</b> và ghé <b>Shop</b> nâng cấp nhé!']];
   let i=0;
   openModalLocked((m,close)=>{const draw=()=>{m.innerHTML='<div class="eyebrow">Hướng dẫn '+(i+1)+'/'+steps.length+'</div><div class="mascot-row" style="margin-top:12px"><div class="mascot" style="width:96px;height:96px">'+mascot(steps[i][0])+'</div><div class="bubble grow"><span class="who">Mochi</span>'+steps[i][1]+'</div></div>';
       const b=el('button','btn yellow block',i<steps.length-1?'Tiếp ›':'Bắt đầu chơi!');b.style.marginTop='14px';b.onclick=()=>{if(i<steps.length-1){i++;draw();}else{G.seenTut=true;saveG();close();}};m.appendChild(b);};draw();});

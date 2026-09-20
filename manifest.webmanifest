@@ -1,7 +1,7 @@
 {
-  "name": "IT English — Tiếng Anh IT cơ bản",
-  "short_name": "IT English",
-  "description": "Luyện tiếng Anh IT / công sở: từ vựng, câu, giao tiếp AI, nghe.",
+  "name": "Nói Nghề — Tiếng Anh đúng nghề của bạn",
+  "short_name": "Nói Nghề",
+  "description": "Luyện nói tiếng Anh công việc theo ngành: công sở, IT, khách sạn, bán hàng, nhà máy — từ vựng, câu, nghe, giao tiếp AI.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",

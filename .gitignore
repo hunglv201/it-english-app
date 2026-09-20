@@ -22,3 +22,4 @@ index.html.bak
 .env
 .env.local
 *.env
+.claude/worktrees/

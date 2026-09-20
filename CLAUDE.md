@@ -5,14 +5,15 @@
 
 ## 1. Dự án là gì
 
-**IT English** — bộ 3 sản phẩm web tĩnh (vanilla HTML/CSS/JS, không framework, không build) giúp người Việt
-trình độ cơ bản luyện tiếng Anh IT / môi trường công sở. Chủ repo: `hunglv201`. Ngôn ngữ giao tiếp với người dùng: **tiếng Việt**.
+**Nói Nghề** (tên cũ đến v2.0: *IT English*; repo/khoá localStorage vẫn giữ tên `it-english`) — bộ 3 sản phẩm web tĩnh
+(vanilla HTML/CSS/JS, không framework, không build) giúp người Việt trình độ cơ bản luyện **tiếng Anh công việc theo ngành**
+(v3.0: Công sở chung — mặc định, IT, Khách sạn · Du lịch, Bán hàng · CSKH, Sản xuất · Nhà máy). Chủ repo: `hunglv201`. Ngôn ngữ giao tiếp với người dùng: **tiếng Việt**.
 
 | Sản phẩm | File | URL Pages | Mô tả |
 |---|---|---|---|
-| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Lộ trình 370 ngày, từ vựng SRS, 1000 câu, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **2.0.0** (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
-| **Trang giới thiệu (showcase)** | `gioi-thieu.html` (**v2.0**, ảnh `img/showcase/v2/`) + bản lưu trữ `gioi-thieu-v1.html` | `…/gioi-thieu.html` | Landing fullpage scroll-snap, nền particle-net, mục "Mới trong v2.0", mục **Lịch sử phiên bản** (`#versions`). Dark-first. Quy ước version lớn: xem mục 7 |
-| **Game "IT English Quest"** | `game/index.html` + `game/game.js` (+ bản sao `game/data.gen.js`, `game/phrases.gen.js`) | `…/game/` | Bản game anime **mobile-first**: RPG bản đồ ngày → quiz battle → boss visual novel, AFK idle (Mochi tự cày xu), Shop, huy hiệu, tab **Nói** 5 chế độ luyện nói. Dùng chung dữ liệu + AI key với app |
+| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Gói ngành (IT 370 ngày, các ngành khác 120 ngày), từ vựng SRS, câu thường dùng, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **3.0.0** (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
+| **Trang giới thiệu (showcase)** | `gioi-thieu.html` (**v3.0**, ảnh `img/showcase/v3/`) + lưu trữ `gioi-thieu-v2.html`, `gioi-thieu-v1.html` | `…/gioi-thieu.html` | Landing fullpage scroll-snap, nền particle-net, mục "Mới trong v3.0" (lưới 5 ngành), mục **Lịch sử phiên bản** (`#versions`). Dark-first. Quy ước version lớn: xem mục 7 |
+| **Game "Nói Nghề Quest"** | `game/index.html` + `game/game.js` (+ bản sao `game/data.gen.js`, `game/phrases.gen.js`) | `…/game/` | Bản game anime **mobile-first**: RPG bản đồ ngày → quiz battle → boss visual novel, AFK idle (Mochi tự cày xu), Shop, huy hiệu, tab **Nói** 5 chế độ luyện nói. Dùng chung dữ liệu + AI key với app |
 
 Ngoài Pages, cả 3 còn được publish làm **claude.ai Artifact** (xem mục 6).
 
@@ -21,7 +22,9 @@ Ngoài Pages, cả 3 còn được publish làm **claude.ai Artifact** (xem mụ
 ```
 it-english-app/
 ├── index.html            # App: toàn bộ UI + logic (HTML/CSS/JS 1 file, ~220 KB)
-├── data.gen.js           # window.DATA — sinh từ gen_data.py, KHÔNG sửa tay
+├── data.gen.js           # gói IT: window.DATA — sinh từ gen_data.py, KHÔNG sửa tay
+├── packs/<id>.gen.js     # v3.0: gói office/hotel/sales/factory (window.PACK + DATA + PHRASES + ROLES) — sinh từ packs_src/build.py
+├── packs_src/            # nguồn gói ngành: <id>.py (PACK), build.py (kiểm tra chặt + sinh), README.md (SCHEMA + quy tắc nội dung)
 ├── phrases.gen.js        # window.PHRASES — sinh từ phrases_data.py, KHÔNG sửa tay
 ├── gen_data.py / phases_extra.py / phrases_data.py   # nguồn sinh dữ liệu (Python 3, không lib ngoài)
 ├── roles_data.py         # -> roles.gen.js (window.ROLES: 7 vai Dev/QA/DevOps/BA/PM/Designer/Data — tình huống AI + hội thoại chọn đáp)
@@ -29,17 +32,20 @@ it-english-app/
 ├── ja_data.py            # thuật ngữ tiếng Nhật; gen_data.py ghép vào vocab[].ja = "日本語|romaji"
 │                         # ⚠ mọi script sinh *.gen.js TỰ copy sang game/ — không copy tay
 ├── img/showcase/*.webp   # 17 ảnh của gioi-thieu-v1.html (bản lưu trữ)
-├── img/showcase/v2/*.webp # 25 ảnh của gioi-thieu.html v2.0 (540×1169, chụp bằng Playwright + AI giả)
-├── tests/                # Playwright mobile: lib.mjs + a/b/c.mjs theo đợt, run.sh (xem tests/README.md)
+├── img/showcase/v2/*.webp # 25 ảnh của gioi-thieu-v2.html (lưu trữ)
+├── img/showcase/v3/*.webp # 33 ảnh của gioi-thieu.html v3.0 (540×1169, chụp bằng Playwright + AI giả, nhiều ngành)
+├── tests/                # Playwright mobile: lib.mjs + a…g.mjs, run.sh (xem tests/README.md) — g.mjs: đa ngành
 ├── sw.js                 # service worker; CACHE = 'it-english-v<version>' — bump cùng version app
 ├── manifest.webmanifest, icon-192.png, icon-512.png  # PWA
-├── gioi-thieu.html       # Showcase v2.0 (standalone, có doctype/head/favicon)
+├── gioi-thieu.html       # Showcase v3.0 (standalone, có doctype/head/favicon)
+├── gioi-thieu-v2.html    # Showcase v2.0 lưu trữ
 ├── gioi-thieu-v1.html    # Showcase v1 lưu trữ (noindex, thanh "Bản lưu trữ" ở đáy)
 ├── CHANGELOG.md          # lịch sử phiên bản đầy đủ (showcase link tới)
 ├── game/
 │   ├── index.html        # CSS theme anime (Fredoka/Nunito/IBM Plex Mono) + khung HTML
 │   ├── game.js           # Toàn bộ logic game (IIFE, ~100 KB)
-│   └── data.gen.js, phrases.gen.js, roles.gen.js   # bản sao do script sinh tự copy
+│   ├── data.gen.js, phrases.gen.js, roles.gen.js   # bản sao do script sinh tự copy
+│   └── packs/<id>.gen.js  # bản sao gói ngành (build.py tự copy)
 ├── docs/
 │   ├── it-english-showcase.html      # bản showcase dùng cho Artifact (không doctype/head/body)
 │   ├── demo/giao-tiep-ai-demo.mp4    # video demo luồng Giao tiếp AI (không tiếng)
@@ -54,6 +60,17 @@ it-english-app/
 ```
 
 ## 3. Dữ liệu & lưu trữ
+
+**Gói ngành (v3.0)** — `<head>` của `index.html` và `game/index.html` có script nạp gói bằng `document.write`:
+`store.cfg.track` (hoặc `?track=`) → `it` nạp `data/phrases/roles.gen.js`, còn lại nạp `packs/<id>.gen.js`. Người dùng cũ có tiến độ mà chưa có
+`track` → `it`; người mới → `office`. Trong app: `TRACK`, `TRK` (meta trong hằng `TRACKS`: emoji, nhãn, vai, `them`), `PACK` (`null` = IT),
+`who()` (persona cho mọi prompt AI; `store.cfg.persona` từ JD ghi đè), `REPORT` (báo cáo 60s theo ngành), `AI_SCENARIOS/READING/EVENT_TYPES/REV`
+lấy từ `PACK` nếu có. Đổi ngành: `switchTrack(id)` → lưu + tải lại; tiến độ lộ trình từng ngành cất ở `store.trackDays[track]={days,focus}`
+(`store.daysTrack` = ngành đang giữ `store.days`). Làm quen: `onboardModal(step)` (3 bước, đều bỏ qua được), `trackPicker()`, `trackNudge()`.
+Thêm ngành mới: viết `packs_src/<id>.py` theo SCHEMA → `python3 packs_src/build.py <id>` → thêm id vào `ORDER` (build.py), `TRACKS` + map
+`T` trong 2 script nạp (app + game), placeholder theo ngành (tìm `({office:` trong index.html), `sw.js` ASSETS, test `tests/g.mjs`.
+
+**Gói IT (dữ liệu gốc):**
 
 - `window.DATA`: `vocab[370]{t,ipa,pos,vi,ex,exVi}`, `days[370]{n,phase,title,v[],ph,di,li}`, `phaseTitles[37]`,
   `listen[222]{s[],blank[],hint,p?}` (`p:1` = đoạn họp 2–3 câu, 74 đoạn → app hiện nhiều ô điền), `dialogues[185]{them,opts[{t,good,fb}]}` (đáp án đúng đã xáo vị trí khi sinh), `phrases[185]{en,vi,note}`.
@@ -123,6 +140,7 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 
 ## 8. Lịch sử tóm tắt (mới → cũ)
 
+- 09/2026 **v3.0.0 (major)**: đổi tên **Nói Nghề**; đa ngành (Công sở chung mặc định, IT, Khách sạn, Bán hàng, Nhà máy; 23 vai); làm quen 3 bước bỏ qua được; tiến độ riêng từng ngành; báo cáo 60s theo nghề; JD mọi ngành + 12 từ riêng; game theo ngành; showcase v3.0 (v2 lưu trữ). Nội dung 4 gói mới viết bởi subagent theo `packs_src/README.md`, build.py kiểm tra.
 - 09/2026 **v2.0.0 (major)**: nội dung ×2 — 185 hội thoại chọn đáp (trước 74, sửa lỗi đáp án đúng luôn ở vị trí 1), 222 bài nghe gồm 74 đoạn họp 2–3 câu (điền nhiều ô, shadowing dài), thêm vai Designer & Data (7 vai); showcase v2.0 chụp lại 25 ảnh + mục Standup/Dịch ngược/Theo vai/Tiếng Nhật + lịch sử phiên bản, v1 lưu trữ ở `gioi-thieu-v1.html`; `CHANGELOG.md`.
 - 09/2026 **v1.22.0**: nâng cấp UI/UX — bỏ nút AI nổi, Luyện 4 nhóm ô gọn, Lộ trình lưới 37 chặng, danh sách từ tải dần, Giao tiếp đưa chip tình huống lên đầu, Câu thường dùng gọn, thanh ghim nền đặc, báo offline, khung chờ AI, rung, vùng chạm 44px, bàn phím không che ô nhập.
 - 09/2026 **v1.21.1**: cập nhật tại chỗ mượt — không chạy lại hiệu ứng/không nhảy đầu trang (`viewTop`, `onceCls`, `.main.enter`).
@@ -141,7 +159,7 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 
 ## 9. Ý tưởng còn mở (chưa làm)
 
-⭐ **Định hướng lớn tiếp theo (v3.0): đa ngành + cá nhân hoá**, người bỏ qua thì vào gói *Công sở chung* — xem [`docs/DINH-HUONG-DA-NGANH-2026-09-20.md`](docs/DINH-HUONG-DA-NGANH-2026-09-20.md) (đợt D0–D5, ~5–6 phiên).
+✅ **v3.0 đa ngành** đã làm (D0–D5 trong [`docs/DINH-HUONG-DA-NGANH-2026-09-20.md`](docs/DINH-HUONG-DA-NGANH-2026-09-20.md)). Tiếp theo có thể: gói Logistics · Tài chính · Marketing–TMĐT · Y tế; nhờ người trong nghề đọc duyệt nội dung các gói mới; thêm tiếng Nhật cho câu mẫu.
 
 Đợt A/B/C trong [`docs/REVIEW-2026-09-20.md`](docs/REVIEW-2026-09-20.md) **đã làm xong** (v1.19–1.21, xem mục "Trạng thái" cuối file đó). Còn lại:
 

@@ -1,7 +1,8 @@
-/* IT English — service worker (offline app shell) */
-const CACHE = 'it-english-v2.0.0';
+/* Nói Nghề (IT English) — service worker (offline app shell) */
+const CACHE = 'it-english-v3.0.0';
 const ASSETS = [
   './', 'index.html', 'data.gen.js', 'phrases.gen.js', 'roles.gen.js',
+  'packs/office.gen.js', 'packs/hotel.gen.js', 'packs/sales.gen.js', 'packs/factory.gen.js',
   'manifest.webmanifest', 'icon-192.png', 'icon-512.png'
 ];
 

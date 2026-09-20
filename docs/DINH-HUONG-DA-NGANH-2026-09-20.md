@@ -1,6 +1,7 @@
 # Định hướng: từ "IT English" sang tiếng Anh công việc đa ngành, cá nhân hoá
 
-> Nghiên cứu 20/09/2026 · app đang ở v2.0.0 · tài liệu đề xuất, chưa triển khai.
+> Nghiên cứu 20/09/2026 · app đang ở v2.0.0.
+> ✅ **Trạng thái: đã triển khai trong v3.0.0 (20/09/2026)** — chủ repo chọn: mặc định *Công sở chung*, 3 gói Khách sạn · Bán hàng · Nhà máy, đổi tên thành **Nói Nghề**. "Ngành khác" làm gọn: dùng gói Công sở + JD (AI tạo tình huống + 12 từ riêng) thay cho gói mini riêng.
 > Câu hỏi: app không chỉ cho IT mà cho nhiều ngành, nhiều đối tượng; có cá nhân hoá; **nếu người dùng không chọn gì thì vẫn vào app mặc định được**.
 
 **Trả lời ngắn: làm được, và nên làm theo kiểu "lõi chung + gói ngành".** Ai bỏ qua bước chọn thì vào ngay gói *Công sở chung*.

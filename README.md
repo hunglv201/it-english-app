@@ -1,12 +1,12 @@
-# IT English — App luyện tiếng Anh IT cơ bản
+# Nói Nghề — Tiếng Anh đúng nghề của bạn
 
-Ứng dụng web cá nhân giúp luyện tiếng Anh chuyên ngành IT và môi trường làm việc,
-dành cho người trình độ cơ bản. Chạy hoàn toàn trong trình duyệt, không cần server,
+*(Tên cũ đến v2.0: IT English.)* Ứng dụng web giúp người Việt trình độ cơ bản luyện **tiếng Anh công việc theo ngành**:
+🏢 Công sở chung (mặc định) · 💻 IT · 🏨 Khách sạn – Du lịch · 🎧 Bán hàng – CSKH · 🏭 Sản xuất – Nhà máy — hoặc tự tả nghề của bạn để AI tạo tình huống và từ vựng riêng. Chạy hoàn toàn trong trình duyệt, không cần server,
 không cần tài khoản.
 
 **Live demo:** https://hunglv201.github.io/it-english-app/
 · 🎮 **Game:** https://hunglv201.github.io/it-english-app/game/
-· 📖 **Trang giới thiệu (v2.0):** https://hunglv201.github.io/it-english-app/gioi-thieu.html · [bản v1 lưu trữ](https://hunglv201.github.io/it-english-app/gioi-thieu-v1.html) · [lịch sử phiên bản](./CHANGELOG.md)
+· 📖 **Trang giới thiệu (v3.0):** https://hunglv201.github.io/it-english-app/gioi-thieu.html · lưu trữ [v2.0](https://hunglv201.github.io/it-english-app/gioi-thieu-v2.html) · [v1](https://hunglv201.github.io/it-english-app/gioi-thieu-v1.html) · [lịch sử phiên bản](./CHANGELOG.md)
 
 > Đang dùng Claude/Cowork để phát triển? Đọc [`CLAUDE.md`](./CLAUDE.md) — ngữ cảnh dự án, pipeline deploy, quy ước.
 
@@ -14,11 +14,12 @@ không cần tài khoản.
 
 ## Tính năng
 
+- **Chọn ngành (v3.0)** — mở app lần đầu: ngành → vị trí → trình độ, bước nào cũng **bỏ qua được** (bỏ qua = *Công sở chung*). Đổi ngành bất cứ lúc nào bằng chip dưới tên app; tiến độ lộ trình giữ riêng từng ngành. Link `?track=hotel|sales|factory|office|it` mở sẵn một ngành.
 - **Hôm nay** — bài học thích ứng mỗi ngày (4 việc ngắn, ~5 phút): ôn từ, nghe, trò chuyện AI, luyện câu. Có streak (chuỗi ngày) và thanh tiến độ.
-- **Lộ trình 370 ngày** — chia theo chặng chủ đề; mỗi ngày gồm từ vựng, mẫu câu, hội thoại (185 bài chọn đáp), bài nghe (222 bài) và phần luyện thêm với AI.
+- **Lộ trình theo ngành** — IT 370 ngày (185 hội thoại, 222 bài nghe); các ngành khác 12 chặng · 120 ngày (60 hội thoại, 72 bài nghe, 120 từ). Mỗi ngày gồm từ vựng, mẫu câu, hội thoại, bài nghe và phần luyện thêm với AI.
 - **Từ vựng** — 3 chế độ: *thẻ lật* (phát âm + ví dụ), *kiểm tra* (trắc nghiệm 2 chiều Anh↔Việt), *danh sách* (tìm kiếm, lọc chủ đề). Ôn tập theo thuật toán **SRS (SM-2 rút gọn)**.
-- **Câu thường dùng** — 1000 câu chia 25 nhóm; lưu câu yêu thích để ôn lại.
-- **Giao tiếp** — trò chuyện với AI theo tình huống công việc (standup, báo blocker, code review, deploy…). AI đóng vai đồng nghiệp, nói tiếng Anh đơn giản và **sửa lỗi** sau mỗi lượt. Có thể mô tả lĩnh vực của bạn để AI gợi ý tình huống riêng.
+- **Câu thường dùng** — IT 1000 câu; các ngành khác ~720 câu (câu của ngành + ~610 câu công sở chung); lưu câu yêu thích để ôn lại.
+- **Giao tiếp** — trò chuyện với AI theo tình huống của ngành bạn (nhận phòng, khách khiếu nại, báo máy hỏng, standup, code review…). AI đóng vai khách, đồng nghiệp, sếp hay chuyên gia, nói tiếng Anh đơn giản và **sửa lỗi** sau mỗi lượt. Có thể mô tả lĩnh vực của bạn để AI gợi ý tình huống riêng.
 - **Nghe** — 2 chế độ: *chép chính tả* (điền từ trống) và *shadowing* (nhại lại, chấm phát âm qua mic theo %). Có 74 **đoạn họp dài 2–3 câu** (điền nhiều ô cùng lúc) giống cuộc họp thật.
 - **Tự động chạy (autoplay)** — nút *Tự động* trong Từ vựng, Câu, Nghe: app tự đọc và tự chuyển sau số giây bạn đặt, học rảnh tay không cần bấm.
 - **Cấu hình** — màn cài đặt (nút bánh răng ở header): chỉnh thời gian autoplay từng chức năng, bật/tắt tự đọc, chọn giao diện, và cấu hình AI.
@@ -47,8 +48,8 @@ Nút **Tiến độ & thống kê** ở Hôm nay: streak, số từ đã thuộc
 - **Standup 60 giây** — ở Hôm nay: nói liền 3 ý (hôm qua · hôm nay · vướng gì), AI chấm 1–10, đưa bản chuẩn, chỉ lỗi và cho *Đọc lại* chấm %.
 - **Dịch ngược** — cho câu tiếng Việt kiểu dev ("anh check giúp em cái PR này với"), bạn nói tiếng Anh, AI chấm theo *nghĩa* và gợi ý 2–3 cách nói tự nhiên.
 - **Ôn câu (SRS)** — câu AI đã sửa cho bạn, câu dịch ngược/đọc theo điểm thấp tự vào hàng ôn cách quãng.
-- **Chọn đáp theo vai trò** — 7 vai Dev · QA · DevOps · BA · PM · Designer · Data (Cài đặt › Vai trò), kèm tình huống AI riêng; game cũng dùng.
-- **Cá nhân hoá bằng JD** — dán mô tả công việc 1 lần: AI chọn vai, 6 chặng nên ưu tiên (hiện ở Lộ trình) và 3 tình huống luyện nói riêng.
+- **Chọn đáp theo vai trò** — 23 vai trong 5 ngành (Cài đặt › Ngành & vai trò), kèm tình huống AI riêng; game cũng dùng.
+- **Cá nhân hoá bằng JD / tự tả công việc (mọi ngành)** — AI chọn ngành + vai, gợi ý chuyển gói hợp hơn, chặng nên ưu tiên, 3 tình huống luyện nói và 12 từ vựng riêng của nghề bạn.
 - **Sự kiện sắp tới** — ghi sprint review/demo/phỏng vấn; trước 1 ngày app nhắc ở Hôm nay và mở tình huống luyện đúng chủ đề.
 - **Podcast dev** — nghe thụ động ~5 phút (2 giọng hỏi–đáp, điều khiển từ màn khoá), cuối tập 3 câu kiểm tra.
 - **Hỏi nhanh (nút ?)** — hỏi nghĩa/so sánh từ hoặc dán tin nhắn đồng nghiệp từ bất kỳ màn nào; lưu từ vào “Của tôi” một chạm.
@@ -117,7 +118,7 @@ Phần **Giao tiếp** (và Boss AI / Đấu thoại trong game) gọi AI theo t
 
 ---
 
-## 🎮 IT English Quest (game)
+## 🎮 Nói Nghề Quest (game)
 
 Bản game anime dùng **chung dữ liệu và AI key** với app, thiết kế **mobile-first** (vừa 1 màn iPhone SE, không cuộn):
 
@@ -126,13 +127,13 @@ Bản game anime dùng **chung dữ liệu và AI key** với app, thiết kế 
 - **Nói** — 5 chế độ luyện nói: Đấu thoại AI (AI chấm thành sát thương), Đọc theo nhịp (mic chấm từng từ), Chuyện văn phòng (VN 5 cảnh · 3 kết cục), Phản xạ 5 giây, Trang bị cho Mochi.
 - **Hằng ngày / Shop / Huy hiệu / Hồ sơ** — rương ngày, nhiệm vụ, nâng cấp, vật phẩm, thống kê, cài AI key ngay trong game.
 
-Mở từ app (Luyện tập → *IT English Quest*) hoặc trực tiếp `/game/`.
+Game theo ngành bạn đang học (quái, câu Mochi nói, Boss AI). Mở từ app (Luyện tập → *Nói Nghề Quest*) hoặc trực tiếp `/game/`.
 
 ---
 
 ## 📖 Trang giới thiệu
 
-`gioi-thieu.html` — landing page fullpage (mỗi lần cuộn = 1 trang), nền particle chạy theo con trỏ, chữ chạy, 25 ảnh chụp màn hình (`img/showcase/v2/`), mục "Mới trong v2.0" và **Lịch sử phiên bản**. Mỗi version lớn giữ lại trang cũ làm bản lưu trữ (`gioi-thieu-v1.html`…). Deploy cùng Pages.
+`gioi-thieu.html` — landing page fullpage (mỗi lần cuộn = 1 trang), nền particle chạy theo con trỏ, chữ chạy, 33 ảnh chụp màn hình (`img/showcase/v3/`), mục "Mới trong v3.0" (lưới 5 ngành), menu chọn phiên bản ở đầu trang và **Lịch sử phiên bản**. Mỗi version lớn giữ lại trang cũ làm bản lưu trữ (`gioi-thieu-v2.html`, `gioi-thieu-v1.html`). Deploy cùng Pages.
 
 ---
 
@@ -159,6 +160,8 @@ it-english-app/
 ├── index.html          # App (giao diện + logic)
 ├── data.gen.js         # Dữ liệu 370 ngày (sinh ra, không sửa tay)
 ├── phrases.gen.js      # 1000 câu (sinh ra, không sửa tay)
+├── packs/              # v3.0: gói ngành office/hotel/sales/factory (sinh từ packs_src/build.py)
+├── packs_src/          # nguồn gói ngành + build.py + README (schema)
 ├── gen_data.py         # Script sinh data.gen.js
 ├── phases_extra.py     # 27 chặng chủ đề mở rộng (nguồn cho gen_data.py)
 ├── phrases_data.py     # Script sinh phrases.gen.js
@@ -171,7 +174,7 @@ it-english-app/
 ├── gioi-thieu.html     # Trang giới thiệu v2.0 (showcase)
 ├── gioi-thieu-v1.html  # Trang giới thiệu v1 (lưu trữ)
 ├── CHANGELOG.md        # Lịch sử phiên bản
-├── game/               # IT English Quest: index.html (theme) + game.js (logic) + bản sao *.gen.js
+├── game/               # Nói Nghề Quest: index.html (theme) + game.js (logic) + bản sao *.gen.js
 ├── docs/               # showcase bản artifact, video demo, review
 ├── push.sh             # push bằng token trong .env (không commit .env)
 ├── README.md
