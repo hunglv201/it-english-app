@@ -1,0 +1,13 @@
+import {launch,page,BASE,baseStore,report} from './lib.mjs';
+const d=new Date(),dow=(d.getDay()+6)%7,mon=new Date(d);mon.setDate(d.getDate()-dow);const wk=mon.toISOString().slice(0,10);
+const b=await launch();const p=await page(b,{store:baseStore({stats:{placed:true,sundayShown:wk}})});
+await p.goto(BASE+'index.html');await p.waitForTimeout(600);
+await p.evaluate(()=>go('settings'));await p.waitForTimeout(600);
+console.log('after nav enter?',await p.evaluate(()=>main.classList.contains('enter')));
+await p.evaluate(()=>window.scrollTo(0,400));await p.waitForTimeout(100);
+const y0=await p.evaluate(()=>scrollY);
+await p.evaluate(()=>{store.cfg.showJa=!store.cfg.showJa;save(store);openSettings();});await p.waitForTimeout(50);
+console.log('toggle: scroll',y0,'->',await p.evaluate(()=>scrollY),'enter class',await p.evaluate(()=>main.classList.contains('enter')),'anim running',await p.evaluate(()=>getComputedStyle(document.querySelector('.view>*')).animationName));
+await p.evaluate(()=>go('practice'));await p.waitForTimeout(50);
+console.log('nav: scroll',await p.evaluate(()=>scrollY),'anim',await p.evaluate(()=>getComputedStyle(document.querySelector('.view>*')).animationName));
+report(p,'D');await b.close();

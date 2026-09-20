@@ -10,7 +10,7 @@ trình độ cơ bản luyện tiếng Anh IT / môi trường công sở. Chủ
 
 | Sản phẩm | File | URL Pages | Mô tả |
 |---|---|---|---|
-| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Lộ trình 370 ngày, từ vựng SRS, 1000 câu, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **1.21.0** (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
+| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Lộ trình 370 ngày, từ vựng SRS, 1000 câu, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **1.21.1** (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
 | **Trang giới thiệu (showcase)** | `gioi-thieu.html` (≈1.6 MB, ảnh JPEG inline) | `…/gioi-thieu.html` | Landing fullpage scroll-snap, nền particle-net, chữ chạy, 17 ảnh chụp màn hình có caption, tập trung vào tính năng AI. Dark-first, nền đen mặc định |
 | **Game "IT English Quest"** | `game/index.html` + `game/game.js` (+ bản sao `game/data.gen.js`, `game/phrases.gen.js`) | `…/game/` | Bản game anime **mobile-first**: RPG bản đồ ngày → quiz battle → boss visual novel, AFK idle (Mochi tự cày xu), Shop, huy hiệu, tab **Nói** 5 chế độ luyện nói. Dùng chung dữ liệu + AI key với app |
 
@@ -80,6 +80,14 @@ it-english-app/
 - Dock tab `.tabs` cố định đáy, ẩn bằng `body.infight`. Hiệu ứng: `#main.vin>*` (viewin), `.pop`, nhấn nút lún.
 - Bài kiểm tra Playwright nằm ở scratchpad phiên cũ (không commit): stub `speechSynthesis` phải có `getVoices`, `onvoiceschanged`, `addEventListener`; hàm game nằm trong IIFE nên test qua click UI (`.tab`, `.tmode`, `.thero`, `.qchip`, `.node.cur`…).
 
+## 5b. App — render & chuyển cảnh (quan trọng khi sửa UI)
+
+- Mỗi màn là hàm `vXxx()` xoá `#main` rồi dựng lại; **cập nhật tại chỗ cũng gọi lại chính hàm đó**. Để không có cảm giác "tải lại cả màn":
+  - Hiệu ứng `rise` của `.view>*` chỉ chạy khi `#main` có class `enter` (do `markEnter()` gắn 0.5s).
+  - `go(k)` luôn cuộn lên đầu + `markEnter()`. Trong màn, dùng **`viewTop(key)`** thay cho `window.scrollTo(0,0)`: chỉ cuộn/hiệu ứng khi `key` đổi (vd `'rv'+rv.i` — sang câu mới), còn bấm nút/chấm điểm/bật tắt thì giữ nguyên vị trí.
+  - Hiệu ứng vào của thẻ (`cardIn`/`flipReveal`) bọc bằng **`onceCls(slot,key,cls)`** để chỉ chạy khi đổi mục.
+- Không dùng thư viện diff DOM vì nhiều handler đóng (closure) vào chính node của nó (`b.onclick=…b.textContent=…`).
+
 ## 6. Deploy — pipeline chuẩn
 
 Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/Users/macbookpro/Desktop/me/it-english-app`, trong device shell là `$HOME/mnt/me/it-english-app`).
@@ -107,6 +115,7 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 
 ## 8. Lịch sử tóm tắt (mới → cũ)
 
+- 09/2026 **v1.21.1**: cập nhật tại chỗ mượt — không chạy lại hiệu ứng/không nhảy đầu trang (`viewTop`, `onceCls`, `.main.enter`).
 - 09/2026 **v1.21.0 (Đợt C)**: thuật ngữ Nhật, SRS câu, chọn đáp theo vai + cá nhân hoá JD, sự kiện, podcast, hỏi nhanh (nút ?), AI phân tích phát âm, ảnh chia sẻ PNG, cache AI + luật ngữ pháp offline, test vào repo, CSP khi tự host.
 - 09/2026 **v1.20.0 (Đợt B)**: Standup 60 giây, Dịch ngược, biểu đồ tiến bộ, game ưu tiên từ hay sai + log đấu thoại, showcase 1.6 MB → 44 KB, badge icon.
 - 09/2026 **v1.19.0 (Đợt A)**: chống chèn HTML (esc/cleanWord), sao lưu/khôi phục, script tự copy data sang game, meta/OG.
