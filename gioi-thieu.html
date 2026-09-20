@@ -329,9 +329,53 @@ html{scroll-behavior:smooth}
 .ncard.ind{padding:14px;gap:8px}.ncard.ind b{font-size:15px;line-height:1.35}.ncard.ind p{font-size:13px}
 .ncard.ind .roles{font-family:var(--mono);font-size:11.5px;color:var(--faint);line-height:1.5}.ncard.ind .aiw{font-size:12.5px;color:var(--accent-ink)}
 @media(max-width:1100px){.igrid{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:700px){.igrid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding-bottom:10px;margin-inline:-16px;padding-inline:16px;scrollbar-width:thin}.igrid .ncard{flex:0 0 min(78%,300px);scroll-snap-align:start}}
 @media(max-width:900px){.ngrid{grid-template-columns:repeat(2,1fr)}.nums{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.ngrid{grid-template-columns:1fr;max-width:340px;margin-inline:auto}}
+
+/* ===== v3.1 mobile: các lưới/khối tính năng thành dải vuốt ngang, gọn chiều dài trang ===== */
+.featrow{display:contents}
+html,body{overflow-x:clip}
+@media(max-width:560px){.vmenu{position:fixed;left:12px;right:12px;top:60px;min-width:0}}
+@media(max-width:380px){.nav-actions{gap:6px}.navcta{padding:0 10px}.brand b{font-size:16px}.brand .logo{width:32px;height:32px}.tbtn{width:34px;height:34px}}
+.mdots{display:none}
+@media(max-width:780px){
+  .wrap{padding-inline:18px}
+  .nav-in{padding:10px 16px}
+  .navcta{padding:0 12px;font-size:13.5px}
+  .tbtn{width:36px;height:36px}
+  .vsel>button{height:32px}
+  .wrap.hero.slide,section>.wrap.slide,.tech>.wrap.slide,.wrap.cta-slide{padding-block:48px}
+  .hero-media{order:1}
+  .hero-media .phone img{max-height:420px}
+  .hero-grid{gap:26px}
+  .shead h2{font-size:clamp(25px,7vw,32px)}
+  .mrail{display:flex!important;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;gap:12px;
+    margin-inline:-18px!important;padding:4px 18px 6px!important;scroll-padding-inline:18px;max-width:none!important;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .mrail::-webkit-scrollbar{display:none}
+  .mrail>*{flex:0 0 min(82%,330px);scroll-snap-align:start;min-width:0}
+  .featrow{margin-top:26px}
+  .featrow>.feat{display:flex;flex-direction:column;gap:14px;margin:0;min-height:0!important;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:14px 14px 18px;box-shadow:var(--shadow-sm)}
+  .featrow .feat-media{order:0}
+  .featrow .phone{padding:6px;border-radius:22px;box-shadow:none}
+  .featrow .phone::before{display:none}
+  .featrow .phone img{max-height:330px;border-radius:17px}
+  .featrow .feat-body h3{font-size:19px;line-height:1.2}
+  .featrow .feat-body p{font-size:14.5px;margin-top:8px;line-height:1.5}
+  .featrow .tags{margin-top:10px;gap:6px}.featrow .tag{font-size:12px;padding:5px 8px}
+  .featrow .rise,.mrail .rise{opacity:1!important;transform:none!important}
+  .cards.mrail{margin-top:24px}
+  .cards .pcard{padding:12px 12px 14px;gap:10px}
+  .ngrid.mrail{padding-bottom:6px!important}
+  .ncard .k,.pcard .kbd,.ncard.ind .roles{font-size:12px}
+  .mdots{display:flex;justify-content:center;gap:6px;margin:10px 0 0}
+  .mdots button{width:22px;height:22px;border:0;background:none;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .mdots button i{width:7px;height:7px;border-radius:99px;background:var(--line);transition:width .2s,background .2s}
+  .mdots button.on i{width:18px;background:var(--accent)}
+  .aiband .ngrid{margin-top:24px}
+  .tgrid.mrail>*{flex-basis:min(74%,280px)}.titem{padding:16px}
+  .cta2{padding:34px 20px}
+  .cta2-foot a{display:inline-block;padding:6px 2px}
+}
 </style>
 
 <canvas id="bgcanvas"></canvas>
@@ -362,7 +406,7 @@ html{scroll-behavior:smooth}
       </div>
       <div class="hero-cta">
         <a class="btn primary" href="https://hunglv201.github.io/it-english-app/" target="_blank" rel="noopener">Mở app ngay ›</a>
-        <a class="btn ghost" href="#new">Có gì mới trong 3.0</a>
+        <a class="btn ghost" href="#new">Có gì mới trong 3.x</a>
       </div>
     </div>
     <div class="hero-media">
@@ -386,7 +430,7 @@ html{scroll-behavior:smooth}
       <div class="num"><b>1.190+</b><small>từ vựng theo ngành, nhiều từ có nghĩa tiếng Nhật</small><span class="was">v2: 370</span></div>
       <div class="num"><b>0 giây</b><small>để bắt đầu: bỏ qua là vào học công sở chung</small><span class="was">mọi bước đều bỏ qua được</span></div>
     </div>
-    <div class="igrid">
+    <div class="igrid mrail">
       <div class="ncard ind"><div class="shot"><img src="img/showcase/v3/home-office.webp" alt="Màn Hôm nay gói Công sở chung" width="540" height="1169" loading="lazy"></div><div class="k">🏢 Công sở chung</div><b>“Could you send me the file by Friday?”</b><p>Email, họp, gọi điện, xin nghỉ phép, phỏng vấn — gói mặc định cho mọi người.</p><p class="roles">Nhân viên văn phòng · Hành chính – Nhân sự · Trưởng nhóm · Sinh viên – ứng viên</p><p class="aiw">AI đóng vai: đồng nghiệp, sếp, nhà tuyển dụng</p></div>
       <div class="ncard ind"><div class="shot"><img src="img/showcase/v3/home-it.webp" alt="Màn Hôm nay gói IT · Phần mềm" width="540" height="1169" loading="lazy"></div><div class="k">💻 IT · Phần mềm</div><b>“Could you take a look at my PR, please?”</b><p>Lộ trình 370 ngày của IT English 2.0 — giữ nguyên, người dùng cũ không mất gì.</p><p class="roles">Dev · QA · DevOps · BA · PM · Designer · Data</p><p class="aiw">AI đóng vai: đồng nghiệp, khách hàng nước ngoài</p></div>
       <div class="ncard ind"><div class="shot"><img src="img/showcase/v3/home-hotel.webp" alt="Màn Hôm nay gói Khách sạn · Du lịch" width="540" height="1169" loading="lazy"></div><div class="k">🏨 Khách sạn · Du lịch</div><b>“Your room is on the fifth floor.”</b><p>Nhận – trả phòng, gọi món, dị ứng, phàn nàn, chỉ đường, dẫn tour.</p><p class="roles">Lễ tân · Nhà hàng – Bar · Buồng phòng · Hướng dẫn viên</p><p class="aiw">AI đóng vai: khách nước ngoài</p></div>
@@ -402,6 +446,7 @@ html{scroll-behavior:smooth}
 
 <div class="aiband">
   <div class="wrap" style="padding-block:0">
+    <div class="featrow mrail">
     <div class="feat">
       <div class="feat-media"><div class="phone"><img src="img/showcase/v3/onb-track.webp" alt="Màn chọn ngành khi mở app lần đầu" width="540" height="1169" loading="lazy"></div></div>
       <div class="feat-body">
@@ -456,7 +501,8 @@ html{scroll-behavior:smooth}
         <div class="tags"><span class="tag">email · menu · phiếu</span><span class="tag">từ vựng → SRS</span><span class="tag">tình huống luyện nói</span></div>
       </div>
     </div>
-    <div class="ngrid" style="padding-bottom:clamp(40px,6vw,72px)">
+    </div>
+    <div class="ngrid mrail" style="padding-bottom:clamp(40px,6vw,72px)">
       <div class="ncard"><div class="shot"><img src="img/showcase/v3/rolequiz.webp" alt="Chọn cách đáp theo vai trò trong nhà máy" width="540" height="1169" loading="lazy"></div><div class="k">chọn cách đáp</div><b>Lựa chọn sai là lỗi thật người Việt hay mắc</b><p>Mỗi ngành 60 hội thoại + 24 tình huống theo vai; câu sai là lỗi thật: dịch từng chữ, thiếu động từ, đổ lỗi, cộc lốc.</p></div>
       <div class="ncard"><div class="shot"><img src="img/showcase/v3/reverse.webp" alt="Dịch ngược câu tiếng Việt kiểu bán hàng" width="540" height="1169" loading="lazy"></div><div class="k">dịch ngược</div><b>Câu Việt đúng kiểu nghề bạn</b><p>“Anh/chị cần em giúp gì ạ?” — nói lại bằng tiếng Anh, AI chấm theo nghĩa và gợi ý 2–3 cách nói tự nhiên.</p></div>
       <div class="ncard"><div class="shot"><img src="img/showcase/v3/vocab-ja.webp" alt="Thẻ từ ngành nhà máy có tiếng Nhật" width="540" height="1169" loading="lazy"></div><div class="k">日本語</div><b>Thuật ngữ Nhật cho cả nhà máy, khách sạn</b><p>安全 anzen, 不良 furyō, 改善 kaizen, 予約 yoyaku… hiện ngay trên thẻ khi bật tiếng Nhật.</p></div>
@@ -484,6 +530,7 @@ html{scroll-behavior:smooth}
       </div>
     </div>
 
+    <div class="featrow mrail">
     <div class="feat">
       <div class="feat-media"><div class="phone"><img src="img/showcase/v3/talk-pick.webp" alt="Chọn tình huống luyện nói, AI gợi ý tình huống" width="540" height="1169" loading="lazy"></div></div>
       <div class="feat-body">
@@ -493,7 +540,6 @@ html{scroll-behavior:smooth}
         <div class="tags"><span class="tag">nhận phòng</span><span class="tag">khiếu nại</span><span class="tag">báo máy hỏng</span><span class="tag">code review</span><span class="tag">AI gợi ý tình huống</span></div>
       </div>
     </div>
-
     <div class="feat">
       <div class="feat-media"><div class="phone"><img src="img/showcase/v3/talk-chat.webp" alt="Nghe hết hội thoại, xướng vai từng lượt" width="540" height="1169" loading="lazy"></div></div>
       <div class="feat-body">
@@ -503,7 +549,6 @@ html{scroll-behavior:smooth}
         <div class="tags"><span class="tag">xướng vai</span><span class="tag">2 giọng</span><span class="tag">tô sáng câu đang đọc</span></div>
       </div>
     </div>
-
     <div class="feat">
       <div class="feat-media"><div class="phone"><img src="img/showcase/v3/talk-generate.webp" alt="Tạo hội thoại mẫu tự động bằng AI" width="540" height="1169" loading="lazy"></div></div>
       <div class="feat-body">
@@ -513,7 +558,6 @@ html{scroll-behavior:smooth}
         <div class="tags"><span class="tag">nhập số lượt</span><span class="tag">viết cả 2 phía</span><span class="tag">theo trình độ</span></div>
       </div>
     </div>
-
     <div class="feat">
       <div class="feat-media"><div class="phone"><img src="img/showcase/v3/talk-review.webp" alt="AI chấm điểm cả buổi nói" width="540" height="1169" loading="lazy"></div></div>
       <div class="feat-body">
@@ -523,7 +567,6 @@ html{scroll-behavior:smooth}
         <div class="tags"><span class="tag">điểm /10</span><span class="tag">gợi ý tiếng Việt</span><span class="tag">mẫu câu nên dùng</span></div>
       </div>
     </div>
-
     <div class="feat">
       <div class="feat-media"><div class="phone"><img src="img/showcase/v3/rewrite.webp" alt="AI viết lại tin nhắn công việc" width="540" height="1169" loading="lazy"></div></div>
       <div class="feat-body">
@@ -533,7 +576,6 @@ html{scroll-behavior:smooth}
         <div class="tags"><span class="tag">lịch sự</span><span class="tag">ngắn gọn</span><span class="tag">cảnh báo cộc lốc</span></div>
       </div>
     </div>
-
     <div class="feat">
       <div class="feat-media"><div class="phone"><img src="img/showcase/v3/reading.webp" alt="Đọc hiểu văn bản công việc, trả lời câu hỏi" width="540" height="1169" loading="lazy"></div></div>
       <div class="feat-body">
@@ -542,6 +584,7 @@ html{scroll-behavior:smooth}
         <p>Luyện đọc đúng thứ nghề bạn gặp hằng ngày: email đặt phòng, phiếu đổi trả, thông báo an toàn, báo cáo QC — hay stack trace, PR comment với dân IT — rồi trả lời 2 câu hỏi hiểu bài.</p>
         <div class="tags"><span class="tag">email khách</span><span class="tag">thông báo</span><span class="tag">báo cáo</span><span class="tag">log lỗi (IT)</span></div>
       </div>
+    </div>
     </div>
 
     <p style="margin-top:clamp(34px,5vw,56px);color:var(--muted);font-family:var(--mono);font-size:13px;text-align:center">
@@ -558,7 +601,7 @@ html{scroll-behavior:smooth}
       <h2>Một vòng học gọn, đều đặn mỗi ngày</h2>
       <p class="sub">Màn “Hôm nay” lấy đúng nội dung từ ngày trong lộ trình ngành bạn: báo cáo 60 giây mở đầu (standup, giao ca, báo cáo sale, báo cáo ca), 4 việc ngắn, nhắc sự kiện sắp tới. Đủ 4 việc là xong ngày.</p>
     </div>
-    <div class="cards">
+    <div class="cards mrail">
       <div class="pcard"><div class="shot"><img src="img/showcase/v3/home-hotel.webp" alt="Màn Hôm nay" width="540" height="1169" loading="lazy"></div><div class="cap"><div class="kbd">hôm nay</div><b>Báo cáo 60s + 4 việc mỗi ngày</b><p>Báo cáo 60 giây + ôn nhanh ở đầu, 4 việc ngắn, thẻ nhắc sự kiện ngày mai.</p></div></div>
       <div class="pcard"><div class="shot"><img src="img/showcase/v3/roadmap.webp" alt="Màn Lộ trình" width="540" height="1169" loading="lazy"></div><div class="cap"><div class="kbd">lộ trình</div><b>Lộ trình theo ngành</b><p>12 chặng · 120 ngày cho mỗi ngành (IT: 370 ngày), có chặng AI khuyên ưu tiên cho bạn.</p></div></div>
       <div class="pcard"><div class="shot"><img src="img/showcase/v3/day.webp" alt="Chi tiết một ngày" width="540" height="1169" loading="lazy"></div><div class="cap"><div class="kbd">ngày</div><b>Từng bước trong ngày</b><p>Từ mới (kèm tiếng Nhật), mẫu câu, hội thoại chọn đáp và bài nghe.</p></div></div>
@@ -575,7 +618,7 @@ html{scroll-behavior:smooth}
       <h2>Luyện theo 4 nhóm, một nơi</h2>
       <p class="sub">Từ &amp; câu · Nói · Nghe · Công việc thật — 12 kiểu luyện gom gọn trong một màn, cùng một kiểu ô dễ chạm trên điện thoại.</p>
     </div>
-    <div class="cards">
+    <div class="cards mrail">
       <div class="pcard"><div class="shot"><img src="img/showcase/v3/vocab-ja.webp" alt="Thẻ lật từ vựng" width="540" height="1169" loading="lazy"></div><div class="cap"><div class="kbd">từ vựng</div><b>Thẻ lật + SRS</b><p>Lặp lại ngắt quãng (SM-2), vuốt để đánh dấu, có thuật ngữ tiếng Nhật.</p></div></div>
       <div class="pcard"><div class="shot"><img src="img/showcase/v3/pronounce.webp" alt="Câu thường dùng" width="540" height="1169" loading="lazy"></div><div class="cap"><div class="kbd">câu</div><b>700+ câu mỗi ngành</b><p>Câu theo ngành + nhóm câu công sở chung. Nghe mẫu, đọc theo bằng mic, AI chỉ từng từ phát âm sai.</p></div></div>
       <div class="pcard"><div class="shot"><img src="img/showcase/v3/listen-passage.webp" alt="Luyện nghe chép chính tả" width="540" height="1169" loading="lazy"></div><div class="cap"><div class="kbd">nghe</div><b>Câu ngắn + đoạn họp</b><p>Chép chính tả câu ngắn, điền từ trong đoạn họp 2–3 câu, hoặc nhại theo.</p></div></div>
@@ -592,7 +635,7 @@ html{scroll-behavior:smooth}
       <h2>Vừa với trình độ và công việc của bạn</h2>
       <p class="sub">Chọn ngành, vai trò, trình độ A1 → IELTS và bật tiếng Nhật — AI nói vừa sức, tình huống đúng nghề. Tiến trình sao lưu một chạm trong tab “Tôi”.</p>
     </div>
-    <div class="cards two">
+    <div class="cards two mrail">
       <div class="pcard"><div class="shot"><img src="img/showcase/v3/settings.webp" alt="Cấu hình trình độ tiếng Anh" width="540" height="1169" loading="lazy"></div><div class="cap"><div class="kbd">cấu hình</div><b>Ngành · vai trò · trình độ · 日本語</b><p>Đổi ngành và vai ngay trong Cài đặt, trình độ để AI nói vừa sức, bật thuật ngữ Nhật.</p></div></div>
       <div class="pcard"><div class="shot"><img src="img/showcase/v3/me.webp" alt="Tab Tôi" width="540" height="1169" loading="lazy"></div><div class="cap"><div class="kbd">tôi</div><b>Cá nhân hoá &amp; sao lưu</b><p>Mô tả công việc, sự kiện, câu hay sai, ảnh chia sẻ; xuất/khôi phục tiến độ bằng file.</p></div></div>
     </div>
@@ -606,7 +649,7 @@ html{scroll-behavior:smooth}
       <div class="eyebrow"><span class="sig">$</span> dưới nắp capo</div>
       <h2>Nhẹ, chạy mọi lúc, dữ liệu của riêng bạn</h2>
     </div>
-    <div class="tgrid">
+    <div class="tgrid mrail">
       <div class="titem"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12a7 7 0 0 1 14 0"/><path d="M2 12a10 10 0 0 1 20 0"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg></div><b>PWA chạy offline</b><p>Cài ra màn hình chính, mở như app thật, học cả khi không mạng. Tự cập nhật bản mới.</p></div>
       <div class="titem"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg></div><b>Nghe &amp; nói ngay trong trình duyệt</b><p>Đọc mẫu bằng giọng máy (TTS) và chấm phát âm qua mic — không cần cài thêm gì.</p></div>
       <div class="titem"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="4"/></svg></div><b>Đa nhà cung cấp AI</b><p>Cắm key Gemini, Claude hoặc Groq. Key lưu trên máy bạn, không đẩy đi đâu.</p></div>
@@ -781,5 +824,15 @@ b.addEventListener('click',function(e){e.stopPropagation();set(!s.classList.cont
 document.addEventListener('click',function(e){if(!s.contains(e.target))set(false)});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')set(false)});
 s.querySelectorAll('.vmenu a').forEach(function(a){a.addEventListener('click',function(){set(false)})});})();</script>
+
+<script>/* v3.1 mobile: chấm chỉ vị trí cho các dải vuốt ngang */
+(function(){if(!window.matchMedia||!matchMedia('(max-width:780px)').matches)return;
+  document.querySelectorAll('.mrail').forEach(function(r){var items=[].slice.call(r.children);if(items.length<2)return;
+    var d=document.createElement('div');d.className='mdots';d.setAttribute('aria-hidden','true');
+    items.forEach(function(it,i){var b=document.createElement('button');b.type='button';b.tabIndex=-1;b.innerHTML='<i></i>';b.onclick=function(){r.scrollTo({left:it.offsetLeft-r.offsetLeft-18,behavior:'smooth'});};d.appendChild(b);});
+    r.parentNode.insertBefore(d,r.nextSibling);
+    var paint=function(){var x=r.scrollLeft,best=0,bd=1e9;items.forEach(function(it,i){var dd=Math.abs(it.offsetLeft-r.offsetLeft-18-x);if(dd<bd){bd=dd;best=i;}});[].forEach.call(d.children,function(b,i){b.classList.toggle('on',i===best);});};
+    var t;r.addEventListener('scroll',function(){clearTimeout(t);t=setTimeout(paint,60);},{passive:true});paint();});
+})();</script>
 </body>
 </html>

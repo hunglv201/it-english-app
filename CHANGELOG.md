@@ -11,6 +11,14 @@ làm bản lưu trữ (`gioi-thieu-v<N>.html`) để xem lại app từng trông
 
 ---
 
+## v3.1.1 — 20/09/2026 · Trang giới thiệu gọn cho điện thoại
+
+- Trên màn ≤780px, các khối tính năng, lưới ảnh, lưới ngành, thẻ kỹ thuật thành **dải vuốt ngang** có chấm chỉ vị trí → trang ngắn từ ~29.600px còn ~12.000px (≈ 16 màn thay vì 40).
+- Hero: chữ lên trước, ảnh điện thoại nhỏ lại; khoảng cách các mục gọn hơn; chữ nhỏ nhất ≥12px.
+- Sửa tràn ngang: menu chọn phiên bản (màn 400–560px), thanh điều hướng ở 360px, quầng sáng hero; áp dụng cả cho trang lưu trữ v1, v2.
+
+---
+
 ## v3.1.0 — 20/09/2026 · 9 ngành, kiểm duyệt nội dung, rảnh tay, ảnh → bài học, gói nghề riêng
 
 **Nội dung**
