@@ -3,6 +3,11 @@
 `python3 packs_src/build.py [id…]` → `packs/<id>.gen.js` (+ bản sao `game/packs/`). Script kiểm tra chặt, sai là dừng.
 Gói **IT** không ở đây (vẫn là `data.gen.js` + `phrases.gen.js` + `roles.gen.js`).
 
+## v4.1 — làm giàu: `packs_src/extra/<id>.py`
+`EXTRA = {"phases": [8 chặng, cùng schema], "rev": [...], "reading": [...], "ai": [...], "events": [...] (không có "other"), "quips": [...], "roles": {"<vai có sẵn>": {"scenarios": [...], "dialogues": [...]}}}`.
+build.py **chỉ nối vào cuối** (chặng mới sau chặng lõi office; sự kiện mới trước "other") để chỉ số ngày/từ/hội thoại cũ không đổi — tiến độ người học lưu theo số ngày. build kiểm tra thêm: trùng từ vựng trong gói, trùng tên chặng, trùng key tình huống.
+Gói IT: chặng làm giàu ở `phases_extra2.py` (EXTRA2, nối cuối trong gen_data.py). Biên bản kiểm duyệt: `docs/review/extra-<id>.md`.
+
 ## Schema một file `packs_src/<id>.py`
 
 ```python

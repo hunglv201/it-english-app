@@ -45,11 +45,31 @@ def die(pid, msg):
 def norm(w):
     return re.sub(r"[^\w]", "", w.lower().replace("’", "'"))
 
-def load(pid):
-    path = os.path.join(HERE, pid + ".py")
-    spec = importlib.util.spec_from_file_location("pack_" + pid, path)
+def _mod(path, name):
+    spec = importlib.util.spec_from_file_location(name, path)
     m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
-    return m.PACK
+    return m
+
+def load(pid):
+    P = _mod(os.path.join(HERE, pid + ".py"), "pack_" + pid).PACK
+    # v4.1: nội dung làm giàu ở packs_src/extra/<id>.py (EXTRA). Chỉ NỐI THÊM vào cuối để không
+    # xê dịch chỉ số ngày/từ/hội thoại cũ (tiến độ người học lưu theo số ngày).
+    xp = os.path.join(HERE, "extra", pid + ".py")
+    P["phases2"] = []
+    if os.path.exists(xp):
+        X = _mod(xp, "extra_" + pid).EXTRA
+        P["phases2"] = list(X.get("phases", []))
+        for k in ("rev", "reading", "ai", "quips"):
+            P[k] = list(P[k]) + list(X.get(k, []))
+        if X.get("events"):
+            ev = list(P["events"]); tail = [e for e in ev if e[0] == "other"]
+            P["events"] = [e for e in ev if e[0] != "other"] + list(X["events"]) + tail
+        for rk, rx in (X.get("roles") or {}).items():
+            if rk not in P["roles"]: die(pid, "extra.roles: vai %r không có trong gói" % rk)
+            r = P["roles"][rk]
+            r["scenarios"] = list(r["scenarios"]) + list(rx.get("scenarios", []))
+            r["dialogues"] = list(r["dialogues"]) + list(rx.get("dialogues", []))
+    return P
 
 VI_DIACRITIC = re.compile(r"[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]", re.I)
 
@@ -117,6 +137,16 @@ def check_meta(pid, P):
         if k not in r: die(pid, "report thiếu %r" % k)
     if len(r["steps"]) != 3: die(pid, "report.steps cần 3 bước")
     if len(P["ai"]) < 6: die(pid, "ai cần ≥ 6 tình huống")
+    for k in ("ai", "rev", "quips"):
+        keys = [x if isinstance(x, str) else x[0] for x in P[k]]
+        d = sorted(set(x for x in keys if keys.count(x) > 1))
+        if d: die(pid, "%s trùng: %r" % (k, d[:5]))
+    ks = [x[0] for x in P["ai"]]
+    for rv in P["roles"].values(): ks += ["r_" + x[0] for x in rv["scenarios"]]
+    ek = [e[0] for e in P["events"]]
+    for arr in (ks, ek):
+        d = sorted(set(x for x in arr if arr.count(x) > 1))
+        if d: die(pid, "khoá tình huống trùng: %r" % d[:5])
     if len(P["rev"]) < 10: die(pid, "rev cần ≥ 10 câu")
     if len(P["reading"]) < 4: die(pid, "reading cần ≥ 4 bài")
     for rd in P["reading"]:
@@ -125,8 +155,8 @@ def check_meta(pid, P):
     if len(P["events"]) < 4: die(pid, "events cần ≥ 4 loại")
     if not (3 <= len(P["roles"]) <= 5): die(pid, "roles cần 3–5 vai")
     for rk, rv in P["roles"].items():
-        if len(rv["scenarios"]) != 4: die(pid, "vai %s cần 4 tình huống" % rk)
-        if len(rv["dialogues"]) != 6: die(pid, "vai %s cần 6 hội thoại" % rk)
+        if len(rv["scenarios"]) < 4: die(pid, "vai %s cần ≥ 4 tình huống" % rk)
+        if len(rv["dialogues"]) < 6: die(pid, "vai %s cần ≥ 6 hội thoại" % rk)
         for them, opts in rv["dialogues"]:
             if len(opts) != 3 or sum(1 for o in opts if o[1]) != 1: die(pid, "vai %s: hội thoại %r cần 3 lựa chọn, 1 đúng" % (rk, them))
 
@@ -134,7 +164,16 @@ def build(pid, office=None):
     P = load(pid)
     if P["id"] != pid: die(pid, "PACK.id phải là %r" % pid)
     check_meta(pid, P)
-    for i, p in enumerate(P["phases"]): check_phase(pid, i, p)
+    for i, p in enumerate(P["phases"] + P["phases2"]): check_phase(pid, i, p)
+    own = P["phases"] + P["phases2"]
+    seen = {}
+    for p in own:
+        for v in p["vocab"]:
+            k = v[0].lower()
+            if k in seen: die(pid, "từ vựng trùng %r (chặng %r và %r)" % (v[0], seen[k], p["title"]))
+            seen[k] = p["title"]
+    tt = [p["title"] for p in own]
+    if len(set(tt)) != len(tt): die(pid, "tên chặng trùng")
     phases = list(P["phases"])
     core = P.get("core", [])
     if core and not os.path.exists(os.path.join(HERE, "office.py")):
@@ -145,6 +184,7 @@ def build(pid, office=None):
         ins = [office["phases"][c] for c in core]
         # xen chặng lõi: một chặng giữa lộ trình, còn lại ở cuối
         phases = phases[:half] + ins[:1] + phases[half:] + ins[1:]
+    phases += P["phases2"]   # chặng làm giàu: luôn ở cuối lộ trình
     POOL = {"vocab": [], "phrases": [], "dialogues": [], "listen": []}
     idx = build_phase_pools(pid, phases, POOL)
     DAYS = []

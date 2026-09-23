@@ -131,9 +131,13 @@ assert.ok(await until(p2,()=>/Báo cáo cho chủ lớp/.test(document.getElemen
 assert.ok(await p2.evaluate(()=>/Xuất CSV/.test(document.getElementById('main').textContent)&&/An/.test(document.getElementById('main').textContent)));
 await shot(p2,'k_class_owner');
 report(p2,'K device2');
-// 5) Ngành mới nạp được
-for(const t of ['construction','aviation']){const q=await page(b,{store:st({cfg:{level:'A2',autoSpeak:false,track:t,trackChosen:true}})});
+// 5) Mọi ngành nạp được + v4.1: các ngày làm giàu (cuối lộ trình) mở được, tham chiếu hợp lệ
+for(const [t,nd] of [['it',450],['office',200],['hotel',200],['sales',200],['factory',200],['logistics',200],['finance',200],['marketing',200],['health',200],['construction',200],['aviation',200]]){const q=await page(b,{store:st({cfg:{level:'A2',autoSpeak:false,track:t,trackChosen:true}})});
   await q.goto(BASE+'index.html');await q.waitForTimeout(500);
-  const info=await q.evaluate(()=>({track:TRACK,days:DAYS.length,label:TRK.label,rep:REPORT.title,hint:REPORT.hint}));console.log('pack',JSON.stringify(info));
-  assert.equal(info.track,t);assert.equal(info.days,120);report(q,'K '+t);await q.close();}
+  const info=await q.evaluate(()=>({track:TRACK,days:DAYS.length,phases:D.phaseTitles.length,label:TRK.label,rep:REPORT.title,
+    bad:DAYS.filter(function(d){return d.v.some(function(i){return !D.vocab[i];})||!D.phrases[d.ph]||!D.dialogues[d.di]||!D.listen[d.li]||!D.phaseTitles[d.phase];}).length}));console.log('pack',JSON.stringify(info));
+  assert.equal(info.track,t);assert.equal(info.days,nd);assert.equal(info.bad,0);
+  for(const n of [nd-79,nd-40,nd]){await q.evaluate(n=>openDay(n),n);await q.waitForTimeout(150);
+    const txt=await q.evaluate(()=>document.getElementById('main').textContent);assert.ok(txt.indexOf('Ngày '+n)>=0,t+' openDay '+n);}
+  report(q,'K '+t);await q.close();}
 await b.close();

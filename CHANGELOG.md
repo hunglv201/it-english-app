@@ -12,6 +12,29 @@ làm bản lưu trữ (`gioi-thieu-v<N>.html`) để xem lại app từng trông
 
 ---
 
+## v4.1.0 — 23/09/2026 · Làm giàu nội dung mọi ngành
+
+**Nội dung**
+- Mỗi ngành (10 ngành ngoài IT) thêm **8 chặng mới** → **20 chặng · 200 ngày** (trước 12 chặng · 120 ngày). Mỗi chặng: 10 từ (IPA, ví dụ, nhiều từ có tiếng Nhật), 8–10 câu mẫu, 5 hội thoại chọn đáp, 6 bài nghe (4 câu + 2 đoạn).
+  - Công sở: hội nhập & văn hoá công ty, đàm phán, khách hàng & đối tác, đào tạo, làm việc từ xa, đánh giá hiệu suất, công tác nước ngoài, tiệc & xã giao.
+  - Khách sạn: concierge, đưa đón sân bay, spa & hồ bơi, bar, tiệc & hội nghị, phục vụ tại phòng, đánh giá online, an ninh & khẩn cấp.
+  - Bán hàng: B2B, demo, đàm phán hợp đồng, bán thêm & bán chéo, hội chợ, gọi lạnh, CRM, gia hạn.
+  - Nhà máy: bản vẽ & thông số, nguyên vật liệu, đóng gói & xuất hàng, môi trường & hoá chất, tự động hoá & PLC, OEE & KPI, giao ca, sự cố khẩn cấp.
+  - Logistics: air freight, hàng lạnh & hàng nguy hiểm, TMĐT & chặng cuối, bảo hiểm, L/C, đóng container, tối ưu tuyến, WMS/TMS.
+  - Tài chính: lương & bảo hiểm, tài sản cố định, dòng tiền, giá thành, mua hàng & phê duyệt, ERP, vay & lãi suất, giải trình biến động.
+  - Marketing: email & automation, SEO, livestream, thương hiệu, sự kiện, PR & khủng hoảng, A/B test, ngân sách năm.
+  - Y tế: nhi khoa, người cao tuổi, dinh dưỡng, phục hồi chức năng, phòng mổ, kiểm soát nhiễm khuẩn, chẩn đoán hình ảnh, xuất viện.
+  - Xây dựng: khảo sát & đo đạc, đào đất & móng, hoàn thiện, hợp đồng & thanh toán, nhà thầu phụ, máy thi công, họp chủ đầu tư/TVGS, PCCC & sơ cứu.
+  - Hàng không: mua/đổi/hoàn vé, phòng chờ thương gia, miễn thuế, hành khách gây rối, sân đỗ, cargo, thông báo trên loa, sơ cứu trên máy bay.
+- **IT** thêm 8 chặng → **45 chặng · 450 ngày**: làm với khách Nhật & BrSE, spec & Q&A, ước lượng & báo giá outsource, QA thủ công, on-call & sự cố production, mobile, sản phẩm & UX, dùng AI & LLM.
+- Mỗi ngành còn thêm: 16 câu dịch ngược, 5 bài đọc 30 giây, 4 tình huống Giao tiếp AI, 3 loại sự kiện sắp tới, 6 câu Mochi; mỗi vai +2 tình huống, +4 hội thoại.
+- Tổng cộng thêm **880 từ, 440 hội thoại chặng + 160 hội thoại vai, 528 bài nghe, 50 bài đọc**. Viết bởi subagent theo `packs_src/README.md`, **kiểm duyệt chéo** (`docs/review/extra-*.md`).
+
+**Kỹ thuật**
+- `packs_src/extra/<id>.py` + `phases_extra2.py`: chỉ **nối vào cuối** — ngày/từ/hội thoại cũ giữ nguyên chỉ số, tiến độ người học không đổi (đã so sánh từng phần tử).
+- build.py kiểm tra thêm: trùng từ vựng trong gói, trùng tên chặng, trùng key tình huống/sự kiện.
+- `tests/k.mjs`: nạp cả 11 ngành, kiểm tra mọi tham chiếu ngày hợp lệ, mở các ngày mới.
+
 ## v4.0.0 — 23/09/2026 · Nói tốt hơn, cùng nhau, tài khoản & đồng bộ
 
 > Các tính năng cần máy chủ (tài khoản, đồng bộ, AI miễn phí, nhắc học qua thông báo, lớp học, bảng tuần, bạn học) **chỉ bật khi điền `cloud-config.js`** (xem `docs/BACKEND.md`). Để trống thì phần còn lại vẫn chạy đầy đủ, chỉ lưu trên máy.

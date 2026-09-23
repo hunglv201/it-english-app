@@ -1,5 +1,5 @@
 /* Nói Nghề (IT English) — service worker (offline app shell) */
-const CACHE = 'it-english-v4.0.0';
+const CACHE = 'it-english-v4.1.0';
 const ASSETS = [
   './', 'index.html', 'data.gen.js', 'phrases.gen.js', 'roles.gen.js',
   'packs/office.gen.js', 'packs/hotel.gen.js', 'packs/sales.gen.js', 'packs/factory.gen.js',

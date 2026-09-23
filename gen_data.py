@@ -413,6 +413,12 @@ try:
     PHASES = PHASES + EXTRA
 except Exception as e:
     print("EXTRA load failed:", e)
+# v4.1: chặng làm giàu (phases_extra2.py) — chỉ nối vào CUỐI để không xê dịch ngày cũ
+try:
+    from phases_extra2 import EXTRA2
+    PHASES = PHASES + EXTRA2
+except ImportError:
+    pass
 
 # Build flat pools + DAYS (index references)
 V=[]; PH=[]; DI=[]; LI=[]
@@ -433,9 +439,11 @@ for _i,_p in enumerate(PHASES):
         _p["listen"]=list(_p["listen"])+list(_x.get("listen",[]))
 for p in PHASES:
     vi=[]
-    for t,ipa,pos,vn,ex,exvi in p["vocab"]:
+    for _v in p["vocab"]:
+        t,ipa,pos,vn,ex,exvi=_v[:6]
         vi.append(len(V)); _w={"t":t,"ipa":ipa,"pos":pos,"vi":vn,"ex":ex,"exVi":exvi}
         if t in JA: _w["ja"]=JA[t][0]+"|"+JA[t][1]   # N4: thuật ngữ tiếng Nhật
+        elif len(_v)==8 and _v[6]: _w["ja"]=_v[6]+"|"+_v[7]
         V.append(_w)
     phaseVocab.append(vi)
     pi=[]

@@ -11,7 +11,7 @@
 
 | Sản phẩm | File | URL Pages | Mô tả |
 |---|---|---|---|
-| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Gói ngành (IT 370 ngày, các ngành khác 120 ngày), từ vựng SRS, câu thường dùng, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **4.0.0** (backend Supabase có sẵn nhưng chỉ bật khi điền `cloud-config.js`) (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
+| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Gói ngành (IT 450 ngày, các ngành khác 200 ngày), từ vựng SRS, câu thường dùng, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **4.1.0** (backend Supabase có sẵn nhưng chỉ bật khi điền `cloud-config.js`) (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
 | **Trang giới thiệu (showcase)** | `gioi-thieu.html` (**v4.0**, mục "Mới trong 4.0" ảnh `img/showcase/v4/`, phần còn lại dùng ảnh v3) + lưu trữ `gioi-thieu-v3.html`, `gioi-thieu-v2.html`, `gioi-thieu-v1.html` | `…/gioi-thieu.html` | Landing fullpage scroll-snap, nền particle-net, mục "Mới trong v3.0" (lưới 5 ngành), mục **Lịch sử phiên bản** (`#versions`). Dark-first. Quy ước version lớn: xem mục 7 |
 | **Game "Nói Nghề Quest"** | `game/index.html` + `game/game.js` (+ bản sao `game/data.gen.js`, `game/phrases.gen.js`) | `…/game/` | Bản game anime **mobile-first**: RPG bản đồ ngày → quiz battle → boss visual novel, AFK idle (Mochi tự cày xu), Shop, huy hiệu, tab **Nói** 5 chế độ luyện nói. Dùng chung dữ liệu + AI key với app |
 
@@ -25,7 +25,7 @@ it-english-app/
 ├── data.gen.js           # gói IT: window.DATA — sinh từ gen_data.py, KHÔNG sửa tay
 ├── packs/<id>.gen.js     # gói ngành office/hotel/sales/factory/logistics/finance/marketing/health/construction/aviation (window.PACK + DATA + PHRASES + ROLES) — sinh từ packs_src/build.py
 ├── packs/custom.js       # VIẾT TAY: ghép store.customPack ("Nghề của tôi", AI tạo) vào đầu gói office khi track='custom'
-├── packs_src/            # nguồn gói ngành: <id>.py (PACK), build.py (kiểm tra chặt + sinh), README.md (SCHEMA + quy tắc nội dung)
+├── packs_src/            # nguồn gói ngành: <id>.py (PACK), extra/<id>.py (v4.1: EXTRA làm giàu, chỉ nối cuối), build.py (kiểm tra chặt + sinh), README.md (SCHEMA + quy tắc nội dung)
 ├── phrases.gen.js        # window.PHRASES — sinh từ phrases_data.py, KHÔNG sửa tay
 ├── gen_data.py / phases_extra.py / phrases_data.py   # nguồn sinh dữ liệu (Python 3, không lib ngoài)
 ├── roles_data.py         # -> roles.gen.js (window.ROLES: 7 vai Dev/QA/DevOps/BA/PM/Designer/Data — tình huống AI + hội thoại chọn đáp)
@@ -159,6 +159,7 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 
 ## 8. Lịch sử tóm tắt (mới → cũ)
 
+- 09/2026 **v4.1.0**: làm giàu nội dung mọi ngành — `packs_src/extra/<id>.py` (+8 chặng/ngành → 20 chặng · 200 ngày; +16 dịch ngược, +5 bài đọc, +4 tình huống AI, +3 sự kiện, +6 quips, mỗi vai +2 tình huống +4 hội thoại) và IT `phases_extra2.py` (+8 chặng → 450 ngày). Chỉ nối cuối (tiến độ cũ giữ nguyên, test k.mjs mở ngày mới mọi ngành). Viết bởi subagent, kiểm duyệt chéo `docs/review/extra-*.md`.
 - 09/2026 **v4.0.0 (major)**: backend Supabase (khách + Google, đồng bộ offline-first, AI qua server, báo lỗi) — bật khi điền `cloud-config.js`; đợt B nói tốt hơn (từ mục tiêu, chạm từ, gõ Việt khi bí, phỏng vấn/họp/thuyết trình, phát âm 3 mức, phân tích bài nói); giữ chuỗi (chúc mừng, ngày hoàn hảo, lá chắn cuối tuần, sửa chuỗi, cam kết 7 ngày, nhắc học Web Push); lớp học / bảng tuần / bạn học; kiểm tra trình độ 3 phút; tiếng Nhật công sở; +2 ngành (Xây dựng, Hàng không). Showcase v4.0 (v3 lưu trữ). Test `i/j/k.mjs`, `db_test.sh`.
 - 09/2026 **v3.1.0**: +4 ngành (Logistics, Tài chính, Marketing, Y tế); kiểm duyệt chéo 8 gói (~205 sửa, `docs/review/`); ⚑ báo lỗi nội dung; luyện nói rảnh tay; "Nghề của tôi" (AI tạo gói 3 chặng); ảnh → bài học; game đổi ngành trong Hồ sơ. Test `h.mjs`.
 - 09/2026 **v3.0.0 (major)**: đổi tên **Nói Nghề**; đa ngành (Công sở chung mặc định, IT, Khách sạn, Bán hàng, Nhà máy; 23 vai); làm quen 3 bước bỏ qua được; tiến độ riêng từng ngành; báo cáo 60s theo nghề; JD mọi ngành + 12 từ riêng; game theo ngành; showcase v3.0 (v2 lưu trữ). Nội dung 4 gói mới viết bởi subagent theo `packs_src/README.md`, build.py kiểm tra.
