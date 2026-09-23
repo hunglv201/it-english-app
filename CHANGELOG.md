@@ -12,6 +12,17 @@ làm bản lưu trữ (`gioi-thieu-v<N>.html`) để xem lại app từng trông
 
 ---
 
+## v4.3.0 — 23/09/2026 · Anh ⇄ Nhật cho BrSE, sổ lỗi, chuẩn bị nhanh, mẫu email
+
+**App**
+- 🤝 **Anh ⇄ Nhật cho IT / BrSE** (`ja/brse.js`, nạp lười): 80 câu song ngữ trong 10 nhóm — 報告, 連絡, 相談, xác nhận spec & Q&A, ước lượng & lịch, bug & sự cố, xin lỗi & trễ hạn, họp với khách, review & nghiệm thu, email/chat. Furigana + romaji + giọng Nhật; luyện **Nghe Anh → nói Nhật** và **Nghe Nhật → nói Anh** (chấm theo ký tự / theo từ). Kiểm duyệt: `docs/review/brse.md` — nên nhờ thêm người Nhật đọc duyệt.
+- 📒 **Sổ lỗi cá nhân**: tự gom lỗi từ Giao tiếp AI (phần AI sửa), dịch ngược, chọn cách đáp, nghe chép, đọc theo (từ phát âm chưa đúng) và song ngữ; chia nhóm (thì, mạo từ, giới từ, số nhiều, thiếu chủ ngữ/động từ, câu cộc, trật tự từ, phát âm…). **Ôn lỗi 5 phút** — nói lại câu đúng, đúng 2 lần liền là "đã nắm"; thẻ nhắc ở Hôm nay mỗi tuần khi có ≥ 5 lỗi.
+- 📅 **Chuẩn bị nhanh** cho sự kiện sắp tới (họp, ca, phỏng vấn…): thêm giờ; bấm "Chuẩn bị" → 5 câu cần nói + 3 câu có thể bị hỏi (AI; không có AI thì lấy câu hợp chủ đề trong gói), thêm vào ôn câu, luyện nói 3 phút có dùng đúng các câu đó; sau sự kiện app hỏi "thế nào?" — Khó thì mở luyện lại.
+- 📨 **Mẫu email & tin nhắn** (`mail/templates.js`, nạp lười): 55 mẫu — 16 dùng chung + 3 mẫu riêng cho mỗi ngành; điền vài ô → email/tin nhắn chuẩn, 3 giọng (chuẩn / lịch sự hơn / ngắn cho chat), sao chép, mở ứng dụng mail, nghe đọc; **AI chỉnh câu** (sửa ngữ pháp, dịch ô gõ tiếng Việt). Kiểm duyệt: `docs/review/mail.md`.
+
+**Kỹ thuật**
+- `store.mistakes[]` (đồng bộ qua máy chủ, khoá `key`), `store.events[].time/prep/after`, `store.cfg.myName/mailVals`. Test `tests/n.mjs`.
+
 ## v4.2.0 — 23/09/2026 · 2 ngành mới, boss game, rảnh tay bằng giọng nói, ảnh → bộ bài học, email tổng kết tuần
 
 **Nội dung**

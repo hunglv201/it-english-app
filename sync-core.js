@@ -22,6 +22,7 @@
     ['reports', 'reports', function (x) { return x.at; }, 'at'],
     ['convos', 'convos', function (x) { return x.id; }, 'id', ['turns']],
     ['photoLessons', 'photos', function (x) { return x.id ? 'id~' + x.id : (x.at || '') + '~' + String(x.summary || '').slice(0, 40); }, 'at'],   // v4.2: bộ mới có id
+    ['mistakes', 'mistakes', function (x) { return x.key || x.id; }, 'at'],   // v4.3 sổ lỗi
     ['audits', 'audits', function (x) { return (x.at || '') + '~' + (x.words || 0) + '~' + (x.fillerN || 0); }, 'at']
   ];
   var SCALARS = ['customPack', 'theme', 'swipeSeen'];

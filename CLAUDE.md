@@ -11,7 +11,7 @@
 
 | Sản phẩm | File | URL Pages | Mô tả |
 |---|---|---|---|
-| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Gói ngành (IT 450 ngày, các ngành khác 200 ngày), từ vựng SRS, câu thường dùng, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **4.2.0** (backend Supabase có sẵn nhưng chỉ bật khi điền `cloud-config.js`) (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
+| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Gói ngành (IT 450 ngày, các ngành khác 200 ngày), từ vựng SRS, câu thường dùng, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **4.3.0** (backend Supabase có sẵn nhưng chỉ bật khi điền `cloud-config.js`) (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
 | **Trang giới thiệu (showcase)** | `gioi-thieu.html` (**v4.0**, mục "Mới trong 4.0" ảnh `img/showcase/v4/`, phần còn lại dùng ảnh v3) + lưu trữ `gioi-thieu-v3.html`, `gioi-thieu-v2.html`, `gioi-thieu-v1.html` | `…/gioi-thieu.html` | Landing fullpage scroll-snap, nền particle-net, mục "Mới trong v3.0" (lưới 5 ngành), mục **Lịch sử phiên bản** (`#versions`). Dark-first. Quy ước version lớn: xem mục 7 |
 | **Game "Nói Nghề Quest"** | `game/index.html` + `game/game.js` (+ bản sao `game/data.gen.js`, `game/phrases.gen.js`) | `…/game/` | Bản game anime **mobile-first**: RPG bản đồ ngày → quiz battle → boss visual novel, AFK idle (Mochi tự cày xu), Shop, huy hiệu, tab **Nói** 5 chế độ luyện nói. Dùng chung dữ liệu + AI key với app |
 
@@ -36,6 +36,8 @@ it-english-app/
 ├── img/showcase/v2/*.webp # 25 ảnh của gioi-thieu-v2.html (lưu trữ)
 ├── img/showcase/v3/*.webp # 33 ảnh của gioi-thieu.html v3.0 (540×1169, chụp bằng Playwright + AI giả, nhiều ngành)
 ├── tests/                # Playwright mobile: lib.mjs + a…k.mjs, run.sh (xem tests/README.md) — g.mjs: đa ngành · i.mjs: tài khoản/đồng bộ (server giả cloud-fake.mjs) · sync-core.test.mjs (node)
+├── ja/brse.js            # v4.3: window.JA_BRSE (80 câu song ngữ Anh–Nhật cho IT/BrSE, 10 nhóm) — nạp lười
+├── mail/templates.js     # v4.3: window.MAIL_TPL (55 mẫu email/tin nhắn: 16 chung + 3/ngành) — nạp lười
 ├── ja/keigo.js           # v4.0: window.JA_KEIGO (51 câu kính ngữ, furigana/kana/romaji) — nạp lười khi mở Luyện › Tiếng Nhật công sở
 ├── img/showcase/v4/*.webp # 11 ảnh mục "Mới trong 4.0" (chụp bằng Playwright, 540×1169)
 ├── cloud-config.js       # v4.0: url + anonKey Supabase (công khai). ĐỂ TRỐNG = tắt máy chủ, app chạy như v3.1
@@ -160,6 +162,7 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 
 ## 8. Lịch sử tóm tắt (mới → cũ)
 
+- 09/2026 **v4.3.0**: song ngữ Anh ⇄ Nhật cho BrSE (`ja/brse.js` → `window.JA_BRSE`, `vBrse`/`brseQuiz`/`brseMic`, `go('brse')`, `srOnce(lang)`); sổ lỗi (`mkAdd`/`mkCat`/`MK_IRR`, hook ở `psrsFromFix`, chọn cách đáp ×3, dịch ngược, `lCheckDict`, `lTokens`→`mkPronFrom`; `vMistakes`/`mkQuizStart`/`mkHomeCard`, `store.mistakes`, sync-core LISTS `mistakes`); chuẩn bị nhanh (`prepModal`/`prepMake`/`prepOffline`, `eventAfterCard`, `events[].time/prep/after`); mẫu email (`mail/templates.js` → `window.MAIL_TPL`, `vMail`/`mailText`/`mailAi`). Test `n.mjs`.
 - 09/2026 **v4.2.0**: +2 ngành (education, legal; 20 chặng, kiểm duyệt `docs/review/education.md`, `legal.md`); game boss cuối chặng + kết cục + vô tận (`PBOSS`/`PEND`, `pbStart`, `G.pboss[ngành]`, test `l.mjs`); rảnh tay lệnh giọng nói (`hfCmd`, `HF_CMDS`, `hfMedia`); ảnh → bộ bài học (`phClean`/`phSave`/`phOpen`/`phDel`, `store.photoLessons[]` có `id,vocab,replies,questions,scenario,text?`) + OCR trên máy (`phOcr`, `vendor/tesseract/`, `workerBlobURL:false` vì CSP) + `phOffline` (tra `dictFindIn`); email tổng kết tuần (`emailCard`, migration 0006, `send-reminders` + Resend, `?unsub=` → `email_unsubscribe`). Test `m.mjs`, `db3.test.sql`.
 - 09/2026 **v4.1.0**: làm giàu nội dung mọi ngành — `packs_src/extra/<id>.py` (+8 chặng/ngành → 20 chặng · 200 ngày; +16 dịch ngược, +5 bài đọc, +4 tình huống AI, +3 sự kiện, +6 quips, mỗi vai +2 tình huống +4 hội thoại) và IT `phases_extra2.py` (+8 chặng → 450 ngày). Chỉ nối cuối (tiến độ cũ giữ nguyên, test k.mjs mở ngày mới mọi ngành). Viết bởi subagent, kiểm duyệt chéo `docs/review/extra-*.md`.
 - 09/2026 **v4.0.0 (major)**: backend Supabase (khách + Google, đồng bộ offline-first, AI qua server, báo lỗi) — bật khi điền `cloud-config.js`; đợt B nói tốt hơn (từ mục tiêu, chạm từ, gõ Việt khi bí, phỏng vấn/họp/thuyết trình, phát âm 3 mức, phân tích bài nói); giữ chuỗi (chúc mừng, ngày hoàn hảo, lá chắn cuối tuần, sửa chuỗi, cam kết 7 ngày, nhắc học Web Push); lớp học / bảng tuần / bạn học; kiểm tra trình độ 3 phút; tiếng Nhật công sở; +2 ngành (Xây dựng, Hàng không). Showcase v4.0 (v3 lưu trữ). Test `i/j/k.mjs`, `db_test.sh`.
