@@ -21,7 +21,7 @@ language sql immutable as $$ select d - (extract(isodow from d)::int - 1) $$;
 create or replace function public.nn_streak(p_user uuid) returns int
 language sql stable security definer set search_path = public as $$
   select case when coalesce(u.state->>'stats|lastActive', '') >= to_char(current_date - 1, 'YYYY-MM-DD')
-              then coalesce(nullif(u.state->>'stats|streak', '')::int, 0) else 0 end
+              then least(greatest(coalesce(public.nn_num(u.state->'stats|streak'), 0), 0), 100000)::int else 0 end
     from user_state u where u.user_id = p_user
 $$;
 revoke all on function public.nn_streak(uuid) from public, anon, authenticated;

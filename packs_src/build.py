@@ -11,7 +11,7 @@ import json, os, re, sys, shutil, importlib.util
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-ORDER = ["office", "hotel", "sales", "factory", "logistics", "finance", "marketing", "health", "construction", "aviation"]
+ORDER = ["office", "hotel", "sales", "factory", "logistics", "finance", "marketing", "health", "construction", "aviation", "education", "legal"]
 
 # nhóm "Câu thường dùng" chung cho mọi gói (lấy từ phrases_data.py, bỏ câu mang chất IT)
 GENERIC_GROUPS = {

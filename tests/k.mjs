@@ -110,6 +110,14 @@ assert.equal(srv.buddies.length,1);
 // máy 2 lưu bằng Google → tạo lớp
 await p2.evaluate(()=>NNCloud.linkGoogle());await p2.waitForLoadState('load');
 assert.ok(await until(p2,()=>NNCloud.state().google&&NNCloud.state().status==='ok'),'p2 google');
+// v4.2: email tổng kết tuần — khách thấy gợi ý Google (p1), Google bật/tắt được, huỷ bằng link ?unsub=
+await p1.evaluate(()=>go('account'));assert.ok(await until(p1,()=>/Liên kết Google để nhận tổng kết/.test(document.getElementById('main').textContent)),'email card guest');
+await p2.evaluate(()=>go('account'));assert.ok(await until(p2,()=>/Bật email tổng kết tuần/.test(document.getElementById('main').textContent)),'email card');
+await p2.evaluate(()=>[...document.querySelectorAll('#emailCard .btn')].find(x=>/Bật email/.test(x.textContent)).click());
+assert.ok(await until(p2,()=>/Đang bật · tối Chủ nhật/.test(document.getElementById('emailCard').textContent)),'email on');await shot(p2,'k_email_on');
+{const uid2=await p2.evaluate(()=>localStorage.getItem('fake-auth'));const tok=srv.email[uid2].token;assert.ok(srv.email[uid2].weekly&&typeof srv.email[uid2].tz==='number');
+ await p1.goto(BASE+'index.html?unsub='+tok);assert.ok(await until(p1,()=>NNCloud.state().status==='ok'&&!sessionStorage.getItem('nn-unsub')),'unsub done');
+ assert.equal(srv.email[uid2].weekly,false);assert.ok(await p1.evaluate(()=>!/unsub/.test(location.search)),'url cleaned');}
 await p2.evaluate(()=>socialStart());await until(p2,()=>/Tạo lớp/.test(document.getElementById('main').textContent));
 assert.ok(await p2.evaluate(()=>/An/.test(document.getElementById('main').textContent)&&/Nhắc An/.test(document.getElementById('main').textContent)),'buddy paired view');
 await p2.evaluate(()=>[...document.querySelectorAll('#main .btn')].find(x=>/Nhắc An/.test(x.textContent)).click());await p2.waitForTimeout(300);
@@ -132,7 +140,7 @@ assert.ok(await p2.evaluate(()=>/Xuất CSV/.test(document.getElementById('main'
 await shot(p2,'k_class_owner');
 report(p2,'K device2');
 // 5) Mọi ngành nạp được + v4.1: các ngày làm giàu (cuối lộ trình) mở được, tham chiếu hợp lệ
-for(const [t,nd] of [['it',450],['office',200],['hotel',200],['sales',200],['factory',200],['logistics',200],['finance',200],['marketing',200],['health',200],['construction',200],['aviation',200]]){const q=await page(b,{store:st({cfg:{level:'A2',autoSpeak:false,track:t,trackChosen:true}})});
+for(const [t,nd] of [['it',450],['office',200],['hotel',200],['sales',200],['factory',200],['logistics',200],['finance',200],['marketing',200],['health',200],['construction',200],['aviation',200],['education',200],['legal',200]]){const q=await page(b,{store:st({cfg:{level:'A2',autoSpeak:false,track:t,trackChosen:true}})});
   await q.goto(BASE+'index.html');await q.waitForTimeout(500);
   const info=await q.evaluate(()=>({track:TRACK,days:DAYS.length,phases:D.phaseTitles.length,label:TRK.label,rep:REPORT.title,
     bad:DAYS.filter(function(d){return d.v.some(function(i){return !D.vocab[i];})||!D.phrases[d.ph]||!D.dialogues[d.di]||!D.listen[d.li]||!D.phaseTitles[d.phase];}).length}));console.log('pack',JSON.stringify(info));

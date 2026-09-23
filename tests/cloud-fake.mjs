@@ -53,6 +53,11 @@ export function fakeServer() {
         const tasks = (id) => Object.entries((users.get(id) || { state: {} }).state).filter(([p]) => p.startsWith('hist|')).reduce((t, [, v]) => t + (+v || 0), 0);
         const row = (id, n) => ({ nick: n, me: id === a.uid, days: days(id), tasks: tasks(id), streak: +(users.get(id).state['stats|streak'] || 0) });
         api.push = api.push || {}; api.classes = api.classes || []; api.invites = api.invites || {}; api.buddies = api.buddies || []; api.nudges = api.nudges || [];
+        // v4.2 email tổng kết tuần (logic thật: supabase/tests/db3.test.sql)
+        api.email = api.email || {};
+        if (a.name === 'email_status') { const e = api.email[a.uid] || {}; return { available: !u.anon, email: u.anon ? null : 'a***@example.com', weekly: !!e.weekly, tz: e.tz }; }
+        if (a.name === 'set_email_weekly') { if (g.p_on && u.anon) return { error: 'google_required' }; api.email[a.uid] = { weekly: !!g.p_on, tz: g.p_tz_offset, token: (api.email[a.uid] || {}).token || '11111111-2222-3333-4444-' + String(++seq).padStart(12, '0') }; return { available: true, email: 'a***@example.com', weekly: !!g.p_on }; }
+        if (a.name === 'email_unsubscribe') { if (process.env.NN_DEBUG_EMAIL) console.log('UNSUB', JSON.stringify(g), JSON.stringify(api.email)); const hit = Object.values(api.email).find(e => e.token === g.p_token && e.weekly); if (hit) hit.weekly = false; return !!hit; }
         if (a.name === 'save_push') { api.push[a.uid] = Object.assign(api.push[a.uid] || {}, { sub: g.p_sub }); return { ok: true }; }
         if (a.name === 'set_reminder') { api.push[a.uid] = Object.assign(api.push[a.uid] || {}, { mode: g.p_mode, fixed: g.p_fixed_min, tz: g.p_tz_offset }); return { ok: true }; }
         if (a.name === 'touch_reminder') { api.push[a.uid] = Object.assign(api.push[a.uid] || {}, { first: g.p_first_min }); return null; }

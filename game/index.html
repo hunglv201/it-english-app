@@ -555,7 +555,7 @@ button.srow:active{background:var(--panel2)}
 <div class="fx" id="fx"></div>
 <div class="toast" id="toast"></div>
 <!-- v3.0: nạp gói ngành giống app (store.cfg.track của app; mặc định Công sở chung, người dùng cũ → IT) -->
-<script>(function(){var T={office:1,it:1,hotel:1,sales:1,factory:1,logistics:1,finance:1,marketing:1,health:1,construction:1,aviation:1,custom:1},t='',s=null;
+<script>(function(){var T={office:1,it:1,hotel:1,sales:1,factory:1,logistics:1,finance:1,marketing:1,health:1,construction:1,aviation:1,education:1,legal:1,custom:1},t='',s=null;
 try{s=JSON.parse(localStorage.getItem('it-english-v1')||'null');}catch(e){}
 if(s&&s.cfg&&T[s.cfg.track])t=s.cfg.track;
 else if(s&&((s.stats&&s.stats.placed)||Object.keys((s.days&&s.days.done)||{}).length||((s.days&&s.days.cur)||1)>1))t='it';

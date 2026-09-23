@@ -12,6 +12,26 @@ làm bản lưu trữ (`gioi-thieu-v<N>.html`) để xem lại app từng trông
 
 ---
 
+## v4.2.0 — 23/09/2026 · 2 ngành mới, boss game, rảnh tay bằng giọng nói, ảnh → bộ bài học, email tổng kết tuần
+
+**Nội dung**
+- 2 ngành mới, mỗi ngành 20 chặng · 200 ngày, 4 vai, kiểm duyệt chéo (`docs/review/education.md`, `legal.md`) → **13 ngành, 55 vai**:
+  - 🎓 **Giáo dục · Đào tạo** — giáo viên song ngữ, trợ giảng, tư vấn tuyển sinh · du học, giáo vụ · liên lạc phụ huynh.
+  - ⚖️ **Luật · Hành chính công** — pháp chế doanh nghiệp, trợ lý công ty luật, cán bộ một cửa, phiên dịch · dịch thuật công chứng (không nêu điều luật/mức phí cụ thể).
+
+**Game**
+- **Boss cuối mỗi chặng** theo ngành (khách khó tính, thanh tra, kiểm toán, hành khách gây rối, khách Nhật khó tính…): 3 pha — hội thoại chọn đáp → nghe điền từ → dịch, lấy từ dữ liệu của chính chặng đó.
+- **Kết cục**: hạ boss chặng cuối (hoặc đủ boss mọi chặng) → câu chuyện "Bạn đã trở thành…" theo ngành + thống kê + thưởng xu; chế độ **Vô tận** lưu kỷ lục. Hồ sơ › Boss chặng & kết cục.
+
+**App**
+- **Rảnh tay**: ra lệnh bằng giọng nói tiếng Anh — *next* (bỏ qua), *again* (nghe lại), *slower* / *faster*, *stop*; nút trên tai nghe / màn khoá (Media Session) khi trình duyệt hỗ trợ.
+- **Ảnh → bài học**: lưu cả bài (từ, câu trả lời mẫu, câu hỏi, tình huống) thành **bộ** để mở lại, xoá; **đọc chữ ngay trên máy** (Tesseract, tự host `vendor/tesseract/`, ≈ 11 MB tải lần đầu) khi AI không đọc được ảnh hoặc chưa cấu hình AI — ảnh không gửi đi đâu; có AI thì tạo bài từ chữ, không có thì tra từ có trong gói ngành.
+- **Tổng kết tuần qua email** (tuỳ chọn, mặc định tắt, chỉ tài khoản Google): tối Chủ nhật, ≤ 1 email/tuần, tự dừng khi 4 tuần không học, huỷ 1 chạm (`?unsub=`). Cần máy chủ + secret Resend (`docs/BACKEND.md`).
+
+**Kỹ thuật**
+- Migration `0006_email.sql` (`email_prefs`, `email_status`, `set_email_weekly`, `claim_weekly_emails`, `release_weekly_email`, `email_unsubscribe`) + `supabase/tests/db3.test.sql`. `send-reminders` gửi email qua Resend khi có `RESEND_API_KEY` + `EMAIL_FROM` (thiếu VAPID vẫn chạy phần email).
+- Test mới: `tests/l.mjs` (boss + kết cục game), `tests/m.mjs` (lệnh giọng nói, bộ ảnh, OCR thật trên ảnh vẽ bằng canvas); `k.mjs` thêm email + 2 ngành mới.
+
 ## v4.1.0 — 23/09/2026 · Làm giàu nội dung mọi ngành
 
 **Nội dung**

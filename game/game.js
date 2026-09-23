@@ -21,6 +21,8 @@ function saveApp(a){try{localStorage.setItem(APPKEY,JSON.stringify(a));}catch(e)
 let G=Object.assign({name:'Dev',lv:1,xp:0,hp:100,maxHp:100,coins:0,combo:0,bestCombo:0,cleared:{},badges:{},cur:1,ch:null,wins:0,correct:0,total:0,bossWins:0,streak:0,lastDay:null,
   items:{hint:2,potion:1},up:{hp:0,timer:0,combo:0,rate:0,cap:0},idle:{last:Date.now(),bugs:0},daily:{},seenTut:false,sound:true},loadG());
 G.items=Object.assign({hint:0,potion:0},G.items||{});G.up=Object.assign({hp:0,timer:0,combo:0,rate:0,cap:0},G.up||{});G.idle=Object.assign({last:Date.now(),bugs:0},G.idle||{});G.daily=G.daily||{};G.talk=Object.assign({equipped:[],shadowBest:0,reflexBest:0,battleWins:0,endings:{}},G.talk||{});
+// G3: boss chặng + kết cục theo ngành — G.pboss[trackId]={won:{[phase]:{s,n,d}},end:{d,n}|null,inf,infBest}; dữ liệu cũ thiếu → {}
+G.pboss=(G.pboss&&typeof G.pboss==='object'&&!Array.isArray(G.pboss))?G.pboss:{};
 /* ---------- AFK / idle economy ---------- */
 function clearedDays(){return Object.keys(G.cleared).filter(n=>dayCleared(+n)).length;}
 function equipBonus(){return Math.min(40,(G.talk.equipped||[]).length);}
@@ -170,7 +172,7 @@ function playerCard(){
 }
 
 /* ---------- MAP (mobile-first) ---------- */
-const TIPS=['Đánh vài con '+BUG+' từ vựng lấy XP nhé!','Combo càng cao, XP và xu càng nhiều!','Hạ Boss bằng cách chọn đúng câu trả lời!','Sai câu nào mất HP đó — cẩn thận!','Hết HP thì nghỉ chút, HP hồi 50% khi chơi lại.','Xong đủ 3 quest là mở ngày tiếp theo!','Ghé tab Nói để luyện mic — nói thật mới lên trình!'];
+const TIPS=['Đánh vài con '+BUG+' từ vựng lấy XP nhé!','Combo càng cao, XP và xu càng nhiều!','Hạ Boss bằng cách chọn đúng câu trả lời!','Sai câu nào mất HP đó — cẩn thận!','Hết HP thì nghỉ chút, HP hồi 50% khi chơi lại.','Xong đủ 3 quest là mở ngày tiếp theo!','Ghé tab Nói để luyện mic — nói thật mới lên trình!','Cuối mỗi chặng có 👑 Boss khó tính — hạ boss chặng cuối để mở kết cục!'];
 function hud(){
   const h=el('div','hud');
   h.innerHTML='<div class="avatar sm">'+mascot(G.hp<=30?'sad':'happy')+'</div><div class="grow" style="min-width:0"><div class="row" style="gap:6px"><b class="h" style="font-size:14.5px">'+esc(G.name)+'</b><span class="lv">Lv '+G.lv+'</span><span class="kbd" style="margin-left:auto">🔥 '+(G.streak||0)+'</span></div>'+
@@ -182,11 +184,12 @@ function vMap(){
   main.innerHTML='';touchStreak();saveG();
   main.appendChild(hud());
   // ---- Chơi tiếp ----
-  const d=dayInfo(G.cur),st=G.cleared[G.cur]||{};
+  const cn=Math.max(1,Math.min(G.cur,DAYS.length)); // G3: xong ngày cuối → G.cur = DAYS.length+1, vẫn hiện ngày cuối
+  const d=dayInfo(cn),st=G.cleared[cn]||{};
   const play=el('div','card play');
-  play.innerHTML='<div class="row between"><div><div class="eyebrow">Chơi tiếp · ngày '+G.cur+'</div><b class="h" style="font-size:18px;line-height:1.15">'+esc(d.title)+'</b></div><div class="mascot xs">'+mascot('wink')+'</div></div>';
+  play.innerHTML='<div class="row between"><div><div class="eyebrow">Chơi tiếp · ngày '+cn+'</div><b class="h" style="font-size:18px;line-height:1.15">'+esc(d.title)+'</b></div><div class="mascot xs">'+mascot('wink')+'</div></div>';
   const chips=el('div','qchips');
-  ['v','p','l','b'].forEach(k=>{const c=el('button','qchip'+(st[k]?' done':''));c.style.setProperty('--c',QI[k][2]);c.innerHTML='<span class="ic">'+QI[k][0]+'</span><span>'+QI[k][1]+'</span><small>'+(st[k]?'★'.repeat(st[k]):'—')+'</small>';c.onclick=()=>{k==='b'?bossStart(G.cur):battleStart(G.cur,k);};chips.appendChild(c);});
+  ['v','p','l','b'].forEach(k=>{const c=el('button','qchip'+(st[k]?' done':''));c.style.setProperty('--c',QI[k][2]);c.innerHTML='<span class="ic">'+QI[k][0]+'</span><span>'+QI[k][1]+'</span><small>'+(st[k]?'★'.repeat(st[k]):'—')+'</small>';c.onclick=()=>{k==='b'?bossStart(cn):battleStart(cn,k);};chips.appendChild(c);});
   play.appendChild(chips);
   const dl0=daily();const qd0=DQ.filter(q=>(dl0[q[0]]||0)>=q[2]).length,qc0=DQ.filter(q=>dl0.claimed[q[0]]).length;const hasNew0=(!dl0.chest)||(qd0>qc0);
   const drow=el('button','drow'+(hasNew0?' new':''));
@@ -235,8 +238,10 @@ function vMap(){
     const stars=(s2.v||0)+(s2.p||0)+(s2.l||0)+(s2.b||0);if(stars)b.innerHTML+='<span class="st">'+'★'.repeat(Math.min(3,Math.ceil(stars/4)))+'</span>';
     b.onclick=()=>{if(n>G.cur){toast('🔒 Xong ngày '+G.cur+' để mở');return;}questSelect(n);};
     if(n===G.cur)curNode=b;rail.appendChild(b);});
+  if(days.length){const pw=pbT().won[ch],po=pbOpen(ch);const bn=el('button','node sm pbnode'+(pw?' done':po?' open':' lock'),pbDef(ch).e);bn.id='pbNode';bn.title='Boss chặng '+(ch+1);
+    if(pw)bn.innerHTML+='<span class="st">'+'★'.repeat(pw.s)+'</span>';else if(!po)bn.innerHTML+='<span class="lk">🔒</span>';bn.onclick=()=>pbIntro(ch);rail.appendChild(bn);if(po&&!pw&&!curNode)curNode=bn;}
   rc.appendChild(rail);
-  if(dayInfo(G.cur).phase!==ch){const j=el('button','btn ghost sm block','🎯 Về chặng hiện tại');j.style.marginTop='8px';j.onclick=()=>{G.ch=dayInfo(G.cur).phase;saveG();vMap();};rc.appendChild(j);}
+  if(dayInfo(cn).phase!==ch){const j=el('button','btn ghost sm block','🎯 Về chặng hiện tại');j.style.marginTop='8px';j.onclick=()=>{G.ch=dayInfo(cn).phase;saveG();vMap();};rc.appendChild(j);}
   // chèn dải ngày ngay sau thẻ Chơi tiếp
   main.insertBefore(rc,afk);
   requestAnimationFrame(()=>{if(curNode)rail.scrollLeft=Math.max(0,curNode.offsetLeft-rail.clientWidth/2+curNode.offsetWidth/2);});
@@ -337,8 +342,9 @@ function vBattle(){
   pb.onclick=()=>{if(!B||G.items.potion<=0||G.hp>=G.maxHp)return;G.items.potion--;G.hp=Math.min(G.maxHp,G.hp+50);saveG();pb.innerHTML='🧪<b>'+G.items.potion+'</b>';pb.disabled=G.items.potion<=0;const ph=$('#php'),bar=$('#phpbar');if(ph)ph.textContent=G.hp;if(bar){bar.querySelector('i').style.width=Math.round(G.hp/G.maxHp*100)+'%';bar.classList.toggle('low',G.hp<=30);}const r=bar.getBoundingClientRect();fxText(r.left+40,r.top-10,'+50 HP','heal');sfx.ok();};
   const q=el('button','ibtn','✕');q.id='quitB';q.title='Rút lui';
   top.appendChild(hb);top.appendChild(pb);top.appendChild(q);a.appendChild(top);
-  const mon=el('div','card moncard');
-  mon.innerHTML='<div class="monster" id="mon"><div class="art">'+bug()+'</div><div class="grow"><div class="row between"><div class="mname">'+MON[B.type][0]+' · Ngày '+B.n+'</div><span class="combo" id="combo">x0</span></div><div class="bar mon" id="monbar"><i style="width:100%"></i><span id="montxt">'+B.monHp+' / '+B.monMax+'</span></div></div></div>';
+  const mon=el('div','card moncard'+(B.boss?' pb':''));
+  if(B.boss){const bd=B.boss.def;mon.innerHTML='<div class="monster" id="mon"><div class="art pbart">'+bd.e+'</div><div class="grow" style="min-width:0"><div class="row between"><div class="mname">'+esc(bd.r)+' · '+esc(bd.n)+'</div><span class="combo" id="combo">x0</span></div><div class="pbstage" id="pbstage">'+pbStageLbl()+'</div><div class="bar mon" id="monbar"><i style="width:100%"></i><span id="montxt">'+B.monHp+' / '+B.monMax+'</span></div><div class="pbsay" id="pbsay"></div></div></div>';}
+  else mon.innerHTML='<div class="monster" id="mon"><div class="art">'+bug()+'</div><div class="grow"><div class="row between"><div class="mname">'+MON[B.type][0]+' · Ngày '+B.n+'</div><span class="combo" id="combo">x0</span></div><div class="bar mon" id="monbar"><i style="width:100%"></i><span id="montxt">'+B.monHp+' / '+B.monMax+'</span></div></div></div>';
   a.appendChild(mon);
   a.appendChild(el('div','bar time','<i id="tbar" style="width:100%"></i>'));
   a.appendChild(el('div','',''));a.lastChild.id='qwrap';
@@ -350,14 +356,15 @@ function startTimer(){stopTimer();B.t0=performance.now();const tick=()=>{if(!B||
 function nextQ(){
   if(!B)return;
   if(B.monHp<=0){victory();return;}
+  if(B.boss&&!B.queue.length)B.queue=pbQs(B.boss.p,B.stage);
   if(!B.queue.length){B.queue=shuffle(B.wrongList||[]);B.wrongList=[];if(!B.queue.length){victory();return;}}
   const q=B.cur=B.queue.shift();B.locked=false;B.hinted=false;const ih=$('#itHint');if(ih)ih.disabled=G.items.hint<=0;
   const w=$('#qwrap');w.innerHTML='';
-  const card=el('div','qcard pop');card.innerHTML='<div class="kind">'+esc(q.kind)+'</div><div class="q">'+(q.listen&&q.q==='🔊'?'<button class="btn blue" id="replay" style="min-height:64px;width:64px;border-radius:50%;font-size:26px">🔊</button>':esc(q.q))+'</div>'+(q.ipa?'<div class="ipa">'+esc(q.ipa)+'</div>':'')+(q.sub?'<div class="sub">'+esc(q.sub)+'</div>':'')+(q.listen&&q.q!=='🔊'?'<div style="margin-top:8px"><button class="btn blue sm" id="replay">🔊 Nghe lại</button></div>':'');
+  const card=el('div','qcard pop'+(q.long?' long':''));card.innerHTML='<div class="kind">'+esc(q.kind)+'</div><div class="q">'+(q.listen&&q.q==='🔊'?'<button class="btn blue" id="replay" style="min-height:64px;width:64px;border-radius:50%;font-size:26px">🔊</button>':esc(q.q))+'</div>'+(q.ipa?'<div class="ipa">'+esc(q.ipa)+'</div>':'')+(q.sub?'<div class="sub">'+esc(q.sub)+'</div>':'')+(q.listen&&q.q!=='🔊'?'<div style="margin-top:8px"><button class="btn blue sm" id="replay">🔊 Nghe lại</button></div>':'');
   w.appendChild(card);
-  const opts=el('div','opts');q.opts.forEach(o=>{const b=el('button','opt',esc(o));b.onclick=()=>answer(o,b);opts.appendChild(b);});w.appendChild(opts);
+  const opts=el('div','opts'+(q.long?' one':''));q.opts.forEach(o=>{const b=el('button','opt',esc(o));b.onclick=()=>answer(o,b);opts.appendChild(b);});w.appendChild(opts);
   const rp=$('#replay');if(rp)rp.onclick=()=>speak(q.say);
-  if(q.listen)setTimeout(()=>speak(q.say),250);
+  if(q.listen||q.auto)setTimeout(()=>speak(q.say),250);
   startTimer();
 }
 function answer(o,btn){
@@ -367,7 +374,7 @@ function answer(o,btn){
   const monEl=$('#mon');
   if(ok){
     B.right++;G.correct++;B.combo++;G.combo=B.combo;G.bestCombo=Math.max(G.bestCombo||0,B.combo);
-    const dmg=10;B.monHp=Math.max(0,B.monHp-dmg);
+    const dmg=B.boss&&B.combo>=3?15:10;B.monHp=Math.max(0,B.monHp-dmg);
     sfx.ok();monEl.classList.remove('hit');void monEl.offsetWidth;monEl.classList.add('hit');
     const r=monEl.getBoundingClientRect();fxText(r.left+r.width/2+(Math.random()*60-30),r.top+40,'-'+dmg+(B.combo>=3?' ✦':''));
     const cb=$('#combo');cb.textContent='x'+B.combo;cb.classList.remove('big');void cb.offsetWidth;cb.classList.add('big');
@@ -377,17 +384,19 @@ function answer(o,btn){
   }else{
     if(btn)btn.classList.add('bad');B.wrong++;B.combo=0;G.combo=0;$('#combo').textContent='x0';
     (B.wrongList=B.wrongList||[]).push(q);
-    G.hp=Math.max(0,G.hp-10);sfx.bad();flashRed();main.classList.add('shaking');setTimeout(()=>main.classList.remove('shaking'),400);
+    const hurt=B.boss?15:10;G.hp=Math.max(0,G.hp-hurt);sfx.bad();flashRed();main.classList.add('shaking');setTimeout(()=>main.classList.remove('shaking'),400);
     const ph=$('#php'),pb=$('#phpbar');if(ph)ph.textContent=G.hp;if(pb){pb.querySelector('i').style.width=Math.round(G.hp/G.maxHp*100)+'%';pb.classList.toggle('low',G.hp<=30);}
-    const r=$('#phpbar').getBoundingClientRect();fxText(r.left+40,r.top-10,'-10 HP');
+    const r=$('#phpbar').getBoundingClientRect();fxText(r.left+40,r.top-10,'-'+hurt+' HP');
     if(!q.listen&&q.say)speak(q.say);else if(q.listen)speak(q.say);
   }
   saveG();
   const mb=$('#monbar');if(mb){mb.querySelector('i').style.width=Math.round(B.monHp/B.monMax*100)+'%';$('#montxt').textContent=B.monHp+' / '+B.monMax;}
+  if(B.boss&&B.monHp>0)pbStageCheck();
   if(G.hp<=0){setTimeout(defeat,700);return;}
   setTimeout(nextQ,ok?650:1300);
 }
 function victory(){
+  if(B&&B.boss){pbVictory();return;}
   stopTimer();const monEl=$('#mon');if(monEl)monEl.classList.add('dead');sfx.win();confetti();
   const acc=B.right/Math.max(1,B.right+B.wrong);const stars=acc>=.9?3:acc>=.7?2:1;
   const st=G.cleared[B.n]||(G.cleared[B.n]={});st[B.type]=Math.max(st[B.type]||0,stars);
@@ -406,7 +415,7 @@ function victory(){
   }),700);
 }
 function defeat(){
-  stopTimer();const b=B;B=null;
+  stopTimer();const b=B;B=null;if(b&&b.boss){pbDefeat(b);return;}
   openModalLocked((m,close)=>{m.innerHTML='<div class="eyebrow" style="text-align:center;color:var(--red)">HẾT HP</div><div class="big" style="font-size:26px">Bạn gục rồi…</div><div class="mascot-row" style="margin-top:14px"><div class="mascot">'+mascot('sad')+'</div><div class="bubble grow"><span class="who">Mochi</span>Không sao! Nghỉ một chút, HP hồi 50% rồi quay lại nhé.</div></div>';
     G.hp=Math.ceil(G.maxHp/2);saveG();
     const r=el('div','row');r.style.cssText='gap:10px;margin-top:14px';const a=el('button','btn grow','Thử lại');a.onclick=()=>{close();battleStart(b.n,b.type);};const k=el('button','btn ghost grow','Về bản đồ');k.onclick=()=>{close();go('map');};r.appendChild(a);r.appendChild(k);m.appendChild(r);});
@@ -468,6 +477,200 @@ function bossEnd(){
     const k=el('button','btn yellow grow','Về ngày '+n);k.onclick=()=>{close();go('map');questSelect(n);};r.appendChild(k);m.appendChild(r);
   });
 }
+
+/* ---------- G3: BOSS CHẶNG theo ngành + KẾT CỤC ---------- */
+// Cuối mỗi chặng (phase) có 1 "người khó tính" đúng ngành. 3 pha: hội thoại chọn đáp → nghe điền từ → dịch (đổi pha khi máu < 60% / < 30%).
+// Câu hỏi sinh từ dữ liệu chính chặng đó (DATA.dialogues/listen/vocab/phrases theo days[].phase). Lưu: G.pboss[TRK_ID].
+const TRK_ID=(PACK&&PACK.id)||window.TRACK||'it';
+const PB_GEN={low:["I'm not finished with you yet!","Last chance. Answer carefully.","You won't win that easily!"],win:["Come back when you're ready.","Not good enough. Try again.","Better luck next time."]};
+// id ngành → kiểu boss {n: tên, r: vai (VI), e: emoji, hi: câu mở màn, mad: pha 2, ko: khi bị hạ}
+const PBOSS={
+ office:[{n:'Mr. Grant',r:'Sếp khó tính',e:'👔',hi:'I need that report on my desk. Now.',mad:'Is that really your best answer?',ko:"Fine. You're better than I thought."},
+  {n:'Ms. Carter',r:'Trưởng phòng nhân sự',e:'📋',hi:"Let's review your performance, shall we?",mad:'I expected more from you.',ko:'Excellent. I will note that in your review.'},
+  {n:'Mr. Lee',r:'Khách VIP hay đổi ý',e:'💼',hi:'I changed my mind again. Can you keep up?',mad:'No, no, that is not what I meant!',ko:'Perfect. That is exactly what I wanted.'},
+  {n:'Director Kim',r:'Giám đốc bận rộn',e:'🕴️',hi:'You have five minutes. Impress me.',mad:'Faster, please. Time is money.',ko:'Good. You have my attention.'}],
+ it:[{n:'Tanaka-san',r:'Khách Nhật khó tính',e:'🎌',hi:'The spec is not correct. Please explain carefully.',mad:'This is a serious problem for us.',ko:'Thank you. Excellent work.'},
+  {n:'Mr. Blocker',r:'Tech lead soi code',e:'🧱',hi:'I found twelve issues in your pull request.',mad:'Did you even run the tests?',ko:'LGTM. Ship it.'},
+  {n:'Ms. Deadline',r:'PM hối deadline',e:'⏰',hi:'The release is tomorrow. Why is it still red?',mad:'The client is calling me again!',ko:'Great, we are on schedule.'},
+  {n:'Sato-buchou',r:'Trưởng phòng phía Nhật',e:'🗾',hi:'We need a full incident report. Today, please.',mad:'Why did this happen twice?',ko:'Very clear. We trust your team.'}],
+ hotel:[{n:'Mr. Douglas',r:'Khách phàn nàn',e:'😤',hi:'My room is too noisy and nobody cares!',mad:'This is the worst service ever!',ko:'Well… thank you. You really helped.'},
+  {n:'Mrs. Pennyworth',r:'Khách VIP kén chọn',e:'👒',hi:'The towels are not white enough, darling.',mad:'I expected five-star service!',ko:'Lovely. I will stay here again.'},
+  {n:'Mr. Roy',r:'Thanh tra khách sạn',e:'🔍',hi:'I am checking your service standards today.',mad:'That answer would lose you a star.',ko:'Your hotel passes with top marks.'},
+  {n:'Mr. Blake',r:'Khách đòi hoàn tiền',e:'🧳',hi:'I want a full refund for last night.',mad:'I will write a bad review!',ko:'OK, that is a fair solution.'}],
+ sales:[{n:'Mr. Refund',r:'Khách đòi hoàn tiền',e:'💸',hi:'This product is broken. Give me my money back!',mad:'I want to speak to your manager!',ko:'Fine, I will keep it. Thanks for your help.'},
+  {n:'Ms. Discount',r:'Khách mặc cả',e:'🏷️',hi:'Your price is too high. Give me thirty percent off.',mad:'Your competitor is much cheaper!',ko:'Deal. You are a good salesperson.'},
+  {n:'Mr. Angry',r:'Khách gọi tổng đài nổi nóng',e:'📞',hi:'I have been on hold for forty minutes!',mad:'Stop reading from a script!',ko:'Thank you for actually listening.'},
+  {n:'Ms. Compare',r:'Khách so sánh đối thủ',e:'🧐',hi:'Why should I choose you and not them?',mad:'That is not a real answer.',ko:'You convinced me. I will buy it.'}],
+ factory:[{n:'Inspector Novak',r:'Thanh tra an toàn',e:'🦺',hi:'Where is your safety checklist?',mad:'That is a safety violation!',ko:'Clean report. Good job, team.'},
+  {n:'Mr. Audit',r:'Chuyên gia đánh giá ISO',e:'✅',hi:'Show me your process records, please.',mad:'This procedure is not documented.',ko:'No major findings. Well done.'},
+  {n:'Ms. Yield',r:'QC phía khách hàng',e:'📉',hi:'We found defects in your last batch.',mad:'The defect rate is too high!',ko:'Your corrective action is clear. Thank you.'},
+  {n:'Mr. Schmidt',r:'Kỹ sư chuyên gia nước ngoài',e:'⚙️',hi:'Why did line three stop again?',mad:'I need the root cause, not excuses.',ko:'Good analysis. Keep it up.'}],
+ logistics:[{n:'Officer Grant',r:'Hải quan soi hồ sơ',e:'🛃',hi:'Your documents do not match the cargo.',mad:'This shipment will be held!',ko:'Everything is in order. Cleared.'},
+  {n:'Mr. Late',r:'Khách hàng hàng trễ',e:'🚢',hi:'Where is my container? It is three days late!',mad:'My production line is waiting!',ko:'OK, thanks for the clear update.'},
+  {n:'Ms. Claim',r:'Khách khiếu nại hàng hỏng',e:'📦',hi:'Half of the boxes arrived damaged.',mad:'Who is going to pay for this?',ko:'Good. Please send the claim form.'},
+  {n:'Captain Ruiz',r:'Đại diện hãng tàu',e:'⚓',hi:'The vessel leaves in two hours. Are you ready?',mad:'No booking, no space!',ko:'Booking confirmed. Safe voyage.'}],
+ finance:[{n:'Auditor Hale',r:'Kiểm toán viên',e:'🧮',hi:'These numbers do not add up.',mad:'I need supporting documents for this.',ko:'The accounts are clean. Well done.'},
+  {n:'Mr. Variance',r:'CFO khắt khe',e:'📊',hi:'Explain this variance in one minute.',mad:'That is not a good enough reason.',ko:'Clear and accurate. Thank you.'},
+  {n:'Ms. Tax',r:'Cán bộ thuế',e:'🏛️',hi:'Your tax return has some problems.',mad:'This invoice is not valid.',ko:'Everything is correct. Case closed.'},
+  {n:'Mr. Overdue',r:'Khách nợ quá hạn',e:'💳',hi:'I already paid. Check again!',mad:'Stop sending me reminders!',ko:'OK, I will pay by Friday.'}],
+ marketing:[{n:'Ms. Brand',r:'Khách hàng brand khó tính',e:'🎨',hi:'This design does not feel like our brand.',mad:'Make it pop. And change everything.',ko:'Love it. Launch tomorrow.'},
+  {n:'Mr. ROI',r:'Sếp đòi số liệu',e:'📈',hi:'Show me the numbers. What is the ROI?',mad:'Likes are not sales!',ko:'Great results. Double the budget.'},
+  {n:'Troll99',r:'Khách chê trên mạng',e:'👾',hi:'Your product is a total scam. One star!',mad:'Everyone will see this comment!',ko:'Oh… thanks for fixing it. Five stars.'},
+  {n:'Ms. Influencer',r:'KOL đòi hỏi',e:'🤳',hi:'My fee just doubled. Take it or leave it.',mad:'My followers will not like this.',ko:'OK, let us work together.'}],
+ health:[{n:'Mr. Impatient',r:'Bệnh nhân sốt ruột',e:'⏳',hi:'I have waited two hours! Why so slow?',mad:'I want to see the doctor now!',ko:'Thank you, nurse. I feel better now.'},
+  {n:'Mrs. Worry',r:'Người nhà lo lắng',e:'😟',hi:'Is my husband going to be OK? Tell me everything!',mad:'Nobody is explaining anything to me!',ko:'Thank you for being so kind.'},
+  {n:'Dr. Strict',r:'Bác sĩ trưởng khoa',e:'🩻',hi:'Give me a clear handover. No mistakes.',mad:'Where are the vital signs?',ko:'Excellent handover. Well done.'},
+  {n:'Inspector Mei',r:'Thanh tra kiểm soát nhiễm khuẩn',e:'🧪',hi:'I am here to check your hygiene procedures.',mad:'That is against protocol.',ko:'Your ward meets every standard.'}],
+ construction:[{n:'Inspector Novak',r:'Thanh tra an toàn công trường',e:'🦺',hi:'Why is that worker not wearing a harness?',mad:'I can stop this site today!',ko:'Site is safe. Carry on.'},
+  {n:'Mr. Owner',r:'Chủ đầu tư',e:'🏢',hi:'We are behind schedule. Explain!',mad:'I am not paying for delays!',ko:'Good plan. I trust your team.'},
+  {n:'Eng. Weber',r:'Tư vấn giám sát',e:'📐',hi:'These drawings do not match the site.',mad:'This must be rebuilt.',ko:'Approved. Good workmanship.'},
+  {n:'Ms. Neighbor',r:'Hàng xóm phàn nàn',e:'🏘️',hi:'Your noise starts at six in the morning!',mad:'I will call the police!',ko:'OK, thank you for understanding.'}],
+ aviation:[{n:'Mr. Rowdy',r:'Hành khách gây rối',e:'😡',hi:'I want a better seat right now!',mad:'Do you know who I am?',ko:'Sorry… you handled that very well.'},
+  {n:'Mrs. Heavy',r:'Khách hành lý quá cân',e:'🧳',hi:'My bag is not overweight. Your scale is wrong!',mad:'I am not paying extra!',ko:'Fine. Thank you for explaining.'},
+  {n:'Captain Hayes',r:'Cơ trưởng khó tính',e:'👨‍✈️',hi:'Why is boarding delayed again?',mad:'We will lose our slot!',ko:'Good teamwork. Ready for departure.'},
+  {n:'Officer Park',r:'An ninh sân bay',e:'🛂',hi:'This bag needs a full check.',mad:'That item is not allowed.',ko:'All clear. You may proceed.'}],
+ education:[{n:'Mrs. Helicopter',r:'Phụ huynh khó tính',e:'🚁',hi:'Why did my son get a C?',mad:'I will talk to the principal!',ko:'I understand now. Thank you, teacher.'},
+  {n:'Inspector Ward',r:'Thanh tra giáo dục',e:'📝',hi:'I will observe your class today.',mad:'Your lesson plan is not clear.',ko:'An outstanding lesson. Well done.'},
+  {n:'Tom',r:'Học viên cá biệt',e:'🎒',hi:'This is boring. Why do we need English?',mad:'I did not do my homework. So what?',ko:'OK… that was actually fun.'},
+  {n:'Dean Morris',r:'Trưởng khoa',e:'🎓',hi:'Student feedback is low. Explain.',mad:'We need results, not excuses.',ko:'Great progress. Keep it up.'}],
+ legal:[{n:'Mr. Objection',r:'Luật sư đối phương',e:'⚖️',hi:'Objection! Your argument has no basis.',mad:'That clause means nothing!',ko:'Well argued. We accept your terms.'},
+  {n:'Judge Stone',r:'Thẩm phán nghiêm khắc',e:'👩‍⚖️',hi:'Be brief and precise, please.',mad:'Stick to the facts.',ko:'The court is satisfied.'},
+  {n:'Mr. Paperwork',r:'Công dân nóng tính ở bộ phận một cửa',e:'🗂️',hi:'Why do I need ten documents for this?',mad:'I have come here three times!',ko:'Thank you. Now I understand the process.'},
+  {n:'Ms. Clause',r:'Đối tác soi hợp đồng',e:'📜',hi:'Clause seven is unacceptable.',mad:'We will not sign this!',ko:'Agreed. Let us sign today.'}]
+};
+PBOSS.custom=[{n:'The Tough Client',r:'Khách hàng khó tính',e:'😠',hi:'I am not happy with your work.',mad:'That is not what I asked for!',ko:'Great. You really know your job.'},
+ {n:'The Big Boss',r:'Sếp lớn',e:'👔',hi:'Show me what you can do.',mad:'Is that all?',ko:'Impressive. Well done.'},
+ {n:'The Inspector',r:'Thanh tra',e:'🔍',hi:'I will check everything today.',mad:'That is a problem.',ko:'Everything is in order.'},
+ {n:'The Critic',r:'Người soi lỗi',e:'🧐',hi:'I can find a mistake in anything.',mad:'Wrong again!',ko:'Hmm… I cannot find any mistakes.'}];
+// kết cục: [danh hiệu, câu chuyện ngắn tiếng Việt]
+const PEND={
+ office:['Trưởng phòng được cả công ty tin cậy','Từ những email ngập ngừng ngày đầu, giờ bạn chủ trì họp với đối tác nước ngoài và xử lý gọn mọi yêu cầu khó. Sếp khó tính nhất cũng phải gật đầu: “Great job!”'],
+ it:['Tech Lead được khách Nhật tin tưởng','Bạn giải thích spec rành mạch, báo cáo sự cố đúng giờ và review code bằng tiếng Anh không cần tra từ. Tanaka-san cúi chào: “Thank you, excellent work.”'],
+ hotel:['Trưởng lễ tân khách sạn 5 sao','Vị khách hay phàn nàn nhất cũng ra về với nụ cười và một đánh giá 5 sao. Tên bạn được nhắc trong thư cảm ơn của khách quốc tế.'],
+ sales:['Quán quân doanh số & chăm sóc khách hàng','Khách đòi hoàn tiền trở thành khách trung thành, khách mặc cả chốt đơn vui vẻ. Bảng doanh số tháng này có tên bạn ở vị trí số 1.'],
+ factory:['Trưởng ca an toàn gương mẫu','Thanh tra an toàn và chuyên gia ISO kết thúc buổi kiểm tra với biên bản “không lỗi”. Chuyên gia nước ngoài xin bạn làm phiên dịch cho cả dây chuyền.'],
+ logistics:['Điều phối viên XNK “không trễ chuyến nào”','Hồ sơ hải quan chuẩn từng dòng, container đến đúng hẹn, khiếu nại được xử lý trong một cuộc gọi. Đối tác nước ngoài chỉ muốn làm việc với bạn.'],
+ finance:['Kế toán trưởng vượt mọi kỳ kiểm toán','Kiểm toán viên khó tính nhất ký báo cáo “sạch”, CFO khen bạn giải trình số liệu ngắn gọn, chính xác. Sổ sách công ty chưa bao giờ gọn như thế.'],
+ marketing:['Marketing Manager của chiến dịch viral','Khách hàng brand duyệt ngay bản đầu, bình luận chê biến thành lời khen, chiến dịch vượt KPI gấp đôi. Cả team gọi bạn là “người kể chuyện thương hiệu”.'],
+ health:['Điều dưỡng trưởng được bệnh nhân quốc tế tin yêu','Bệnh nhân sốt ruột bình tĩnh lại, người nhà yên tâm, bác sĩ trưởng khoa khen bàn giao ca rõ ràng. Khoa của bạn đạt chuẩn quốc tế.'],
+ construction:['Chỉ huy trưởng công trường an toàn','Thanh tra an toàn không tìm ra lỗi, chủ đầu tư hài lòng với tiến độ, tư vấn giám sát ký nghiệm thu. Công trình về đích đúng hạn, không một tai nạn.'],
+ aviation:['Trưởng ca mặt đất bình tĩnh nhất sân bay','Hành khách gây rối nhất cũng xin lỗi, chuyến bay cất cánh đúng giờ và cơ trưởng gửi lời cảm ơn qua bộ đàm. Cả sân bay biết tên bạn.'],
+ education:['Giảng viên được học viên quốc tế yêu mến','Phụ huynh khó tính trở thành người ủng hộ, học viên cá biệt xung phong phát biểu, thanh tra xếp giờ dạy loại xuất sắc. Lớp của bạn luôn kín chỗ.'],
+ legal:['Chuyên viên pháp lý đáng tin cậy','Hợp đồng chặt chẽ từng điều khoản, luật sư đối phương phải chấp nhận lập luận của bạn, người dân rời bộ phận một cửa với nụ cười. Hồ sơ nào khó cũng tìm đến bạn.']
+};
+function pbDefs(id){return PBOSS[id||TRK_ID]||PBOSS.custom;}
+function pbDef(p){const L=pbDefs();return L[((p%L.length)+L.length)%L.length];}
+function pbEndText(id){id=id||TRK_ID;if(PEND[id])return PEND[id];const lb=(PACK&&(PACK.short||PACK.label))||'người đi làm';return ['một '+lb+' tự tin nói tiếng Anh','Bạn đã hạ mọi “người khó tính” trong nghề. Giờ bạn trao đổi với đồng nghiệp và khách nước ngoài một cách tự nhiên, rõ ràng và chuyên nghiệp.'];}
+function pbT(){const t=G.pboss[TRK_ID]=Object.assign({won:{},end:null,inf:0,infBest:0},G.pboss[TRK_ID]||{});if(!t.won||typeof t.won!=='object')t.won={};return t;}
+function pbCount(){const w=pbT().won;return Object.keys(w).filter(k=>+k<PHASES.length).length;}
+function phaseDays(p){return DAYS.filter(d=>d.phase===p);}
+function pbOpen(p){const ds=phaseDays(p);if(!ds.length)return false;const last=ds[ds.length-1].n;return !!pbT().won[p]||G.cur>last||dayCleared(last);}
+const PB_STAGE=['💬 Hội thoại','🎧 Nghe điền từ','🔁 Dịch nhanh'];
+function pbStageLbl(){return '👑 BOSS chặng '+(B.boss.p+1)+(B.boss.endless?' · ♾️ cấp '+B.boss.lvl:'')+' · Pha '+(B.stage+1)+'/3 '+PB_STAGE[B.stage];}
+function pbQs(p,stage){
+  const ds=phaseDays(p);let qs=[];
+  if(stage===0){ // hội thoại chọn đáp của chặng
+    [...new Set(ds.map(d=>d.di))].map(i=>DIALOGS[i]).filter(Boolean).forEach(dl=>{const g=dl.opts.find(o=>o.good);if(!g)return;
+      qs.push({kind:'Boss nói — chọn câu đáp hay nhất',q:dl.them,ans:g.t,opts:shuffle(dl.opts.map(o=>o.t)),say:dl.them,long:true,auto:true});});
+  }else if(stage===1){ // nghe điền từ (chọn ô trống ngẫu nhiên, đáp án nhiễu ưu tiên từ cùng chặng)
+    const items=[...new Set(ds.map(d=>d.li))].map(i=>LISTEN[i]).filter(it=>it&&it.s&&it.blank&&it.blank.length);
+    const clean=x=>String(x).replace(/[.,?!:;]+$/,'');
+    const near=items.map(x=>x.s).flat().map(clean).filter(x=>x.length>2&&/^[a-z]+$/i.test(x));
+    const far=LISTEN.map(x=>(x&&x.s)||[]).flat().map(clean).filter(x=>x.length>2&&/^[a-z]+$/i.test(x));
+    items.forEach(it=>{const bi=rnd(it.blank);const w=clean(it.s[bi]);if(!w)return;const s=it.s.join(' ');
+      const shown=it.s.map((x,i)=>i===bi?'____'+(x.match(/[.,?!]+$/)||[''])[0]:x).join(' ');
+      const pool=Array.from(new Set(shuffle(near).concat(shuffle(far)))).filter(x=>x.toLowerCase()!==w.toLowerCase());
+      qs.push({kind:'Nghe và điền từ thiếu',q:shown,sub:it.hint?'gợi ý: '+it.hint:'',ans:w,opts:shuffle([w].concat(pool.slice(0,3))),say:s,listen:true});});
+  }
+  if(stage===2||!qs.length){ // dịch: từ của chặng (Việt → Anh, nhiễu cùng chặng) + câu mẫu của chặng
+    const vi=[...new Set(ds.map(d=>d.v).flat())].filter(i=>VOCAB[i]);
+    vi.forEach(i=>{const w=VOCAB[i];const same=shuffle(vi.filter(j=>j!==i&&VOCAB[j].t!==w.t).map(j=>VOCAB[j].t));const o=Array.from(new Set(same.concat(pickOthers(VOCAB,i,3,x=>x.t).map(x=>x.t)))).filter(x=>x!==w.t).slice(0,3);
+      qs.push({kind:'Dịch sang tiếng Anh',q:w.vi,sub:w.pos||'',ans:w.t,opts:shuffle([w.t].concat(o)),say:w.t});});
+    const pi=[...new Set(ds.map(d=>d.ph))].filter(i=>PHR[i]);
+    pi.forEach(i=>{const p0=PHR[i];const o=pickOthers(PHR,i,3,x=>x.en).map(x=>x.en);if(o.length<2)return;qs.push({kind:'Nói câu này bằng tiếng Anh',q:p0.vi,ans:p0.en,opts:shuffle([p0.en].concat(o)),say:p0.en,long:p0.en.length>40});});
+  }
+  if(!qs.length&&ds[0])qs=vocabQs(ds[0]);
+  return shuffle(qs);
+}
+function pbSay(t){const s=$('#pbsay');if(!s||!t)return;s.textContent='“'+t+'”';s.classList.remove('pop');void s.offsetWidth;s.classList.add('pop');}
+function pbStageCheck(){const pct=B.monHp/B.monMax;const st=pct>.6?0:pct>.3?1:2;if(st<=B.stage)return;B.stage=st;B.queue=pbQs(B.boss.p,st);B.wrongList=[];
+  B.limit=(st===2?12:15)+(G.up.timer||0)*2;const bd=B.boss.def;pbSay(st===1?bd.mad:rnd(PB_GEN.low));const l=$('#pbstage');if(l)l.textContent=pbStageLbl();toast('⚡ Pha '+(st+1)+': '+PB_STAGE[st]);}
+function pbStart(p,o){o=o||{};
+  if(!o.endless&&!pbOpen(p)){toast('🔒 Xong ngày cuối của chặng '+(p+1)+' để gặp boss');return;}
+  animIn();const bd=pbDef(p);const lvl=o.endless?(o.lvl||1):0;const hp=120+lvl*20;
+  if(G.hp<=0)G.hp=Math.ceil(G.maxHp/2);
+  B={n:(phaseDays(p)[0]||{n:1}).n,type:'boss',boss:{p,def:bd,endless:!!o.endless,lvl},stage:0,queue:pbQs(p,0),total:0,monHp:hp,monMax:hp,right:0,wrong:0,combo:0,timer:null,t0:0,limit:16+(G.up.timer||0)*2,cur:null,locked:false,hinted:false};
+  document.body.classList.add('infight');G.combo=0;cur='battle';renderTabs();window.scrollTo(0,0);vBattle();pbSay(bd.hi);nextQ();
+}
+function pbIntro(p){const bd=pbDef(p),w=pbT().won[p],open=pbOpen(p);
+  openModal((m,close)=>{m.innerHTML='<div class="eyebrow">BOSS CHẶNG '+(p+1)+' · '+esc(PHASES[p]||'')+'</div><div class="row" style="gap:12px;margin-top:10px"><div class="pbart lg">'+bd.e+'</div><div class="grow" style="min-width:0"><b class="h" style="font-size:19px">'+esc(bd.n)+'</b><small class="muted" style="display:block">'+esc(bd.r)+(w?' · <span style="color:var(--yellow)">'+'★'.repeat(w.s)+'</span> đã hạ '+w.n+' lần':'')+'</small></div></div>'+
+    '<div class="bubble" style="margin-top:12px"><span class="who">'+esc(bd.n)+'</span>'+esc(bd.hi)+'</div>'+
+    '<p class="muted" style="font-size:12.5px;margin-top:10px">3 pha: 💬 hội thoại → 🎧 nghe điền từ (máu &lt; 60%) → 🔁 dịch nhanh (&lt; 30%). Sai mất 15 HP · combo ≥3 đánh mạnh hơn.</p>';
+    const b=el('button','btn yellow block',open?'⚔️ Đấu boss':'🔒 Xong chặng '+(p+1)+' để mở');b.id='pbGo';b.disabled=!open;b.style.marginTop='12px';b.onclick=()=>{close();pbStart(p);};m.appendChild(b);});}
+function pbVictory(){
+  stopTimer();const monEl=$('#mon');if(monEl)monEl.classList.add('dead');sfx.win();confetti();
+  const b=B;B=null;const bs=b.boss,T=pbT();const acc=b.right/Math.max(1,b.right+b.wrong);const stars=acc>=.9?3:acc>=.7?2:1;
+  G.bossWins++;daily().boss++;let coins,xp,first=false,ending=false;
+  if(bs.endless){T.inf=bs.lvl;T.infBest=Math.max(T.infBest||0,bs.lvl);coins=40+bs.lvl*15;xp=80+bs.lvl*20;}
+  else{const w=T.won[bs.p];first=!w;T.won[bs.p]={s:Math.max(stars,w?w.s:0),n:(w?w.n:0)+1,d:todayStr()};coins=first?100+stars*30:30+stars*10;xp=150+stars*30;
+    ending=!T.end&&(bs.p===PHASES.length-1||pbCount()>=PHASES.length);}   // thưởng kết cục CHỈ lần đầu (chống cày xu)
+  gainXp(xp,coins);saveG();checkBadges();
+  setTimeout(()=>{if(ending){pbEnding({fresh:true});return;}
+    openModalLocked((m,close)=>{const bd=bs.def;
+      m.innerHTML='<div class="eyebrow" style="text-align:center">'+(bs.endless?'♾️ VÔ TẬN · CẤP '+bs.lvl:'BOSS CHẶNG '+(bs.p+1)+' BỊ HẠ')+'</div><div class="stars3">'+'★'.repeat(stars)+'<span style="opacity:.25">'+'★'.repeat(3-stars)+'</span></div><div class="big" style="font-size:24px">'+bd.e+' '+esc(bd.n)+' chịu thua!</div>'+
+        '<div class="row" style="justify-content:center;gap:14px;margin-top:10px;font-family:var(--disp);font-weight:700"><span>✅ '+b.right+'</span><span>❌ '+b.wrong+'</span><span>🪙 +'+coins+'</span><span>+'+xp+' XP</span></div>'+
+        '<div class="bubble" style="margin-top:12px"><span class="who">'+esc(bd.n)+'</span>'+esc(bd.ko)+'</div>'+
+        '<p class="muted" style="text-align:center;font-size:12.5px;margin-top:8px">'+(bs.endless?'Kỷ lục vô tận: cấp '+T.infBest:'Đã hạ '+pbCount()+'/'+PHASES.length+' boss '+esc(PACK?PACK.short:'IT')+(first?' · lần đầu +xu thưởng':''))+'</p>';
+      const r=el('div','row');r.style.cssText='gap:10px;margin-top:12px';
+      if(bs.endless){const s=el('button','btn ghost grow','Dừng');s.onclick=()=>{close();go('map');};const n=el('button','btn yellow grow','Boss tiếp ›');n.id='pbNext';n.onclick=()=>{close();pbEndless(bs.lvl+1);};r.appendChild(s);r.appendChild(n);}
+      else{const a=el('button','btn ghost grow','Chơi lại');a.onclick=()=>{close();pbStart(bs.p);};const k=el('button','btn yellow grow','Về bản đồ');k.onclick=()=>{close();go('map');};r.appendChild(a);r.appendChild(k);}
+      m.appendChild(r);});},700);
+}
+function pbDefeat(b){const bs=b.boss,bd=bs.def,T=pbT();G.hp=Math.ceil(G.maxHp/2);if(bs.endless)T.inf=0;saveG();
+  openModalLocked((m,close)=>{m.innerHTML='<div class="eyebrow" style="text-align:center;color:var(--red)">HẾT HP</div><div class="big" style="font-size:24px">'+bd.e+' '+esc(bd.n)+' thắng lần này…</div>'+
+    '<div class="bubble" style="margin-top:12px"><span class="who">'+esc(bd.n)+'</span>'+esc(rnd(PB_GEN.win))+'</div>'+
+    '<div class="mascot-row" style="margin-top:12px"><div class="mascot">'+mascot('sad')+'</div><div class="bubble grow"><span class="who">Mochi</span>'+(bs.endless?'Chuỗi vô tận dừng ở cấp '+(bs.lvl-1)+' · kỷ lục '+(T.infBest||0)+'.':'Ôn lại các ngày trong chặng rồi đấu lại nhé.')+' HP hồi 50%.</div></div>';
+    const r=el('div','row');r.style.cssText='gap:10px;margin-top:12px';const a=el('button','btn grow','Thử lại');a.id='pbRetry';a.onclick=()=>{close();bs.endless?pbEndless(1):pbStart(bs.p);};const k=el('button','btn ghost grow','Về bản đồ');k.onclick=()=>{close();go('map');};r.appendChild(a);r.appendChild(k);m.appendChild(r);});}
+function pbEndless(lvl){const T=pbT();if(!T.end){toast('♾️ Hạ boss chặng cuối để mở chế độ vô tận');return;}pbStart(Math.floor(Math.random()*PHASES.length),{endless:true,lvl:lvl||1});}
+function wordsLearned(){const s=new Set();Object.keys(G.cleared).forEach(n=>{const d=DAYS[n-1];if(d&&dayCleared(+n))d.v.forEach(i=>s.add(i));});return Math.max(s.size,Object.keys(loadApp().srs||{}).length);}
+function pbEnding(o){o=o||{};const T=pbT();let bonus=0;
+  if(o.fresh){bonus=T.end?200:1000;T.end={d:todayStr(),n:((T.end&&T.end.n)||0)+1};gainXp(300,bonus);saveG();sfx.lv();confetti();}
+  if(!T.end){toast('🏆 Hạ boss chặng cuối để mở kết cục');return;}
+  const et=pbEndText(),lp=PHASES.length-1;
+  openModalLocked((m,close)=>{m.innerHTML='<div class="eyebrow" style="text-align:center">🏆 KẾT CỤC · '+esc(PACK?PACK.emoji+' '+PACK.short:'💻 IT')+'</div><div class="pbhero">'+(PACK?PACK.emoji:'💻')+'</div>'+
+    '<div class="h" style="font-size:20px;text-align:center;margin-top:6px;line-height:1.25">Bạn đã trở thành <span style="color:var(--yellow)">'+esc(et[0])+'</span></div>'+
+    '<div class="mascot-row" style="margin-top:10px"><div class="mascot">'+mascot('cheer')+'</div><div class="bubble grow" style="font-size:13.5px"><span class="who">Mochi</span>'+esc(et[1])+'</div></div>'+
+    '<div class="stats pbstats"><div class="stile"><span class="ic">👑</span><b class="h n">'+pbCount()+'/'+PHASES.length+'</b><small>boss</small></div><div class="stile"><span class="ic">📘</span><b class="h n">'+wordsLearned()+'</b><small>từ đã học</small></div><div class="stile"><span class="ic">🪙</span><b class="h n">'+G.coins+'</b><small>xu'+(bonus?' (+'+bonus+')':'')+'</small></div></div>'+
+    (T.infBest?'<p class="muted" style="text-align:center;font-size:12px;margin-top:6px">♾️ Kỷ lục vô tận: cấp '+T.infBest+' · kết cục lần '+T.end.n+'</p>':'');
+    const r=el('div','row');r.style.cssText='gap:10px;margin-top:12px';
+    const a=el('button','btn ghost grow','↺ Chơi lại');a.id='pbReplay';a.onclick=()=>{close();pbStart(lp);};
+    const e=el('button','btn yellow grow','♾️ Vô tận');e.id='pbInf';e.onclick=()=>{close();pbEndless(1);};
+    r.appendChild(a);r.appendChild(e);m.appendChild(r);
+    const k=el('button','btn ghost block sm','Về bản đồ');k.style.marginTop='8px';k.onclick=()=>{close();go('map');};m.appendChild(k);});
+}
+function pbSheet(){const T=pbT();
+  openModal((m,close)=>{m.innerHTML='<div class="eyebrow">BOSS CHẶNG · '+esc(PACK?PACK.emoji+' '+PACK.short:'💻 IT')+'</div><b class="h" style="font-size:18px">Đã hạ '+pbCount()+'/'+PHASES.length+' boss</b>';
+    if(T.end){const r=el('div','row');r.style.cssText='gap:8px;margin-top:10px';const a=el('button','btn yellow sm grow','🏆 Kết cục');a.onclick=()=>{close();pbEnding();};const e=el('button','btn violet sm grow','♾️ Vô tận'+(T.infBest?' · '+T.infBest:''));e.onclick=()=>{close();pbEndless(1);};r.appendChild(a);r.appendChild(e);m.appendChild(r);}
+    else m.appendChild(el('p','muted','<small>Hạ boss chặng cuối để mở <b>kết cục</b> và chế độ <b>vô tận</b>.</small>'));
+    const l=el('div','pblist');
+    PHASES.forEach((t,p)=>{const bd=pbDef(p),w=T.won[p],op=pbOpen(p);const b=el('button','pbrow'+(w?' won':op?' ready':' lock'));
+      b.innerHTML='<span class="pbe">'+(op||w?bd.e:'🔒')+'</span><span class="grow" style="min-width:0"><b>'+(p+1)+'. '+esc(bd.n)+'</b><small>'+esc(t)+'</small></span><span class="st">'+(w?'★'.repeat(w.s):op?'⚔️':'')+'</span>';
+      b.onclick=()=>{close();pbIntro(p);};l.appendChild(b);});
+    m.appendChild(l);});
+}
+(function(){const st=el('style');st.textContent=
+ '.qcard.long .q{font-size:16px;line-height:1.3}.opts.one{grid-template-columns:1fr;gap:8px}.opts.one .opt{min-height:44px;font-size:13px;text-align:left;padding:7px 12px}'+
+ '.moncard.pb{background:linear-gradient(180deg,#4a1650,#1b1147)}.pbart{display:flex;align-items:center;justify-content:center;font-size:42px;line-height:1;border-radius:50%;border:3px solid var(--stroke);background:radial-gradient(circle at 50% 40%,#ffd16666,#ff4f9a44 60%,#2a2160 72%)}'+
+ '.moncard .monster .art.pbart{width:68px;height:68px}.pbart.lg{width:72px;height:72px;flex:0 0 auto;font-size:44px}'+
+ '.pbstage{font-family:var(--mono);font-size:10px;color:var(--yellow);margin:2px 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'+
+ '.pbsay{margin-top:5px;background:#fff;color:#221a4d;border:2px solid var(--stroke);border-radius:10px;padding:3px 8px;font-size:12px;font-weight:800;line-height:1.3}.pbsay:empty{display:none}'+
+ '.rail .node.pbnode{font-size:20px;background:linear-gradient(180deg,#ffb1d6,#ff4f9a);color:#fff}.rail .node.pbnode.lock{background:var(--panel2)}.rail .node.pbnode.done{background:linear-gradient(180deg,#ffe08a,#ffb703)}'+
+ '.pbhero{font-size:56px;text-align:center;line-height:1;margin-top:6px}.stats.pbstats{grid-template-columns:repeat(3,1fr)}'+
+ '.pblist{display:flex;flex-direction:column;gap:6px;max-height:52vh;overflow:auto;margin-top:10px}'+
+ '.pbrow{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:14px;border:2px solid var(--stroke);background:var(--panel2);text-align:left;font-size:13px;min-height:44px}'+
+ '.pbrow small{display:block;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pbrow .pbe{font-size:22px}.pbrow .st{color:var(--yellow);font-size:12px}.pbrow.won{border-color:var(--yellow)}.pbrow.lock{opacity:.55}';
+ document.head.appendChild(st);})();
+window.NNGame={PBOSS,PEND,pbDefs,pbEndText,pbStart,pbEndless,pbEnding,pbSheet,pbIntro,pbQs,pbDef,pbOpen,pbT,trk:TRK_ID,state:()=>({G,B})}; // móc cho test
 
 /* ---------- AI BOSS (free talk, visual novel) ---------- */
 function aiCfg(){const a=loadApp();return (a.ai&&a.ai.key&&a.ai.provider)?a.ai:null;}
@@ -741,7 +944,7 @@ async function aiCallWith(c,system,msgs){
 const RANKS=[[1,'Tập sự'],[3,'Junior Dev'],[6,'Mid Dev'],[10,'Senior Dev'],[15,'Tech Lead'],[20,'Kiến trúc sư']];
 function rankName(){let r=RANKS[0][1];RANKS.forEach(x=>{if(G.lv>=x[0])r=x[1];});return r;}
 // v3.1: đổi ngành ngay trong game (ghi chung store của app) — cần cho bản game chạy riêng (vd claude.ai)
-const GTRACKS=[['office','🏢','Công sở chung'],['it','💻','IT · Phần mềm'],['hotel','🏨','Khách sạn · Du lịch'],['sales','🎧','Bán hàng · CSKH'],['factory','🏭','Sản xuất · Nhà máy'],['logistics','🚚','Logistics · XNK'],['finance','💰','Tài chính · Kế toán'],['marketing','📣','Marketing · TMĐT'],['health','🩺','Y tế · Điều dưỡng'],['construction','🏗️','Xây dựng · Kỹ thuật'],['aviation','✈️','Hàng không · Sân bay']];
+const GTRACKS=[['office','🏢','Công sở chung'],['it','💻','IT · Phần mềm'],['hotel','🏨','Khách sạn · Du lịch'],['sales','🎧','Bán hàng · CSKH'],['factory','🏭','Sản xuất · Nhà máy'],['logistics','🚚','Logistics · XNK'],['finance','💰','Tài chính · Kế toán'],['marketing','📣','Marketing · TMĐT'],['health','🩺','Y tế · Điều dưỡng'],['construction','🏗️','Xây dựng · Kỹ thuật'],['aviation','✈️','Hàng không · Sân bay'],['education','🎓','Giáo dục · Đào tạo'],['legal','⚖️','Luật · Hành chính công']];
 function trackSheet(){openModal((m,close)=>{const curT=window.TRACK||'it';m.innerHTML='<div class="eyebrow">NGÀNH</div><b class="h" style="font-size:18px">Chọn ngành để chơi</b><p class="tip" style="margin-top:6px">Quái, câu hỏi và Boss AI lấy theo ngành. Dùng chung với app học.</p>';
   const w=el('div');w.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px';
   GTRACKS.forEach(t=>{const b=el('button','btn'+(t[0]===curT?' blue':' ghost'),t[1]+' '+t[2]);b.style.cssText='height:auto;min-height:44px;font-size:13px;padding:8px';b.onclick=()=>{const a=loadApp();a.cfg=a.cfg||{};a.cfg.track=t[0];a.cfg.trackChosen=true;saveApp(a);close();location.reload();};w.appendChild(b);});
@@ -767,6 +970,7 @@ function vProfile(){
     setRow('🤖','Boss AI',inClaude()?'<b style="color:var(--green)">Claude sẵn có</b>':(aiCfg()?'<b style="color:var(--green)">'+(PROV[aiCfg().provider]||[aiCfg().provider])[0].split(' ·')[0]+'</b>':'chưa có key'),aiSetupSheet),
     toggleRow('🔊','Âm thanh',G.sound!==false,v=>{G.sound=v;saveG();main.classList.remove('vin');vProfile();}),
     toggleRow('🌸','Hoa rơi & hiệu ứng nền',G.fx!==false,v=>{G.fx=v;saveG();document.body.classList.toggle('nofx',!v);main.classList.remove('vin');vProfile();}),
+    setRow('👑','Boss chặng & kết cục',pbCount()+'/'+PHASES.length+(pbT().end?' · 🏆':''),pbSheet),
     setRow('🧭','Ngành đang học',(PACK?PACK.emoji+' '+PACK.short:'💻 IT'),trackSheet),
     setRow('📖','Xem lại hướng dẫn','',tutorial),
     setRow('📱','Mở app học '+APPN,'',openApp),

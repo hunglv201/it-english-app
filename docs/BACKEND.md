@@ -14,10 +14,10 @@
 | `vendor/supabase.min.js` | supabase-js 2.116 tự host (CSP chỉ cho `'self'`); chỉ tải khi đã cấu hình |
 | `index.html` | Thẻ tài khoản ở Tôi, màn Tài khoản & đồng bộ, chấm trạng thái trên tab Tôi (chỉ hiện khi đang gửi / offline còn thay đổi / cần xử lý), thẻ gợi ý "Lưu bằng Google", màn gộp tiến độ |
 | `chinh-sach.html` · `dieu-khoan.html` · `xoa-du-lieu.html` | Trang pháp lý (cần điền email liên hệ — chỗ tô vàng) |
-| `supabase/migrations/*.sql` | 0001 người dùng + RLS · 0002 đồng bộ `apply_changes` · 0003 báo lỗi, hạn mức AI, thống kê, dọn khách · 0004 nhắc học Web Push (`claim_reminders`, lời nhắc bạn học, `admin_quality`) · 0005 lớp học, bảng tuần theo ngành, bạn học |
+| `supabase/migrations/*.sql` | 0001 người dùng + RLS · 0002 đồng bộ `apply_changes` · 0003 báo lỗi, hạn mức AI, thống kê, dọn khách · 0004 nhắc học Web Push (`claim_reminders`, lời nhắc bạn học, `admin_quality`) · 0005 lớp học, bảng tuần theo ngành, bạn học · 0006 tổng kết tuần qua email (`claim_weekly_emails`, huỷ nhận bằng token) |
 | `supabase/functions/ai` | Gọi Gemini (hoặc Claude) bằng key chung, kiểm hạn mức ngày + phút, không log nội dung |
 | `supabase/functions/delete-account` | Người dùng tự xoá tài khoản (cần service role) |
-| `supabase/functions/send-reminders` | Gửi nhắc học 15 phút/lần (header `x-cron-secret`), web-push VAPID, ≤ 1 thông báo/ngày/người |
+| `supabase/functions/send-reminders` | Gửi nhắc học 15 phút/lần (header `x-cron-secret`), web-push VAPID, ≤ 1 thông báo/ngày/người · v4.2: email tổng kết tuần qua Resend (tối Chủ nhật, người dùng tự bật, chỉ Google) |
 | `supabase/queries/admin.sql` | Truy vấn lưu sẵn cho Studio: báo lỗi mới, DAU, tỉ lệ đúng, lượt AI, dung lượng |
 | `.github/workflows/backend-*.yml` | Sao lưu `pg_dump` hằng tuần (mã hoá) · keepalive + dọn khách hằng ngày · gọi `send-reminders` 15 phút/lần |
 
@@ -54,6 +54,8 @@ Server tự suy ra bảng thống kê từ các thay đổi: `user_days` (ngày 
    npx web-push generate-vapid-keys            # → Public Key (điền vapidPublicKey trong cloud-config.js) + Private Key
    supabase secrets set VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... VAPID_SUBJECT=mailto:<email> CRON_SECRET=<chuỗi ngẫu nhiên dài>
    supabase functions deploy send-reminders
+   # tuỳ chọn v4.2 — email tổng kết tuần (không đặt thì bỏ qua phần email): tạo tài khoản Resend, xác minh tên miền gửi
+   supabase secrets set RESEND_API_KEY=... EMAIL_FROM="Nói Nghề <hello@ten-mien-cua-ban>" APP_URL=https://hunglv201.github.io/it-english-app/
    ```
    Lịch chạy: workflow `backend-reminders.yml` (cần secret `CRON_SECRET` trong GitHub) **hoặc** `pg_cron` + `pg_net` trong Supabase:
    `select cron.schedule('nn-reminders', '*/15 * * * *', $$ select net.http_post(url := '<SUPABASE_URL>/functions/v1/send-reminders', headers := jsonb_build_object('x-cron-secret', '<CRON_SECRET>')) $$);` — chỉ chọn **một** trong hai (hai cái cùng chạy vẫn không gửi trùng nhờ `claim_reminders`, nhưng tốn lượt gọi).

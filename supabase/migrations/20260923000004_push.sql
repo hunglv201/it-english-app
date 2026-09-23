@@ -130,8 +130,8 @@ language sql stable security definer set search_path = public as $$
                                else coalesce(b.first_min - 30, 1170) end, b.lo), b.hi) as target
       from win b
   ), st as (
-    select c.*, coalesce(nullif(u.state->>'stats|streak', '')::int, 0) as stk,
-           coalesce(nullif(u.state->>'stats|freeze', '')::int, 0) as frz,
+    select c.*, least(greatest(coalesce(public.nn_num(u.state->'stats|streak'), 0), 0), 100000)::int as stk,
+           least(greatest(coalesce(public.nn_num(u.state->'stats|freeze'), 0), 0), 100000)::int as frz,
            coalesce(p.track, 'office') as trk
       from calc c left join user_state u on u.user_id = c.user_id left join profiles p on p.id = c.user_id
   )
