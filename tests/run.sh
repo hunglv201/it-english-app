@@ -8,4 +8,4 @@ trap "kill $SRV" EXIT
 sleep 1
 export BASE_URL="http://localhost:$PORT/"
 node tests/sync-core.test.mjs
-for t in tests/a.mjs tests/b.mjs tests/c.mjs tests/d.mjs tests/e.mjs tests/f.mjs tests/g.mjs tests/h.mjs tests/i.mjs; do echo "== $t"; node "$t"; done
+for t in tests/a.mjs tests/b.mjs tests/c.mjs tests/d.mjs tests/e.mjs tests/f.mjs tests/g.mjs tests/h.mjs tests/i.mjs tests/j.mjs; do echo "== $t"; node "$t"; done

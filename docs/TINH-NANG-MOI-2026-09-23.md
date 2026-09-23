@@ -6,6 +6,8 @@
 
 ---
 
+> **Trạng thái (23/09):** đã làm **đợt B** (B1–B5) và phần chạy trên máy của A3 + A6 (lá chắn cuối tuần, sửa chuỗi, chúc mừng, ngày hoàn hảo) — nhánh `feature/noi-tot-hon`, test `tests/j.mjs`. A1/A2/A4/A5 (Web Push, giờ nhắc thích ứng, kéo người vắng) chờ bật máy chủ v4.0.
+
 ## 0. Kết luận nhanh
 
 1. **Việc đáng làm nhất là giữ chân người học, và phần lớn cần backend v4.0.** Nhắc học hiện là thông báo cục bộ, chỉ chạy khi app đang mở. **Web Push qua Supabase** là điều kiện để các cơ chế giữ chân khác có tác dụng.

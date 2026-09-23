@@ -21,7 +21,8 @@
     ['events', 'events', function (x) { return x.id; }, null],
     ['reports', 'reports', function (x) { return x.at; }, 'at'],
     ['convos', 'convos', function (x) { return x.id; }, 'id', ['turns']],
-    ['photoLessons', 'photos', function (x) { return (x.at || '') + '~' + String(x.summary || '').slice(0, 40); }, 'at']
+    ['photoLessons', 'photos', function (x) { return (x.at || '') + '~' + String(x.summary || '').slice(0, 40); }, 'at'],
+    ['audits', 'audits', function (x) { return (x.at || '') + '~' + (x.words || 0) + '~' + (x.fillerN || 0); }, 'at']
   ];
   var SCALARS = ['customPack', 'theme', 'swipeSeen'];
 

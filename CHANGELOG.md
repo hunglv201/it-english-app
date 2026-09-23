@@ -31,6 +31,19 @@ làm bản lưu trữ (`gioi-thieu-v<N>.html`) để xem lại app từng trông
 - Chưa có key AI riêng vẫn dùng được AI: **10 lượt/ngày** (khách) · **20 lượt/ngày** (Google), qua máy chủ.
 - Báo lỗi ⚑ gửi thẳng cho người làm app (offline thì gửi sau).
 
+**Nói tốt hơn** (đợt B, `docs/TINH-NANG-MOI-2026-09-23.md`)
+- 🎯 **Từ mục tiêu trong Giao tiếp AI**: mỗi buổi chọn 3–5 từ/câu đang tới hạn ôn hoặc hay sai; AI khéo dẫn dắt để bạn dùng; dùng đúng → ✓ và tính 1 lần ôn SRS. Tắt/bật trong ⋯ Tùy chọn.
+- **Chạm từ AI nói** → nghĩa, IPA, ví dụ (tra từ điển gói trước, không có mới hỏi AI, có cache) · lưu vào "Của tôi" · dịch cả câu.
+- **Bí thì gõ tiếng Việt**: app gợi ý câu tiếng Anh để bạn tự nói/gõ lại (không tính là một lượt).
+- 🎤 **Phỏng vấn · Họp nêu ý kiến · Thuyết trình 2 phút** cho mọi ngành, chấm thêm theo tiêu chí (vd có ví dụ cụ thể: tình huống → việc làm → kết quả).
+- **Phát âm 3 mức**: 🟩 đúng · 🟨 gần đúng (hiện từ bạn nói) · 🟥 thiếu; chạm từ để nghe chậm + IPA — ở Nhại theo, Đọc câu, Báo cáo 60s, Ôn nhanh.
+- 🎤 **Phân tích bài nói**: nói tối đa 2 phút (hoặc dán chữ) → số từ, tốc độ từ/phút, từ đệm (um, like, you know…), AI sửa lỗi + nói lại tự nhiên hơn, lưu câu sửa để ôn. Không lưu ghi âm.
+
+**Giữ chuỗi**
+- 🔥 Chúc mừng khi việc đầu tiên trong ngày nối chuỗi (mốc 3/7/14/30/100 ngày) · 🌟 đếm "ngày hoàn hảo" (đủ 4 việc).
+- 🛡️ **Lá chắn cuối tuần**: nghỉ Thứ Bảy/Chủ nhật mà 7 ngày trước học ≥5 ngày → chuỗi giữ nguyên.
+- 🔧 **Sửa chuỗi** (1 lần/tháng, trong 2 ngày sau khi đứt): làm đủ 4 việc hôm nay để tự nối lại, hoặc đổi 150 xu game.
+
 **Máy chủ** — Supabase (Singapore): 3 migration có RLS, RPC `apply_changes` gộp theo thao tác + chống gửi trùng, thống kê học (ngày học, việc/ngày, đúng/sai), hạn mức AI, dọn khách bỏ quá 30 ngày; Edge Functions `ai`, `delete-account`; sao lưu hằng tuần + keepalive bằng GitHub Actions.
 
 ---
