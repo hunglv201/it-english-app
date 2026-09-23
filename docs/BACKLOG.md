@@ -1,5 +1,7 @@
 # Việc để sau (backlog)
 
+> 23/09/2026: nghiên cứu mới + lộ trình đợt A–D (giữ chân, nói tốt hơn, lớp học, nội dung) — xem [`TINH-NANG-MOI-2026-09-23.md`](TINH-NANG-MOI-2026-09-23.md).
+
 Ghi lại các ý tưởng đã bàn nhưng **chưa làm** (cập nhật 20/09/2026, sau v3.1.0). Thứ tự ≈ độ ưu tiên đề xuất.
 
 | # | Việc | Ước lượng | Ghi chú |

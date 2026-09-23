@@ -23,3 +23,7 @@ index.html.bak
 .env.local
 *.env
 .claude/worktrees/
+
+# Supabase CLI
+supabase/.temp/
+supabase/.branches/

@@ -1,9 +1,11 @@
 /* Nói Nghề (IT English) — service worker (offline app shell) */
-const CACHE = 'it-english-v3.1.0';
+const CACHE = 'it-english-v4.0.0';
 const ASSETS = [
   './', 'index.html', 'data.gen.js', 'phrases.gen.js', 'roles.gen.js',
   'packs/office.gen.js', 'packs/hotel.gen.js', 'packs/sales.gen.js', 'packs/factory.gen.js',
   'packs/logistics.gen.js', 'packs/finance.gen.js', 'packs/marketing.gen.js', 'packs/health.gen.js', 'packs/custom.js',
+  'cloud-config.js', 'sync-core.js', 'cloud.js', 'vendor/supabase.min.js',
+  'chinh-sach.html', 'dieu-khoan.html', 'xoa-du-lieu.html',
   'manifest.webmanifest', 'icon-192.png', 'icon-512.png'
 ];
 
@@ -36,10 +38,10 @@ self.addEventListener('fetch', function (e) {
   if (req.method !== 'GET') return;
   var url;
   try { url = new URL(req.url); } catch (err) { return; }
-  // Chỉ xử lý tài nguyên cùng nguồn; font CDN và API AI để mạng lo (không cache)
+  // Chỉ xử lý tài nguyên cùng nguồn; font CDN, API AI và máy chủ Supabase để mạng lo (không cache)
   if (url.origin !== location.origin) return;
 
-  var isHTML = req.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.endsWith('/');
+  var isHTML = req.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.endsWith('/') || url.pathname.endsWith('cloud-config.js');
   if (isHTML) {
     // network-first: luôn ưu tiên bản mới, offline thì dùng cache
     e.respondWith(

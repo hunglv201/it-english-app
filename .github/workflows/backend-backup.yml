@@ -1,0 +1,31 @@
+# Sao lưu DB Supabase hằng tuần (gói Free không có backup). Bật bằng biến repo NN_BACKEND_ENABLED=true.
+# Secrets: SUPABASE_DB_URL (chuỗi kết nối Postgres, dạng session pooler), BACKUP_PASSPHRASE (mã hoá file sao lưu).
+name: backend-backup
+on:
+  schedule: [{ cron: "0 19 * * 0" }]   # 02:00 thứ Hai giờ VN
+  workflow_dispatch:
+jobs:
+  backup:
+    if: vars.NN_BACKEND_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cài pg_dump 17
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSo /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17
+      - name: Dump + mã hoá
+        env:
+          DB: ${{ secrets.SUPABASE_DB_URL }}
+          PASS: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          F=noinghe-$(date -u +%F).sql.gz
+          /usr/lib/postgresql/17/bin/pg_dump "$DB" --no-owner --no-privileges -n public -n auth | gzip -9 > "$F"
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$PASS" -c "$F"
+          ls -la "$F.gpg"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: db-backup
+          path: "*.sql.gz.gpg"
+          retention-days: 30

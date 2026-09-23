@@ -1,0 +1,21 @@
+# Giữ project Supabase Free không bị tạm dừng (dừng sau 7 ngày không có request) + dọn tài khoản khách bỏ quá 30 ngày.
+# Bật bằng biến repo NN_BACKEND_ENABLED=true. Biến: SUPABASE_URL, SUPABASE_ANON_KEY (công khai). Secret: SUPABASE_DB_URL.
+name: backend-maintenance
+on:
+  schedule: [{ cron: "17 20 * * *" }]  # 03:17 giờ VN mỗi ngày
+  workflow_dispatch:
+jobs:
+  keepalive-cleanup:
+    if: vars.NN_BACKEND_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Keepalive (đọc app_config)
+        run: |
+          curl -fsS "${{ vars.SUPABASE_URL }}/rest/v1/app_config?select=key&limit=1" \
+            -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" -H "Authorization: Bearer ${{ vars.SUPABASE_ANON_KEY }}" > /dev/null
+      - name: Dọn khách > 30 ngày
+        env:
+          DB: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          sudo apt-get install -y -qq postgresql-client >/dev/null
+          psql "$DB" -Atc "select public.cleanup_guests(30);" | xargs -I{} echo "Đã xoá {} tài khoản khách"

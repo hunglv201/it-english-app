@@ -11,7 +11,7 @@
 
 | Sản phẩm | File | URL Pages | Mô tả |
 |---|---|---|---|
-| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Gói ngành (IT 370 ngày, các ngành khác 120 ngày), từ vựng SRS, câu thường dùng, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **3.1.0** (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
+| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Gói ngành (IT 370 ngày, các ngành khác 120 ngày), từ vựng SRS, câu thường dùng, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **3.1.0** trên `main`; nhánh `feature/backend-v4` = **4.0.0** (backend Supabase, chưa merge) (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
 | **Trang giới thiệu (showcase)** | `gioi-thieu.html` (**v3.0**, ảnh `img/showcase/v3/`) + lưu trữ `gioi-thieu-v2.html`, `gioi-thieu-v1.html` | `…/gioi-thieu.html` | Landing fullpage scroll-snap, nền particle-net, mục "Mới trong v3.0" (lưới 5 ngành), mục **Lịch sử phiên bản** (`#versions`). Dark-first. Quy ước version lớn: xem mục 7 |
 | **Game "Nói Nghề Quest"** | `game/index.html` + `game/game.js` (+ bản sao `game/data.gen.js`, `game/phrases.gen.js`) | `…/game/` | Bản game anime **mobile-first**: RPG bản đồ ngày → quiz battle → boss visual novel, AFK idle (Mochi tự cày xu), Shop, huy hiệu, tab **Nói** 5 chế độ luyện nói. Dùng chung dữ liệu + AI key với app |
 
@@ -35,7 +35,13 @@ it-english-app/
 ├── img/showcase/*.webp   # 17 ảnh của gioi-thieu-v1.html (bản lưu trữ)
 ├── img/showcase/v2/*.webp # 25 ảnh của gioi-thieu-v2.html (lưu trữ)
 ├── img/showcase/v3/*.webp # 33 ảnh của gioi-thieu.html v3.0 (540×1169, chụp bằng Playwright + AI giả, nhiều ngành)
-├── tests/                # Playwright mobile: lib.mjs + a…g.mjs, run.sh (xem tests/README.md) — g.mjs: đa ngành
+├── tests/                # Playwright mobile: lib.mjs + a…i.mjs, run.sh (xem tests/README.md) — g.mjs: đa ngành · i.mjs: tài khoản/đồng bộ (server giả cloud-fake.mjs) · sync-core.test.mjs (node)
+├── cloud-config.js       # v4.0: url + anonKey Supabase (công khai). ĐỂ TRỐNG = tắt máy chủ, app chạy như v3.1
+├── sync-core.js          # v4.0: hàm thuần làm phẳng store ↔ path→value, diff, luật gộp (giống nn_resolve SQL)
+├── cloud.js              # v4.0: window.NNCloud — khách tự động, Google, đồng bộ offline-first, AI qua server, báo lỗi
+├── vendor/supabase.min.js # supabase-js tự host (chỉ tải khi cloud-config có url)
+├── supabase/             # v4.0: migrations/ (0001 users · 0002 sync · 0003 reports/ai/stats), functions/ (ai, delete-account), queries/admin.sql, tests/db_test.sh
+├── chinh-sach.html · dieu-khoan.html · xoa-du-lieu.html  # v4.0: trang pháp lý (cần điền email liên hệ)
 ├── sw.js                 # service worker; CACHE = 'it-english-v<version>' — bump cùng version app
 ├── manifest.webmanifest, icon-192.png, icon-512.png  # PWA
 ├── gioi-thieu.html       # Showcase v3.0 (standalone, có doctype/head/favicon)
@@ -53,7 +59,9 @@ it-english-app/
 │   ├── design/, bgchooser.html
 │   ├── REVIEW-2026-09-13.md          # review UX/thị trường (mã A1…E16), phần 'Còn lại' đã lạc hậu
 │   ├── DINH-HUONG-DA-NGANH-2026-09-20.md  # định hướng v3.0 đa ngành (đã làm)
-│   ├── BACKEND-PLAN.md               # kế hoạch backend Supabase (server-first, offline, đăng nhập Google, bảng, RLS, ước lượng) — chưa làm
+│   ├── BACKEND-PLAN.md               # kế hoạch backend Supabase (server-first, offline, đăng nhập Google, bảng, RLS, ước lượng)
+│   ├── BACKEND.md                    # ⭐ v4.0 (nhánh feature/backend-v4): cách đồng bộ chạy + dựng project + vận hành + kiểm thử
+│   ├── TINH-NANG-MOI-2026-09-23.md   # ⭐ nghiên cứu tính năng mới (giữ chân, đối thủ, lớp học, tiếng Nhật) + lộ trình đợt A–D
 │   ├── BACKLOG.md                    # ⭐ việc để sau (kiểm tra trình độ, tiếng Nhật chính, lớp học…)
 │   ├── review/*.md                   # nhật ký kiểm duyệt nội dung từng gói (v3.1)
 │   └── REVIEW-2026-09-20.md          # ⭐ rà soát kỹ thuật + tổng hợp hướng cải tiến + kế hoạch 3 đợt — ĐỌC TRƯỚC KHI CHỌN VIỆC
@@ -72,6 +80,7 @@ it-english-app/
 lấy từ `PACK` nếu có. Đổi ngành: `switchTrack(id)` → lưu + tải lại; tiến độ lộ trình từng ngành cất ở `store.trackDays[track]={days,focus}`
 (`store.daysTrack` = ngành đang giữ `store.days`). Làm quen: `onboardModal(step)` (3 bước, đều bỏ qua được), `trackPicker()`, `trackNudge()`.
 **v3.1**: `track='custom'` = office.gen.js + packs/custom.js (đọc `store.customPack` do `cpGenerate()` tạo: 3 chặng, validate bằng `cpFixPhase`). Báo lỗi nội dung: `reportBtn(kind,obj)` → `store.reports[]` → GitHub issue (`reportIssueUrl`). Rảnh tay: `hf` + `hfGo()` (vòng lặp `hfSpeakP`→`hfListenP`→`wordMatch`, dừng khi rời màn `.hfv`). Ảnh → bài học: `vPhoto`/`phGo` + `aiVisionJson` (claude.ai `sample({images})`, Gemini `inline_data`, Claude API `image`; `providerChat(opts.image, opts.maxTokens)`).
+**v4.0 (nhánh `feature/backend-v4`)**: `save()` gọi `NNCloud.touch()`; `cloudBoot()` bind hook (getStore/saveStore/onPulled…) rồi `NNCloud.init()`. Dữ liệu học = bản đồ phẳng (`NNSync.toFlat/fromFlat`), đẩy lô `apply_changes` so với `shadow` (meta ở localStorage `noinghe-cloud-v1`), kéo `get_state` khi `rev` đổi. Không đồng bộ: `store.ai` (key), `convos[].turns`, `cfg.voiceName/remind`. AI: `aiInit()` bước 3 dùng `cloudAdapter()` khi không có key riêng. Màn `vAccount` (`go('account')`). Chi tiết: `docs/BACKEND.md`.
 Thêm ngành mới: viết `packs_src/<id>.py` theo SCHEMA → `python3 packs_src/build.py <id>` → thêm id vào `ORDER` (build.py), `TRACKS` + map
 `T` trong 2 script nạp (app + game), `GTRACKS` trong game.js, placeholder/hint theo ngành (tìm `({office:` trong index.html), `sw.js` ASSETS, test `tests/h.mjs`. Quy trình nội dung: agent viết theo README → **agent khác kiểm duyệt** (log vào `docs/review/`) → build.
 

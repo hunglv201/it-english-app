@@ -1,0 +1,33 @@
+# Cấu hình Supabase CLI cho Nói Nghề (chỉ phần khác mặc định). Xem docs/BACKEND.md.
+project_id = "noi-nghe"
+
+[api]
+schemas = ["public"]
+max_rows = 1000
+
+[auth]
+site_url = "https://hunglv201.github.io/it-english-app/"
+additional_redirect_urls = ["https://hunglv201.github.io/it-english-app/**", "http://localhost:8765/**", "http://127.0.0.1:8765/**"]
+enable_anonymous_sign_ins = true
+enable_manual_linking = true
+enable_signup = true
+
+[auth.rate_limit]
+anonymous_users = 30
+
+[auth.captcha]
+enabled = false          # bật khi đã có Cloudflare Turnstile secret (provider = "turnstile")
+provider = "turnstile"
+secret = "env(TURNSTILE_SECRET)"
+
+[auth.external.google]
+enabled = true
+client_id = "env(GOOGLE_CLIENT_ID)"
+secret = "env(GOOGLE_CLIENT_SECRET)"
+skip_nonce_check = false
+
+[functions.ai]
+verify_jwt = true
+
+[functions.delete-account]
+verify_jwt = true

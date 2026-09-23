@@ -11,6 +11,30 @@ làm bản lưu trữ (`gioi-thieu-v<N>.html`) để xem lại app từng trông
 
 ---
 
+## v4.0.0 — đang phát triển (nhánh `feature/backend-v4`) · Tài khoản & đồng bộ máy chủ
+
+> Chưa phát hành. Bật khi điền `cloud-config.js` (xem `docs/BACKEND.md`); để trống thì app chạy như v3.1.
+
+**Tài khoản**
+- Mở app là có **tài khoản khách tự động** — tiến độ lưu trên máy chủ ngay, không cần đăng nhập, không hỏi gì.
+- **Lưu tiến độ bằng Google** (liên kết vào chính tài khoản khách, không mất gì); gợi ý sau 3 ngày học (iPhone: sau 1 ngày).
+- Google đã có tài khoản → đăng nhập vào đó; cả máy lẫn tài khoản đều có tiến độ → chọn **Gộp cả hai** (mặc định) / dùng tài khoản / dùng máy này.
+- Màn **Tài khoản & đồng bộ** (Tôi › thẻ đầu trang): trạng thái, đồng bộ ngay, lượt AI miễn phí còn lại, đăng xuất, **xoá tài khoản** (gõ XOA).
+- Trang **Chính sách quyền riêng tư**, **Điều khoản**, **Xoá dữ liệu**.
+
+**Đồng bộ & offline**
+- Học như cũ khi mất mạng; thay đổi xếp hàng và tự gửi khi có mạng lại. Chấm nhỏ trên tab Tôi: nhấp nháy = đang gửi, xám = offline còn thay đổi chờ gửi, cam = cần xử lý (đã đồng bộ thì không hiện).
+- Gửi từng thay đổi nhỏ (thẻ ôn, ngày học, câu lưu…) nên 2 máy cùng học vẫn gộp đúng: thẻ ôn giữ bản ôn nhiều hơn, ngày đã học hợp lại, streak lấy lớn hơn.
+- Không đưa lên máy chủ: key AI riêng, nội dung đầy đủ các buổi chat, ảnh, ghi âm.
+
+**AI & báo lỗi**
+- Chưa có key AI riêng vẫn dùng được AI: **10 lượt/ngày** (khách) · **20 lượt/ngày** (Google), qua máy chủ.
+- Báo lỗi ⚑ gửi thẳng cho người làm app (offline thì gửi sau).
+
+**Máy chủ** — Supabase (Singapore): 3 migration có RLS, RPC `apply_changes` gộp theo thao tác + chống gửi trùng, thống kê học (ngày học, việc/ngày, đúng/sai), hạn mức AI, dọn khách bỏ quá 30 ngày; Edge Functions `ai`, `delete-account`; sao lưu hằng tuần + keepalive bằng GitHub Actions.
+
+---
+
 ## v3.1.1 — 20/09/2026 · Trang giới thiệu gọn cho điện thoại
 
 - Trên màn ≤780px, các khối tính năng, lưới ảnh, lưới ngành, thẻ kỹ thuật thành **dải vuốt ngang** có chấm chỉ vị trí → trang ngắn từ ~29.600px còn ~12.000px (≈ 16 màn thay vì 40).

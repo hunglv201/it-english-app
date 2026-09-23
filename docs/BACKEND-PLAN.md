@@ -1,6 +1,6 @@
 # Kế hoạch triển khai backend — Nói Nghề (Supabase · server-first · offline · đăng nhập Google)
 
-> Bản gộp 20/09/2026 · app v3.1.1 · tài liệu kế hoạch, **chưa triển khai**.
+> Bản gộp 20/09/2026 · app v3.1.1 · **Bước 1 (P0–P6) đã code trên nhánh `feature/backend-v4`** — cách chạy, dựng project: [`BACKEND.md`](BACKEND.md). Bước 2 chưa làm.
 > Thay thế các bản nháp trước (local-first, có Facebook). **Không làm đăng nhập Facebook.**
 
 ---

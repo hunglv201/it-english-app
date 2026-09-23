@@ -1,5 +1,6 @@
 <meta charset="utf-8">
-<script>/* T6: CSP chỉ khi tự host (GitHub Pages/localhost) — trong claude.ai để host tự quản */(function(){if(!/(^|\.)github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname))return;var m=document.createElement("meta");m.httpEquiv="Content-Security-Policy";m.content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://generativelanguage.googleapis.com https://api.anthropic.com https://api.groq.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'";document.head.appendChild(m);})();</script>
+<script src="cloud-config.js"></script>
+<script>/* T6: CSP chỉ khi tự host (GitHub Pages/localhost) — trong claude.ai để host tự quản */(function(){if(!/(^|\.)github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname))return;var cc=window.NN_CLOUD_CONFIG||{},cu=(cc.url&&cc.anonKey)?String(cc.url).replace(/\/+$/,""):"",su=cu?" "+cu+" "+cu.replace(/^http/,"ws"):"",ts=cc.turnstileSiteKey?" https://challenges.cloudflare.com":"",gi=cu?" https://*.googleusercontent.com":"";var m=document.createElement("meta");m.httpEquiv="Content-Security-Policy";m.content="default-src 'self'; script-src 'self' 'unsafe-inline'"+ts+"; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:"+gi+"; media-src 'self' data: blob:; connect-src 'self' https://generativelanguage.googleapis.com https://api.anthropic.com https://api.groq.com"+su+"; frame-src 'self'"+ts+"; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'";document.head.appendChild(m);})();</script>
 <title>Nói Nghề — Tiếng Anh đúng nghề của bạn</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b4dff">
@@ -149,6 +150,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-conten
 .streak b{color:var(--accent)}
 .icobtn{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--surface);
   color:var(--muted);display:flex;align-items:center;justify-content:center;padding:0}
+.tab-ic{position:relative}.tabdot{position:absolute;right:-5px;top:-3px;width:9px;height:9px;border-radius:50%;border:2px solid var(--surface);display:none}.tabdot[data-st=sync]{display:block;background:var(--accent);animation:cbp 1s infinite alternate}.tabdot[data-st=off]{display:block;background:var(--faint)}.tabdot[data-st=warn]{display:block;background:#e8a33d}@keyframes cbp{to{opacity:.35}}
 .icobtn:hover{color:var(--ink);border-color:var(--muted)}
 
 .main{flex-grow:1;padding:6px 18px 108px;display:flex;flex-direction:column;gap:18px}
@@ -374,6 +376,8 @@ if(!T[t])t='office';window.TRACK=t;
 if(t==='it')document.write('<script src="data.gen.js"><\/script><script src="phrases.gen.js"><\/script><script src="roles.gen.js"><\/script>');
 else if(t==='custom')document.write('<script src="packs/office.gen.js"><\/script><script src="packs/custom.js"><\/script>');
 else document.write('<script src="packs/'+t+'.gen.js"><\/script>');})();</script>
+<script src="sync-core.js"></script>
+<script src="cloud.js"></script>
 <script>
 // ---------- Lesson data: 100-day curriculum (data.gen.js) ----------
 const D=window.DATA;
@@ -399,10 +403,10 @@ const SITUATIONS=D.phaseTitles.map((name,i)=>({key:'p'+i,name,note:'Chặng '+(i
   phrases:D.phrases.slice(i*5,i*5+5)}));
 
 // ---------- storage ----------
-const APP_VERSION="3.1.0", APP_BUILD="2026-09-20";
+const APP_VERSION="4.0.0", APP_BUILD="2026-09-20";
 const KEY="it-english-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
-function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
+function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}if(window.NNCloud)NNCloud.touch();}
 let store=load();
 if(!store.srs)store.srs={};
 if(!store.stats)store.stats={done:0,lastDay:null,streak:1};
@@ -631,18 +635,19 @@ function attachSwipe(node,onLeft,onRight){
 const TABS=[["home","Hôm nay",ICO.home],["roadmap","Lộ trình",ICO.route],["practice","Luyện",ICO.dumbbell],["me","Tôi",ICO.user]];
 let cur="home";
 // Mỗi màn thuộc về một tab (để làm sáng đúng tab); tab bar đóng vai trò "về gốc"
-const TAB_OF={handsfree:'practice',photo:'practice',reports:'me',standup:'home',reverse:'practice',rolequiz:'practice',sreview:'practice',podcast:'practice',jd:'me',events:'me',home:'home',roadmap:'roadmap',practice:'practice',vocab:'practice',phrase:'practice',listen:'practice',talk:'practice',rewrite:'practice',reading:'practice',me:'me',progress:'me',history:'me',settings:'me'};
-function tabRender(k){return {handsfree:vHandsfree,photo:vPhoto,reports:vReports,standup:vStandup,reverse:vReverse,rolequiz:vRoleQuiz,sreview:vSReview,podcast:vPodcast,jd:vJD,events:vEvents,home:vHome,roadmap:vRoadmap,practice:vPractice,vocab:vVocab,phrase:vPhrase,listen:vListen,talk:vTalk,rewrite:vRewrite,reading:vReading,me:vMe,progress:vProgress,history:vHistory,settings:openSettings}[k]||vHome;}
+const TAB_OF={handsfree:'practice',photo:'practice',reports:'me',account:'me',standup:'home',reverse:'practice',rolequiz:'practice',sreview:'practice',podcast:'practice',jd:'me',events:'me',home:'home',roadmap:'roadmap',practice:'practice',vocab:'practice',phrase:'practice',listen:'practice',talk:'practice',rewrite:'practice',reading:'practice',me:'me',progress:'me',history:'me',settings:'me'};
+function tabRender(k){return {handsfree:vHandsfree,photo:vPhoto,reports:vReports,account:vAccount,standup:vStandup,reverse:vReverse,rolequiz:vRoleQuiz,sreview:vSReview,podcast:vPodcast,jd:vJD,events:vEvents,home:vHome,roadmap:vRoadmap,practice:vPractice,vocab:vVocab,phrase:vPhrase,listen:vListen,talk:vTalk,rewrite:vRewrite,reading:vReading,me:vMe,progress:vProgress,history:vHistory,settings:openSettings}[k]||vHome;}
 function renderTabs(){
   const n=$("#tabs");n.innerHTML="";
   TABS.forEach(([k,label,ic])=>{
     const on=(k===cur);
     const b=el('button',"tab"+(on?" on":""));
-    b.innerHTML='<span class="tab-ic">'+ic+'</span><b>'+label+'</b>';
+    b.innerHTML='<span class="tab-ic">'+ic+(k==='me'?'<i class="tabdot" id="tabDot"></i>':'')+'</span><b>'+label+'</b>';
     b.setAttribute('aria-label',label);if(on)b.setAttribute('aria-current','page');
     b.onclick=()=>go(k);
     n.appendChild(b);
   });
+  if(typeof CLOUD!=='undefined'&&CLOUD)paintCloud();
 }
 function go(k){apClear();closeModal();convoView=null;aiSaveMode=false;if(aiPlayingAll){aiPlayingAll=false;try{speechSynthesis.cancel();}catch(e){}}cur=TAB_OF[k]||k;renderTabs();lastTopKey='go:'+k;window.scrollTo(0,0);markEnter();tabRender(k)();}
 function vPractice(){
@@ -771,6 +776,7 @@ function vReading(){
 function vMe(){
   main.innerHTML="";const v=el('div','view');
   v.appendChild(el('div',null,'<div class="eyebrow">Của tôi</div><div style="font-size:24px;font-weight:800;font-family:var(--disp);letter-spacing:-.01em;margin-top:4px">Tôi</div>'));
+  var acc=cloudMeCard();if(acc)v.appendChild(acc);
   var weak=weakWords().length, mine=(store.myVocab||[]).length, conv=(store.convos||[]).length;
   v.appendChild(iosGroup('Tiến trình',[
     iosRow('Thống kê học tập','🔥 '+curStreak(),function(){go('progress');}),
@@ -1198,6 +1204,7 @@ function vHome(){
     qb.innerHTML='<b style="font-size:14.5px">⚡ Ôn nhanh 5′</b><small style="font-size:11.5px;opacity:.85;font-weight:500">thẻ · câu · nghe · chat</small>';
     qb.onclick=quickStart;row.appendChild(qb);v.appendChild(row);})();
   var evc=eventHomeCard();if(evc)v.appendChild(evc);
+  var ccd=cloudHomeCard();if(ccd)v.appendChild(ccd);
   var tnc=trackNudge();if(tnc)v.appendChild(tnc);
 
   // 2) Danh sách 4 việc hôm nay (việc hiện tại được làm nổi bật)
@@ -2327,7 +2334,7 @@ function makeAdapter(cfg){
   fn.json=async function(prompt,opts){const r=await providerChat(cfg,prompt,opts);return parseJSONLoose(r.text);};
   return fn;
 }
-function aiConfigured(){return !!(window.claude&&window.claude.use)|| !!(store.ai&&store.ai.key&&store.ai.provider);}
+function aiConfigured(){return !!(window.claude&&window.claude.use)|| !!(store.ai&&store.ai.key&&store.ai.provider)||!!(window.NNCloud&&NNCloud.aiReady());}
 async function aiInit(){
   if(aiSample!==undefined)return aiSample;
   // 1) Chạy trong claude.ai → dùng capability sample sẵn có
@@ -2337,6 +2344,8 @@ async function aiInit(){
   }
   // 2) Ngoài claude.ai → dùng provider người dùng cấu hình
   aiSample=wrapAI(makeAdapter(store.ai))||null;
+  // 3) v4.0: chưa có key riêng → AI miễn phí qua máy chủ (có hạn mức/ngày)
+  if(!aiSample&&window.NNCloud&&NNCloud.aiReady())aiSample=wrapAI(cloudAdapter());
   return aiSample;
 }
 function aiReset(){aiSample=undefined;}
@@ -3799,6 +3808,7 @@ function reportModal(kind,o){
       var r={at:new Date().toISOString(),track:TRACK,kind:kind,type:st.type,note:ta.value.trim().slice(0,400),text:reportText(kind,o).slice(0,700),where:(D.phaseTitles&&DAYS[(store.days.cur||1)-1])?('ngày '+(store.days.cur||1)):''};
       if(!store.reports)store.reports=[];store.reports.unshift(r);store.reports=store.reports.slice(0,200);save(store);
       card.innerHTML='';card.appendChild(el('h3',null,'Đã lưu, cảm ơn bạn 🙏'));
+      if(window.NNCloud&&NNCloud.aiReady()){NNCloud.syncNow();card.appendChild(el('div','muted','<span style="font-size:13.5px">Báo lỗi được gửi thẳng cho người làm app'+(navigator.onLine?'':' (khi có mạng)')+'. Bạn vẫn xem lại được ở Tôi › Báo lỗi nội dung.</span>'));var ok0=el('button','btn accent block');ok0.textContent='Xong';ok0.onclick=close;card.appendChild(ok0);return;}
       card.appendChild(el('div','muted','<span style="font-size:13.5px">Báo lỗi nằm ở Tôi › Báo lỗi nội dung. Gửi ngay cho người làm app để sửa ở bản sau:</span>'));
       var gh=el('a','btn accent block');gh.href=reportIssueUrl([r]);gh.target='_blank';gh.rel='noopener';gh.textContent='Gửi qua GitHub';gh.onclick=function(){r.sent=true;save(store);};card.appendChild(gh);
       var cp=el('button','btn ghost block');cp.textContent='Chép nội dung báo lỗi';cp.onclick=function(){copyText('['+r.type+'] '+r.track+' · '+r.kind+'\n'+r.text+(r.note?'\nGợi ý: '+r.note:''),cp);};card.appendChild(cp);
@@ -4055,9 +4065,173 @@ function vPhoto(){
   main.appendChild(v);
 }
 
+// ---------- v4.0: tài khoản + đồng bộ máy chủ (cloud.js · sync-core.js · docs/BACKEND-PLAN.md) ----------
+var CLOUD=window.NNCloud||{enabled:false,state:function(){return {enabled:false};},touch:function(){},aiReady:function(){return false;},bind:function(){},init:function(){}};
+var cloudS=CLOUD.state();
+function cloudAgo(ts){if(!ts)return 'chưa';var s=Math.round((Date.now()-ts)/1000);if(s<60)return 'vừa xong';var m=Math.round(s/60);if(m<60)return m+' phút trước';var h=Math.round(m/60);if(h<24)return h+' giờ trước';return Math.round(h/24)+' ngày trước';}
+function cloudStatusLine(s){s=s||cloudS;
+  if(!s.enabled)return 'Chưa bật máy chủ';
+  if(s.relogin)return '⚠ Phiên đăng nhập đã hết — đăng nhập lại để tiếp tục đồng bộ';
+  if(s.status==='local'||(!s.signedIn&&s.mode==='local'))return 'Chỉ lưu trên máy này';
+  if(!s.signedIn)return s.status==='offline'?'⏸ Offline — sẽ tạo tài khoản khi có mạng':'Đang kết nối…';
+  if(s.status==='syncing')return '↻ Đang đồng bộ…';
+  if(s.status==='offline')return '⏸ Offline'+(s.pending?' · '+s.pending+' thay đổi chờ gửi':'');
+  if(s.status==='paused')return '⏸ Chờ bạn chọn cách gộp tiến độ';
+  if(s.status==='update')return '⚠ Cần cập nhật app để đồng bộ';
+  if(s.status==='error')return '⚠ Chưa đồng bộ được — sẽ thử lại'+(s.pending?' · '+s.pending+' chờ gửi':'');
+  return '✓ Đã đồng bộ · '+cloudAgo(s.lastSync);
+}
+function paintCloud(s){cloudS=s||CLOUD.state();var b=document.getElementById('tabDot');if(!b)return;
+  // chấm trên tab Tôi: chỉ hiện khi đang gửi / offline còn thay đổi chờ / cần xử lý (đã đồng bộ thì không làm phiền)
+  var st=!cloudS.enabled?'':cloudS.relogin?'warn':!cloudS.signedIn?'':({syncing:'sync',paused:'warn',update:'warn',error:'warn'}[cloudS.status]||(cloudS.status==='offline'&&cloudS.pending?'off':''));
+  b.dataset.st=st;b.title=st?cloudStatusLine(cloudS):'';
+  if(cur==='me'&&document.getElementById('acctLine'))document.getElementById('acctLine').textContent=cloudStatusLine(cloudS);
+}
+function cloudAdapter(){
+  var fn=async function(input,opts){opts=opts||{};var pr=toParts(input);
+    try{var r=await CLOUD.ai({system:pr.system,turns:pr.turns,image:opts.image||undefined,maxTokens:opts.maxTokens||undefined});
+      if(typeof opts.onText==='function'){try{opts.onText({text:r.text});}catch(e){}}
+      if(r.limit&&r.remaining<=2)toast('AI miễn phí hôm nay còn '+r.remaining+'/'+r.limit+' lượt');
+      return {text:r.text};
+    }catch(e){
+      if(e.message==='ai_daily_limit'){toast('Hết '+((e.quota&&e.quota.limit)||'')+' lượt AI miễn phí hôm nay — mai dùng tiếp, hoặc dán key riêng ở Cài đặt AI');}
+      else if(e.message==='ai_rate_limited')toast('Chậm lại chút nhé — thử lại sau 1 phút');
+      else if(e.message==='ai_busy')toast('AI miễn phí hôm nay đã hết lượt chung — mai dùng tiếp, hoặc dán key riêng ở Cài đặt AI');
+      throw e;
+    }
+  };
+  fn.__ext=true;fn.__cloud=true;
+  fn.json=async function(prompt,opts){var r=await fn(prompt,opts);return parseJSONLoose(r.text);};
+  return fn;
+}
+function cloudAvatar(u,size){size=size||44;var w=el('div');w.style.cssText='width:'+size+'px;height:'+size+'px;border-radius:50%;flex:none;overflow:hidden;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-weight:800;font-size:'+Math.round(size*0.42)+'px';
+  if(u&&u.avatar&&/^https:\/\//.test(u.avatar)){var im=new Image();im.src=u.avatar;im.alt='';im.referrerPolicy='no-referrer';im.style.cssText='width:100%;height:100%;object-fit:cover';im.onerror=function(){im.remove();w.textContent=(u.name||'?').slice(0,1).toUpperCase();};w.appendChild(im);}
+  else w.textContent=u&&u.name?u.name.slice(0,1).toUpperCase():(u&&u.anon?'👤':'☁️');
+  return w;}
+function cloudErrText(e){var m=String((e&&e.message)||e||'');if(m==='offline')return 'Cần có mạng để làm việc này';return 'Chưa làm được: '+m.slice(0,80);}
+function cloudLinkGoogle(){CLOUD.linkGoogle().catch(function(e){toast(cloudErrText(e));});}
+function cloudLinkRow(label){var b=el('button','btn accent block');b.style.whiteSpace='nowrap';b.innerHTML='<span style="display:inline-flex;width:18px;height:18px;border-radius:50%;background:#fff;color:#4285f4;font-weight:800;font-size:13px;align-items:center;justify-content:center;margin-right:8px">G</span>'+esc(label||'Lưu tiến độ bằng Google');b.onclick=cloudLinkGoogle;return b;}
+function cloudMeCard(){ // đầu màn Tôi
+  var s=cloudS=CLOUD.state();if(!s.enabled)return null;
+  var c=el('button','card');c.style.cssText='display:flex;flex-direction:row;align-items:center;gap:12px;text-align:left;cursor:pointer;width:100%;font:inherit;color:inherit';
+  c.appendChild(cloudAvatar(s.user));
+  var t=el('div','grow');var nm=s.google?(s.user.name||s.user.email||'Tài khoản Google'):s.anon?'Tài khoản khách':s.relogin?'Cần đăng nhập lại':'Chưa đăng nhập';
+  t.innerHTML='<div style="font-weight:800;font-size:15.5px">'+esc(nm)+'</div><div class="muted" id="acctLine" style="font-size:12.5px;margin-top:2px">'+esc(cloudStatusLine(s))+'</div>'
+    +(s.anon?'<div style="font-size:12.5px;margin-top:4px;color:var(--accent);font-weight:700">Lưu bằng Google để không mất tiến độ ›</div>':'');
+  c.appendChild(t);c.appendChild(el('span',null,'<span style="display:inline-flex;color:var(--faint)">'+ICO.chev+'</span>'));
+  c.onclick=function(){go('account');};return c;
+}
+function vAccount(){
+  main.innerHTML='';var v=el('div','view');v.appendChild(backBtn('Tôi','me'));
+  var s=cloudS=CLOUD.state();
+  v.appendChild(viewHead('Tài khoản','Tài khoản & đồng bộ','Tiến độ được lưu trên máy chủ để đổi máy hay xoá trình duyệt không bị mất. Máy này giữ một bản để học được cả khi mất mạng.'));
+  var c=el('div','card');c.style.gap='12px';
+  var top=el('div');top.style.cssText='display:flex;align-items:center;gap:12px';top.appendChild(cloudAvatar(s.user,52));
+  var nm=s.google?(s.user.name||'Tài khoản Google'):s.anon?'Tài khoản khách':'Chưa đăng nhập';
+  var sub=s.google?esc(s.user.email||''):s.anon?'Tự tạo khi bạn mở app — chỉ dùng được trên máy này':'Tiến độ chỉ nằm trên máy này';
+  top.appendChild(el('div','grow','<div style="font-weight:800;font-size:17px">'+esc(nm)+'</div><div class="muted" style="font-size:13px;margin-top:2px">'+sub+'</div>'));
+  c.appendChild(top);
+  var line=el('div','muted');line.id='acctLine';line.style.fontSize='13.5px';line.textContent=cloudStatusLine(s);c.appendChild(line);
+  if(s.signedIn){var sy=el('button','btn ghost block');sy.textContent='↻ Đồng bộ ngay';sy.onclick=function(){if(!navigator.onLine){toast('Đang offline — sẽ tự gửi khi có mạng');return;}CLOUD.syncNow({pull:true}).then(function(){toast(cloudStatusLine(),'ok');});};c.appendChild(sy);}
+  if(s.anon){
+    c.appendChild(el('div',null,'<div style="font-size:13.5px;line-height:1.5">Tài khoản khách sẽ <b>mất</b> nếu bạn xoá dữ liệu trình duyệt'+(isIOS()?' (iPhone còn tự xoá khi lâu không mở app)':'')+'. Lưu bằng Google để giữ lâu dài và học trên nhiều máy — tiến độ hiện tại giữ nguyên.</div>'));
+    c.appendChild(cloudLinkRow());
+  }else if(s.relogin){
+    c.appendChild(el('div',null,'<div style="font-size:13.5px;line-height:1.5">'+(s.wasAnon?'Phiên của tài khoản khách trên máy này đã mất nên không mở lại được. Tiến độ trên máy vẫn còn — tạo tài khoản khách mới hoặc đăng nhập Google để tiếp tục lưu lên máy chủ.':'Đăng nhập lại bằng Google để tiếp tục đồng bộ. Tiến độ trên máy này vẫn còn và sẽ được gộp khi đăng nhập.')+'</div>'));
+    c.appendChild(cloudLinkRow(s.wasAnon?'Đăng nhập bằng Google':'Đăng nhập lại bằng Google'));
+    if(s.wasAnon){var ng=el('button','btn ghost block');ng.textContent='Tạo tài khoản khách mới';ng.onclick=function(){CLOUD.startGuest().then(function(){go('account');}).catch(function(e){toast(cloudErrText(e));});};c.appendChild(ng);}
+  }else if(!s.signedIn){
+    c.appendChild(cloudLinkRow('Đăng nhập bằng Google'));
+    var gb=el('button','btn ghost block');gb.textContent='Dùng tài khoản khách (tự động)';gb.onclick=function(){CLOUD.startGuest().then(function(){go('account');}).catch(function(e){toast(cloudErrText(e));});};c.appendChild(gb);
+  }
+  v.appendChild(c);
+  if(s.signedIn){
+    var q=el('div','card');q.appendChild(el('div',null,'<b>🤖 AI miễn phí hôm nay</b>'));
+    var ql=el('div','muted','…');ql.style.fontSize='13.5px';q.appendChild(ql);
+    var hasKey=!!(store.ai&&store.ai.key&&store.ai.provider);
+    CLOUD.quota().then(function(x){ql.innerHTML=x?('Còn <b>'+x.remaining+'</b> / '+x.limit+' lượt'+(s.anon?' · lưu bằng Google để được nhiều hơn':'')):'Cần mạng để xem';});
+    q.appendChild(el('div','muted','<span style="font-size:12.5px">'+(hasKey?'Bạn đang dùng key AI riêng — không tính vào lượt miễn phí.':'Có key AI riêng (Gemini/Claude/Groq) thì dán ở Giao tiếp › Cài đặt AI để dùng không giới hạn.')+'</span>'));
+    v.appendChild(q);
+  }
+  var g=[];
+  if(s.google)g.push(iosRow('Đăng xuất khỏi máy này','',function(){confirmModal('Đăng xuất?','Tiến độ đã lưu trên máy chủ. Máy này vẫn giữ bản sao nhưng thôi đồng bộ cho tới khi bạn đăng nhập lại.','Đăng xuất',function(){CLOUD.signOut().then(function(){toast('Đã đăng xuất','ok');go('account');});});}));
+  if(s.signedIn)g.push(iosRow('<span style="color:var(--danger)">Xoá tài khoản & dữ liệu trên máy chủ</span>','',cloudDeleteFlow));
+  g.push(iosRow('Chính sách quyền riêng tư','',function(){window.open('chinh-sach.html','_blank','noopener');}));
+  g.push(iosRow('Điều khoản sử dụng','',function(){window.open('dieu-khoan.html','_blank','noopener');}));
+  v.appendChild(iosGroup('Quản lý',g));
+  main.appendChild(v);
+}
+function cloudDeleteFlow(){
+  openModal(function(card,close){
+    card.appendChild(el('h3',null,'Xoá tài khoản?'));
+    card.appendChild(el('div','muted','Xoá vĩnh viễn tiến độ, từ đã lưu, lượt AI… trên máy chủ. Không khôi phục được. Báo lỗi nội dung bạn đã gửi được giữ lại nhưng không còn gắn với bạn.'));
+    var ta=el('input','input');ta.placeholder='Gõ XOA để xác nhận';card.appendChild(ta);
+    var keep=el('label');keep.style.cssText='display:flex;gap:8px;align-items:center;font-size:13.5px';keep.innerHTML='<input type="checkbox" checked> Giữ bản sao tiến độ trên máy này';card.appendChild(keep);
+    var ok=el('button','btn accent block');ok.style.background='var(--danger)';ok.textContent='Xoá tài khoản';
+    ok.onclick=function(){if(ta.value.trim().toUpperCase()!=='XOA'){toast('Gõ XOA để xác nhận');return;}ok.disabled=true;ok.textContent='Đang xoá…';
+      var keepLocal=keep.querySelector('input').checked;
+      CLOUD.deleteAccount().then(function(){close();
+        if(!keepLocal){try{localStorage.removeItem(KEY);localStorage.removeItem('it-english-game-v1');}catch(e){}toast('Đã xoá tài khoản và dữ liệu','ok');setTimeout(function(){location.reload();},700);}
+        else{toast('Đã xoá tài khoản trên máy chủ','ok');go('account');}
+      }).catch(function(e){ok.disabled=false;ok.textContent='Xoá tài khoản';toast(cloudErrText(e));});};
+    card.appendChild(ok);var cc=el('button','btn ghost block');cc.textContent='Huỷ';cc.onclick=close;card.appendChild(cc);
+  });
+}
+function cloudChoiceModal(info){
+  openModal(function(card,close){
+    card.appendChild(el('h3',null,'Tài khoản này đã có tiến độ'));
+    card.appendChild(el('div','muted','Máy này và tài khoản Google đều có tiến độ học. Chọn cách giữ (mặc định: gộp cả hai — từ đã ôn, ngày đã học, câu đã lưu đều giữ lại).'));
+    function opt(label,sub,mode,primary){var b=el('button','btn '+(primary?'accent':'ghost')+' block');b.style.cssText='height:auto;min-height:52px;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:9px 14px';
+      b.innerHTML='<b>'+label+'</b><small style="font-weight:500;opacity:.85">'+sub+'</small>';
+      b.onclick=function(){[].forEach.call(card.querySelectorAll('button'),function(x){x.disabled=true;});b.querySelector('b').textContent='Đang xử lý…';
+        CLOUD.choose(mode).then(function(){close();toast('Đã xong — tiến độ đã đồng bộ','ok');go(cur||'home');}).catch(function(e){close();toast(cloudErrText(e));});};
+      card.appendChild(b);}
+    opt('Gộp cả hai (khuyên dùng)','Giữ mọi thứ đã học ở cả máy này và tài khoản','merge',true);
+    opt('Dùng tiến độ của tài khoản','Bỏ tiến độ trên máy này','account');
+    opt('Dùng tiến độ của máy này','Ghi đè tiến độ trên tài khoản','device');
+  });
+}
+function cloudIdentityConflict(){
+  openModal(function(card,close){
+    card.appendChild(el('h3',null,'Google này đã có tài khoản Nói Nghề'));
+    card.appendChild(el('div','muted','Tài khoản Google bạn chọn đã lưu tiến độ trước đây. Đăng nhập vào đó? Sau khi đăng nhập, app sẽ hỏi bạn muốn gộp tiến độ của máy này thế nào.'));
+    var ok=el('button','btn accent block');ok.textContent='Đăng nhập tài khoản đó';ok.onclick=function(){CLOUD.signInGoogle().catch(function(e){toast(cloudErrText(e));});};card.appendChild(ok);
+    var cc=el('button','btn ghost block');cc.textContent='Để sau (vẫn dùng tài khoản khách)';cc.onclick=close;card.appendChild(cc);
+  });
+}
+function cloudHomeCard(){ // thông báo lần đầu + gợi ý lưu bằng Google
+  var s=cloudS=CLOUD.state();if(!s.enabled||!s.signedIn)return null;
+  var c=el('div','card');c.style.cssText='gap:8px;background:var(--accent-soft);border-color:transparent';
+  var x=el('button','btn ghost sm');x.textContent='Để sau';x.style.alignSelf='flex-start';
+  if(!s.noticeSeen){
+    c.appendChild(el('div',null,'<div style="font-size:13.5px;line-height:1.5">☁️ Tiến độ của bạn giờ được <b>lưu tự động trên máy chủ</b> (tài khoản khách, không cần đăng nhập) để không bị mất. <a href="chinh-sach.html" target="_blank" rel="noopener">Chính sách quyền riêng tư</a></div>'));
+    x.textContent='Đã hiểu';x.onclick=function(){CLOUD.markNotice();c.remove();};c.appendChild(x);return c;
+  }
+  if(!s.anon||store.cfg.linkNudgeOff)return null;
+  var days=Object.keys(store.hist||{}).length;if(days<(isIOS()?1:3))return null;
+  c.appendChild(el('div',null,'<div style="font-size:13.5px;line-height:1.5"><b>Đã học '+days+' ngày rồi 👏</b> Lưu tiến độ bằng Google để không mất khi đổi máy hay xoá trình duyệt.</div>'));
+  var row=el('div','row');row.style.gap='8px';var lb=cloudLinkRow('Lưu bằng Google');lb.classList.remove('block');lb.classList.add('grow');row.appendChild(lb);
+  x.onclick=function(){store.cfg.linkNudgeOff=todayStr();save(store);c.remove();};row.appendChild(x);c.appendChild(row);return c;
+}
+function cloudBoot(){
+  if(!CLOUD.enabled){paintCloud();return;}
+  CLOUD.bind({
+    getStore:function(){return store;},saveStore:function(){save(store);},track:TRACK,appVersion:APP_VERSION,toast:toast,
+    onState:paintCloud,
+    onAuthChanged:function(){aiReset();},
+    onPulled:function(n){$('#streakN').textContent=curStreak();if(cur==='home'||cur==='roadmap')go(cur);
+      if(store.cfg.track&&store.cfg.track!==TRACK&&TRACKS.some(function(t){return t.id===store.cfg.track;}))toast('Máy khác đang học ngành '+((TRACKS.find(function(t){return t.id===store.cfg.track;})||{}).short||'')+' — mở lại app để chuyển');},
+    onChoice:cloudChoiceModal,onIdentityConflict:cloudIdentityConflict,
+    onUpdateRequired:function(){var k='nn-upd-reload';try{if(sessionStorage.getItem(k)){toast('Cần bản app mới hơn để đồng bộ — tiến độ vẫn lưu trên máy');return;}sessionStorage.setItem(k,'1');}catch(e){return;}
+      toast('Có bản app mới — đang tải lại để đồng bộ…');setTimeout(function(){location.reload();},1500);},
+    onGuestCreated:function(){if(cur==='home')setTimeout(function(){if(cur==='home')go('home');},300);}
+  });
+  CLOUD.init();
+}
+
 // ---------- boot ----------
 $("#streakN").textContent=curStreak();
-renderTabs();paintOffline();
+renderTabs();paintOffline();cloudBoot();
 if(!maybeSunday())vHome(); // E8: Chủ nhật tự mở tổng kết
 (function(){var tc=$('#trackChip');if(tc){tc.textContent=TRK.emoji+' '+TRK.short+' ▾';tc.title='Đổi ngành';tc.onclick=trackPicker;}})();
 if(store.pendingJD){delete store.pendingJD;save(store);setTimeout(function(){go('jd');},200);}
