@@ -12,7 +12,7 @@ if(/This photo shows/.test(prompt))return {kind:'Email đặt phòng',summary:'K
 return [];`;
 const b=await launch();
 // 1) 4 gói mới nạp được
-for(const t of ['logistics','finance','marketing','health']){
+for(const t of ['logistics','finance','marketing','health','construction','aviation']){
   const q=await page(b,{store:baseStore({stats:{placed:true,sundayShown:wk},cfg:{level:'A2',autoSpeak:false,track:t,trackChosen:true}})});
   await q.goto(BASE+'index.html');await q.waitForTimeout(600);
   const info=await q.evaluate(()=>({track:TRACK,pack:PACK&&PACK.id,days:DAYS.length,rep:REPORT.title,them:themVi(),roles:Object.keys(ROLE_PACKS).length}));

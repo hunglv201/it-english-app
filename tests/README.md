@@ -11,6 +11,7 @@ Chạy toàn bộ: `tests/run.sh` (tự bật server tĩnh cổng 8765). Ảnh c
 | `h.mjs` | v3.1: 4 gói mới, báo lỗi nội dung, rảnh tay (giả SpeechRecognition), Nghề của tôi (AI giả tạo gói → track custom, cả game), ảnh → bài học (giả sample images), game đổi ngành |
 | `i.mjs` | v4.0 tài khoản & đồng bộ với máy chủ giả `cloud-fake.mjs` (3 "máy"): khách tự động, offline → online, gộp 2 máy, liên kết/đăng nhập Google, hỏi gộp, AI qua server, báo lỗi, mất phiên, xoá tài khoản, supabase-js thật |
 | `j.mjs` | v4.0 đợt B: từ mục tiêu trong chat (vào prompt, dùng đúng → ôn SRS), chạm từ tra nghĩa (gói / AI / dịch câu / lưu), gõ tiếng Việt → gợi ý, phỏng vấn + tiêu chí chấm, phát âm 3 mức, phân tích bài nói, lá chắn cuối tuần, chúc mừng chuỗi, ngày hoàn hảo, sửa chuỗi (xu / đủ 4 việc) |
+| `k.mjs` | v4.0 đợt A/C/D: furigana từ romaji, kính ngữ + đố nhanh, kiểm tra trình độ 3 phút, cam kết 7 ngày, nhắc học (push giả), bạn học qua link mời, bảng tuần, lớp học (đồng ý, báo cáo chủ lớp), 2 ngành mới |
 | `sync-core.test.mjs` | v4.0 lõi đồng bộ (node, không trình duyệt) · SQL: `supabase/tests/db_test.sh` (Postgres cục bộ) |
 | `g.mjs` | v3.0 đa ngành: làm quen (bỏ qua → Công sở), chọn ngành → tải gói, mọi màn với 5 gói, game theo gói, JD gợi ý chuyển ngành, tiến độ riêng từng ngành |
 | `d.mjs` | Cập nhật tại chỗ không chạy lại hiệu ứng / không nhảy lên đầu trang; chỉ khi vào màn mới |

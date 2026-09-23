@@ -3,7 +3,8 @@ const CACHE = 'it-english-v4.0.0';
 const ASSETS = [
   './', 'index.html', 'data.gen.js', 'phrases.gen.js', 'roles.gen.js',
   'packs/office.gen.js', 'packs/hotel.gen.js', 'packs/sales.gen.js', 'packs/factory.gen.js',
-  'packs/logistics.gen.js', 'packs/finance.gen.js', 'packs/marketing.gen.js', 'packs/health.gen.js', 'packs/custom.js',
+  'packs/logistics.gen.js', 'packs/finance.gen.js', 'packs/marketing.gen.js', 'packs/health.gen.js', 'packs/construction.gen.js', 'packs/aviation.gen.js', 'packs/custom.js',
+  'ja/keigo.js',
   'cloud-config.js', 'sync-core.js', 'cloud.js', 'vendor/supabase.min.js',
   'chinh-sach.html', 'dieu-khoan.html', 'xoa-du-lieu.html',
   'manifest.webmanifest', 'icon-192.png', 'icon-512.png'
@@ -20,6 +21,16 @@ self.addEventListener('activate', function (e) {
       return Promise.all(keys.filter(function (k) { return k !== CACHE; }).map(function (k) { return caches.delete(k); }));
     }).then(function () { return self.clients.claim(); })
   );
+});
+
+// v4.0 đợt A: nhắc học Web Push từ máy chủ (Edge Function send-reminders)
+self.addEventListener('push', function (e) {
+  var d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (err) { d = { body: e.data ? e.data.text() : '' }; }
+  e.waitUntil(self.registration.showNotification(d.title || 'Nói Nghề', {
+    body: d.body || 'Luyện tiếng Anh 5 phút hôm nay nhé.', icon: 'icon-192.png', badge: 'icon-192.png',
+    tag: d.tag || 'noinghe', renotify: false, data: { url: d.url || './' }
+  }));
 });
 
 // Nhắc học: bấm vào thông báo thì mở/focus app

@@ -30,7 +30,7 @@
     return m;
   }
   function saveMeta() { try { localStorage.setItem(META_KEY, JSON.stringify(M)); } catch (e) {} }
-  function resetMeta(mode) { M = { mode: mode || 'auto', shadow: {}, rev: 0, uid: null, pending: null, lastSync: M.lastSync || null, noticeSeen: M.noticeSeen }; saveMeta(); }
+  function resetMeta(mode) { M = { mode: mode || 'auto', shadow: {}, rev: 0, uid: null, pending: null, lastSync: M.lastSync || null, noticeSeen: M.noticeSeen, remMode: M.remMode, remFixed: M.remFixed }; saveMeta(); }
   function rid() { return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10); }
   function emit() { if (H.onState) try { H.onState(state()); } catch (e) {} }
   function setStatus(s, err) { S.status = s; S.error = err || null; emit(); }
@@ -287,6 +287,8 @@
       }
       if (needPull) { await pull('merge'); while (loops++ < 80 && await pushBatch()) {} }
       await sendReports();
+      await touchReminder();
+      await refreshPush();
       M.lastSync = Date.now(); saveMeta(); tries = 0;
       setStatus('ok');
     } catch (e) {
@@ -302,6 +304,58 @@
       busy = false;
       if (again) { again = false; schedule(800); }
     }
+  }
+
+  // ---------- nhắc học Web Push (đợt A) ----------
+  function utcDay() { return new Date().toISOString().slice(0, 10); }
+  function tzOffset() { return -new Date().getTimezoneOffset(); }
+  async function touchReminder() { // mỗi ngày 1 lần sau khi đã học: nhớ giờ học để hôm sau nhắc đúng lúc
+    if (!M.push || M.remDay === utcDay()) return;
+    var st = H.getStore && H.getStore(); if (!st || !st.stats || st.stats.lastActive !== utcDay()) return;
+    var d = new Date();
+    try { await A.rpc('touch_reminder', { p_first_min: d.getHours() * 60 + d.getMinutes(), p_tz_offset: tzOffset() }); M.remDay = utcDay(); saveMeta(); } catch (e) {}
+  }
+  function b64u(s) { var p = '='.repeat((4 - s.length % 4) % 4), b = atob((s + p).replace(/-/g, '+').replace(/_/g, '/')), a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
+  function pushSupported() { return ENABLED && !!CFG.vapidPublicKey && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+  function pushInfo() {
+    return { supported: pushSupported(), on: !!M.push, permission: ('Notification' in window) ? Notification.permission : 'unsupported',
+             mode: M.remMode || 'auto', fixed: M.remFixed || null };
+  }
+  async function enablePush() { // gọi trong lúc người dùng vừa bấm (iOS bắt buộc)
+    if (!pushSupported()) throw new Error('push_unsupported');
+    if (!S.user) throw new Error('no-session');
+    var perm = await Notification.requestPermission();
+    if (perm !== 'granted') throw new Error('denied');
+    var reg = await navigator.serviceWorker.ready;
+    var sub = await reg.pushManager.getSubscription();
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64u(CFG.vapidPublicKey) });
+    await A.rpc('save_push', { p_sub: sub.toJSON ? sub.toJSON() : JSON.parse(JSON.stringify(sub)), p_ua: navigator.userAgent.slice(0, 180) });
+    await A.rpc('set_reminder', { p_mode: M.remMode || 'auto', p_fixed_min: M.remFixed || null, p_tz_offset: tzOffset() });
+    M.push = true; M.remDay = null; saveMeta(); emit();
+    touchReminder();
+    return true;
+  }
+  async function refreshPush() { // mỗi ngày 1 lần: gửi lại đăng ký hiện tại (reset lỗi tạm, cập nhật endpoint mới của trình duyệt)
+    if (!M.push || M.pushRefreshed === utcDay() || !pushSupported()) return;
+    try { var reg = await navigator.serviceWorker.ready; var sub = await reg.pushManager.getSubscription();
+      if (!sub || Notification.permission !== 'granted') { M.push = false; saveMeta(); emit(); return; }
+      await A.rpc('save_push', { p_sub: sub.toJSON ? sub.toJSON() : JSON.parse(JSON.stringify(sub)), p_ua: navigator.userAgent.slice(0, 180) });
+      M.pushRefreshed = utcDay(); saveMeta(); } catch (e) {}
+  }
+  async function disablePush() {
+    try { var reg = await navigator.serviceWorker.ready; var sub = await reg.pushManager.getSubscription();
+      if (sub) { try { await A.rpc('delete_push', { p_endpoint: sub.endpoint }); } catch (e) {} await sub.unsubscribe(); } } catch (e) {}
+    M.push = false; saveMeta(); emit();
+  }
+  async function setReminder(mode, fixedMin) {
+    M.remMode = mode; M.remFixed = fixedMin == null ? null : fixedMin; saveMeta();
+    if (S.user && online()) await A.rpc('set_reminder', { p_mode: mode, p_fixed_min: M.remFixed, p_tz_offset: tzOffset() });
+  }
+  async function call(name, args) { // RPC tuỳ ý cho các màn lớp học / bạn học
+    if (!ENABLED || !A) throw new Error('cloud_off');
+    if (!S.user) throw new Error('no-session');
+    if (!online()) throw new Error('offline');
+    return A.rpc(name, args || {});
   }
 
   // ---------- khởi động ----------
@@ -420,6 +474,8 @@
     linkGoogle: linkGoogle, signInGoogle: signInGoogle, signOut: signOut, startGuest: startGuest,
     deleteAccount: deleteAccount, choose: choose, ai: ai, quota: quota,
     aiReady: function () { return ENABLED && !!S.user; },
+    call: call, pushInfo: pushInfo, enablePush: enablePush, disablePush: disablePush, setReminder: setReminder,
+    vapid: !!CFG.vapidPublicKey,
     markNotice: function () { M.noticeSeen = true; saveMeta(); }
   };
 })();

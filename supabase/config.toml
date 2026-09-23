@@ -31,3 +31,6 @@ verify_jwt = true
 
 [functions.delete-account]
 verify_jwt = true
+
+[functions.send-reminders]
+verify_jwt = false   # gọi từ lịch chạy, xác thực bằng header x-cron-secret

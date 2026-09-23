@@ -6,5 +6,6 @@
 window.NN_CLOUD_CONFIG = {
   url: '',          // https://<project-ref>.supabase.co
   anonKey: '',      // anon / publishable key
-  turnstileSiteKey: ''
+  turnstileSiteKey: '',
+  vapidPublicKey: ''  // khoá công khai VAPID cho Web Push (npx web-push generate-vapid-keys); để trống = tắt nhắc qua máy chủ
 };

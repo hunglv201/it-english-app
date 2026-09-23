@@ -6,7 +6,7 @@
 
 ---
 
-> **Trạng thái (23/09):** đã làm **đợt B** (B1–B5) và phần chạy trên máy của A3 + A6 (lá chắn cuối tuần, sửa chuỗi, chúc mừng, ngày hoàn hảo) — nhánh `feature/noi-tot-hon`, test `tests/j.mjs`. A1/A2/A4/A5 (Web Push, giờ nhắc thích ứng, kéo người vắng) chờ bật máy chủ v4.0.
+> **Trạng thái (23/09): đã làm hết đợt A–D, phát hành trong v4.0.0** (`main`). B: `tests/j.mjs`. A/C/D: `tests/k.mjs` + `supabase/tests/db2.test.sql` (migration 0004 push, 0005 lớp học/bảng tuần/bạn học, Edge Function `send-reminders`). A8 tổng kết tuần gửi qua push (chưa có email). A9: `admin_quality()`. Phần cần máy chủ chỉ chạy khi điền `cloud-config.js`.
 
 ## 0. Kết luận nhanh
 

@@ -118,7 +118,7 @@ Phần **Giao tiếp** (và Boss AI / Đấu thoại trong game) gọi AI theo t
    Key lưu `localStorage`, dùng chung giữa app và game. Chưa có key thì app hiện hướng dẫn nhập.
 
 > Key nằm phía client nên chỉ nên dùng key cá nhân (free tier). Kế hoạch sau: backend/proxy giữ key — xem `ARCHITECTURE.md`.
-> **v4.0 (nhánh `feature/backend-v4`)**: tài khoản khách tự động + Google, tiến độ lưu trên máy chủ Supabase và đồng bộ nhiều máy (học offline vẫn được), AI miễn phí có hạn mức qua máy chủ — xem [`docs/BACKEND.md`](docs/BACKEND.md).
+> **v4.0**: 11 ngành, tiếng Nhật công sở, kiểm tra trình độ 3 phút, luyện nói tốt hơn (từ mục tiêu, chạm từ, phát âm 3 mức, phân tích bài nói); khi bật máy chủ: tài khoản khách tự động + Google, nhắc học qua thông báo, lớp học / bảng tuần / bạn học, tiến độ lưu trên máy chủ Supabase và đồng bộ nhiều máy (học offline vẫn được), AI miễn phí có hạn mức qua máy chủ — xem [`docs/BACKEND.md`](docs/BACKEND.md).
 
 ---
 

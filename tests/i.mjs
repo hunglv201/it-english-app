@@ -15,7 +15,7 @@ async function device(store,email){
   return p;
 }
 const st=()=>baseStore({stats:{placed:true,sundayShown:wk},cfg:{level:'A2',autoSpeak:false,track:'office',trackChosen:true}});
-const until=async(p,fn,ms=6000)=>{for(let i=0;i<ms/100;i++){if(await p.evaluate(fn))return true;await p.waitForTimeout(100);}return false;};
+const until=async(p,fn,ms=6000)=>{for(let i=0;i<ms/100;i++){try{if(await p.evaluate(fn))return true;}catch(e){}await p.waitForTimeout(100);}return false;};
 const sync=p=>p.evaluate(()=>NNCloud.syncNow({pull:true}));
 const cs=p=>p.evaluate(()=>NNCloud.state());
 const userOf=async p=>srv.users.get(await p.evaluate(()=>localStorage.getItem('fake-auth')));

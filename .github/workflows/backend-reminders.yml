@@ -1,0 +1,13 @@
+# Gửi nhắc học (Web Push) — gọi Edge Function send-reminders 15 phút/lần. Bật bằng biến repo NN_BACKEND_ENABLED=true.
+# Biến: SUPABASE_URL. Secret: CRON_SECRET (trùng secret cùng tên trong Supabase). Thay thế: pg_cron + pg_net (docs/BACKEND.md).
+name: backend-reminders
+on:
+  schedule: [{ cron: "*/15 * * * *" }]
+  workflow_dispatch:
+jobs:
+  send:
+    if: vars.NN_BACKEND_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -fsS -X POST "${{ vars.SUPABASE_URL }}/functions/v1/send-reminders" -H "x-cron-secret: ${{ secrets.CRON_SECRET }}"

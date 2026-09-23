@@ -7,12 +7,12 @@
 
 **Nói Nghề** (tên cũ đến v2.0: *IT English*; repo/khoá localStorage vẫn giữ tên `it-english`) — bộ 3 sản phẩm web tĩnh
 (vanilla HTML/CSS/JS, không framework, không build) giúp người Việt trình độ cơ bản luyện **tiếng Anh công việc theo ngành**
-(v3.1: 9 ngành — Công sở chung (mặc định), IT, Khách sạn · Du lịch, Bán hàng · CSKH, Sản xuất · Nhà máy, Logistics · XNK, Tài chính · Kế toán, Marketing · TMĐT, Y tế · Điều dưỡng — và "Nghề của tôi" do AI tạo). Chủ repo: `hunglv201`. Ngôn ngữ giao tiếp với người dùng: **tiếng Việt**.
+(v4.0: 11 ngành — Công sở chung (mặc định), IT, Khách sạn · Du lịch, Bán hàng · CSKH, Sản xuất · Nhà máy, Logistics · XNK, Tài chính · Kế toán, Marketing · TMĐT, Y tế · Điều dưỡng, Xây dựng · Kỹ thuật, Hàng không · Sân bay — và "Nghề của tôi" do AI tạo; thêm tiếng Nhật công sở `ja/keigo.js`). Chủ repo: `hunglv201`. Ngôn ngữ giao tiếp với người dùng: **tiếng Việt**.
 
 | Sản phẩm | File | URL Pages | Mô tả |
 |---|---|---|---|
-| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Gói ngành (IT 370 ngày, các ngành khác 120 ngày), từ vựng SRS, câu thường dùng, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **3.1.0** trên `main`; nhánh `feature/backend-v4` = **4.0.0** (backend Supabase, chưa merge) (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
-| **Trang giới thiệu (showcase)** | `gioi-thieu.html` (**v3.0**, ảnh `img/showcase/v3/`) + lưu trữ `gioi-thieu-v2.html`, `gioi-thieu-v1.html` | `…/gioi-thieu.html` | Landing fullpage scroll-snap, nền particle-net, mục "Mới trong v3.0" (lưới 5 ngành), mục **Lịch sử phiên bản** (`#versions`). Dark-first. Quy ước version lớn: xem mục 7 |
+| **App học** | `index.html` (+ `data.gen.js`, `phrases.gen.js`, `sw.js`, `manifest.webmanifest`) | `https://hunglv201.github.io/it-english-app/` | Gói ngành (IT 370 ngày, các ngành khác 120 ngày), từ vựng SRS, câu thường dùng, nghe/shadowing, **Giao tiếp AI** (điểm nhấn), PWA offline. Version hiện tại **4.0.0** (backend Supabase có sẵn nhưng chỉ bật khi điền `cloud-config.js`) (`APP_VERSION` trong `index.html` + `CACHE` trong `sw.js`) |
+| **Trang giới thiệu (showcase)** | `gioi-thieu.html` (**v4.0**, mục "Mới trong 4.0" ảnh `img/showcase/v4/`, phần còn lại dùng ảnh v3) + lưu trữ `gioi-thieu-v3.html`, `gioi-thieu-v2.html`, `gioi-thieu-v1.html` | `…/gioi-thieu.html` | Landing fullpage scroll-snap, nền particle-net, mục "Mới trong v3.0" (lưới 5 ngành), mục **Lịch sử phiên bản** (`#versions`). Dark-first. Quy ước version lớn: xem mục 7 |
 | **Game "Nói Nghề Quest"** | `game/index.html` + `game/game.js` (+ bản sao `game/data.gen.js`, `game/phrases.gen.js`) | `…/game/` | Bản game anime **mobile-first**: RPG bản đồ ngày → quiz battle → boss visual novel, AFK idle (Mochi tự cày xu), Shop, huy hiệu, tab **Nói** 5 chế độ luyện nói. Dùng chung dữ liệu + AI key với app |
 
 Ngoài Pages, cả 3 còn được publish làm **claude.ai Artifact** (xem mục 6).
@@ -23,7 +23,7 @@ Ngoài Pages, cả 3 còn được publish làm **claude.ai Artifact** (xem mụ
 it-english-app/
 ├── index.html            # App: toàn bộ UI + logic (HTML/CSS/JS 1 file, ~220 KB)
 ├── data.gen.js           # gói IT: window.DATA — sinh từ gen_data.py, KHÔNG sửa tay
-├── packs/<id>.gen.js     # gói ngành office/hotel/sales/factory/logistics/finance/marketing/health (window.PACK + DATA + PHRASES + ROLES) — sinh từ packs_src/build.py
+├── packs/<id>.gen.js     # gói ngành office/hotel/sales/factory/logistics/finance/marketing/health/construction/aviation (window.PACK + DATA + PHRASES + ROLES) — sinh từ packs_src/build.py
 ├── packs/custom.js       # VIẾT TAY: ghép store.customPack ("Nghề của tôi", AI tạo) vào đầu gói office khi track='custom'
 ├── packs_src/            # nguồn gói ngành: <id>.py (PACK), build.py (kiểm tra chặt + sinh), README.md (SCHEMA + quy tắc nội dung)
 ├── phrases.gen.js        # window.PHRASES — sinh từ phrases_data.py, KHÔNG sửa tay
@@ -35,16 +35,19 @@ it-english-app/
 ├── img/showcase/*.webp   # 17 ảnh của gioi-thieu-v1.html (bản lưu trữ)
 ├── img/showcase/v2/*.webp # 25 ảnh của gioi-thieu-v2.html (lưu trữ)
 ├── img/showcase/v3/*.webp # 33 ảnh của gioi-thieu.html v3.0 (540×1169, chụp bằng Playwright + AI giả, nhiều ngành)
-├── tests/                # Playwright mobile: lib.mjs + a…i.mjs, run.sh (xem tests/README.md) — g.mjs: đa ngành · i.mjs: tài khoản/đồng bộ (server giả cloud-fake.mjs) · sync-core.test.mjs (node)
+├── tests/                # Playwright mobile: lib.mjs + a…k.mjs, run.sh (xem tests/README.md) — g.mjs: đa ngành · i.mjs: tài khoản/đồng bộ (server giả cloud-fake.mjs) · sync-core.test.mjs (node)
+├── ja/keigo.js           # v4.0: window.JA_KEIGO (51 câu kính ngữ, furigana/kana/romaji) — nạp lười khi mở Luyện › Tiếng Nhật công sở
+├── img/showcase/v4/*.webp # 11 ảnh mục "Mới trong 4.0" (chụp bằng Playwright, 540×1169)
 ├── cloud-config.js       # v4.0: url + anonKey Supabase (công khai). ĐỂ TRỐNG = tắt máy chủ, app chạy như v3.1
 ├── sync-core.js          # v4.0: hàm thuần làm phẳng store ↔ path→value, diff, luật gộp (giống nn_resolve SQL)
 ├── cloud.js              # v4.0: window.NNCloud — khách tự động, Google, đồng bộ offline-first, AI qua server, báo lỗi
 ├── vendor/supabase.min.js # supabase-js tự host (chỉ tải khi cloud-config có url)
-├── supabase/             # v4.0: migrations/ (0001 users · 0002 sync · 0003 reports/ai/stats), functions/ (ai, delete-account), queries/admin.sql, tests/db_test.sh
+├── supabase/             # v4.0: migrations/ (0001 users · 0002 sync · 0003 reports/ai/stats · 0004 push · 0005 social), functions/ (ai, delete-account, send-reminders), queries/admin.sql, tests/db_test.sh (db.test.sql + db2.test.sql)
 ├── chinh-sach.html · dieu-khoan.html · xoa-du-lieu.html  # v4.0: trang pháp lý (cần điền email liên hệ)
 ├── sw.js                 # service worker; CACHE = 'it-english-v<version>' — bump cùng version app
 ├── manifest.webmanifest, icon-192.png, icon-512.png  # PWA
-├── gioi-thieu.html       # Showcase v3.0 (standalone, có doctype/head/favicon)
+├── gioi-thieu.html       # Showcase v4.0 (standalone, có doctype/head/favicon)
+├── gioi-thieu-v3.html    # Showcase v3.x lưu trữ
 ├── gioi-thieu-v2.html    # Showcase v2.0 lưu trữ
 ├── gioi-thieu-v1.html    # Showcase v1 lưu trữ (noindex, thanh "Bản lưu trữ" ở đáy)
 ├── CHANGELOG.md          # lịch sử phiên bản đầy đủ (showcase link tới)
@@ -80,8 +83,9 @@ it-english-app/
 lấy từ `PACK` nếu có. Đổi ngành: `switchTrack(id)` → lưu + tải lại; tiến độ lộ trình từng ngành cất ở `store.trackDays[track]={days,focus}`
 (`store.daysTrack` = ngành đang giữ `store.days`). Làm quen: `onboardModal(step)` (3 bước, đều bỏ qua được), `trackPicker()`, `trackNudge()`.
 **v3.1**: `track='custom'` = office.gen.js + packs/custom.js (đọc `store.customPack` do `cpGenerate()` tạo: 3 chặng, validate bằng `cpFixPhase`). Báo lỗi nội dung: `reportBtn(kind,obj)` → `store.reports[]` → GitHub issue (`reportIssueUrl`). Rảnh tay: `hf` + `hfGo()` (vòng lặp `hfSpeakP`→`hfListenP`→`wordMatch`, dừng khi rời màn `.hfv`). Ảnh → bài học: `vPhoto`/`phGo` + `aiVisionJson` (claude.ai `sample({images})`, Gemini `inline_data`, Claude API `image`; `providerChat(opts.image, opts.maxTokens)`).
-**v4.0 (nhánh `feature/backend-v4`)**: `save()` gọi `NNCloud.touch()`; `cloudBoot()` bind hook (getStore/saveStore/onPulled…) rồi `NNCloud.init()`. Dữ liệu học = bản đồ phẳng (`NNSync.toFlat/fromFlat`), đẩy lô `apply_changes` so với `shadow` (meta ở localStorage `noinghe-cloud-v1`), kéo `get_state` khi `rev` đổi. Không đồng bộ: `store.ai` (key), `convos[].turns`, `cfg.voiceName/remind`. AI: `aiInit()` bước 3 dùng `cloudAdapter()` khi không có key riêng. Màn `vAccount` (`go('account')`). Chi tiết: `docs/BACKEND.md`.
-**Đợt B (nhánh `feature/noi-tot-hon`)**: `aiTargets`/`pickTargets()`/`targetsRule()` (từ mục tiêu vào `aiRules`, `targetsCheck` khi gửi → `grade`/`psrsGrade` nếu tới hạn) · `twHtml()` + `twOpen()` (chạm từ trong bóng AI; `dictFind` tra gói trước, AI sau, cache `aiCacheGet`) · `looksVietnamese`→`aiViToEn` · `xScenarios()` (x_interview/x_meeting/x_present, `X_RUBRIC` trong `aiReview`) · `nearMark`/`wNear` + `lTokens(diff,heard)` + `[data-say]` (chạm nghe chậm) · `vAudit`/`auStats`/`auAnalyze` (`go('audit')`, `store.audits`) · `weekendShield`, `store.stats.broke/repairAt/perfect`, `repairCard`/`doRepair`, `celebrate()`.
+**v4.0**: `save()` gọi `NNCloud.touch()`; `cloudBoot()` bind hook (getStore/saveStore/onPulled…) rồi `NNCloud.init()`. Dữ liệu học = bản đồ phẳng (`NNSync.toFlat/fromFlat`), đẩy lô `apply_changes` so với `shadow` (meta ở localStorage `noinghe-cloud-v1`), kéo `get_state` khi `rev` đổi. Không đồng bộ: `store.ai` (key), `convos[].turns`, `cfg.voiceName/remind`. AI: `aiInit()` bước 3 dùng `cloudAdapter()` khi không có key riêng. Màn `vAccount` (`go('account')`). Chi tiết: `docs/BACKEND.md`.
+**Đợt B**: `aiTargets`/`pickTargets()`/`targetsRule()` (từ mục tiêu vào `aiRules`, `targetsCheck` khi gửi → `grade`/`psrsGrade` nếu tới hạn) · `twHtml()` + `twOpen()` (chạm từ trong bóng AI; `dictFind` tra gói trước, AI sau, cache `aiCacheGet`) · `looksVietnamese`→`aiViToEn` · `xScenarios()` (x_interview/x_meeting/x_present, `X_RUBRIC` trong `aiReview`) · `nearMark`/`wNear` + `lTokens(diff,heard)` + `[data-say]` (chạm nghe chậm) · `vAudit`/`auStats`/`auAnalyze` (`go('audit')`, `store.audits`) · `weekendShield`, `store.stats.broke/repairAt/perfect`, `repairCard`/`doRepair`, `celebrate()`.
+**Đợt A/C/D**: `pushCard`/`reminderCard` + `NNCloud.enablePush/disablePush/setReminder/pushInfo` (VAPID `vapidPublicKey` trong cloud-config; SW có handler `push`) · `wagerModal`/`wagerCheck` (`store.stats.wager`) · `vSocial`/`vClass` (`go('social')`, `NNCloud.call(rpc)`: `league_board`, `buddy_*`, `create_class`/`join_class`/`class_board`/`class_report`), link mời `?buddy=`/`?class=` → `inviteFromUrl`/`invitePending` · `placementTest(st,done)` trong `onboardModal` bước 3 (`PT_LISTEN`, `PT_SPEAK`, `store.cfg.studyTime`) · `romajiToHira`/`jaRuby` (furigana cho `vocab[].ja` trong `jaLine`), `jaSpeak` + `[data-jasay]`, `vKeigo`/`kgQuizStart` (`go('keigo')`), `jaMatch` (chấm theo ký tự). Đếm cho admin: `stats.talkTurns`, `stats.speakSec`.
 Thêm ngành mới: viết `packs_src/<id>.py` theo SCHEMA → `python3 packs_src/build.py <id>` → thêm id vào `ORDER` (build.py), `TRACKS` + map
 `T` trong 2 script nạp (app + game), `GTRACKS` trong game.js, placeholder/hint theo ngành (tìm `({office:` trong index.html), `sw.js` ASSETS, test `tests/h.mjs`. Quy trình nội dung: agent viết theo README → **agent khác kiểm duyệt** (log vào `docs/review/`) → build.
 
@@ -155,6 +159,7 @@ Repo git nằm trên **máy người dùng** (thư mục kết nối Cowork: `/U
 
 ## 8. Lịch sử tóm tắt (mới → cũ)
 
+- 09/2026 **v4.0.0 (major)**: backend Supabase (khách + Google, đồng bộ offline-first, AI qua server, báo lỗi) — bật khi điền `cloud-config.js`; đợt B nói tốt hơn (từ mục tiêu, chạm từ, gõ Việt khi bí, phỏng vấn/họp/thuyết trình, phát âm 3 mức, phân tích bài nói); giữ chuỗi (chúc mừng, ngày hoàn hảo, lá chắn cuối tuần, sửa chuỗi, cam kết 7 ngày, nhắc học Web Push); lớp học / bảng tuần / bạn học; kiểm tra trình độ 3 phút; tiếng Nhật công sở; +2 ngành (Xây dựng, Hàng không). Showcase v4.0 (v3 lưu trữ). Test `i/j/k.mjs`, `db_test.sh`.
 - 09/2026 **v3.1.0**: +4 ngành (Logistics, Tài chính, Marketing, Y tế); kiểm duyệt chéo 8 gói (~205 sửa, `docs/review/`); ⚑ báo lỗi nội dung; luyện nói rảnh tay; "Nghề của tôi" (AI tạo gói 3 chặng); ảnh → bài học; game đổi ngành trong Hồ sơ. Test `h.mjs`.
 - 09/2026 **v3.0.0 (major)**: đổi tên **Nói Nghề**; đa ngành (Công sở chung mặc định, IT, Khách sạn, Bán hàng, Nhà máy; 23 vai); làm quen 3 bước bỏ qua được; tiến độ riêng từng ngành; báo cáo 60s theo nghề; JD mọi ngành + 12 từ riêng; game theo ngành; showcase v3.0 (v2 lưu trữ). Nội dung 4 gói mới viết bởi subagent theo `packs_src/README.md`, build.py kiểm tra.
 - 09/2026 **v2.0.0 (major)**: nội dung ×2 — 185 hội thoại chọn đáp (trước 74, sửa lỗi đáp án đúng luôn ở vị trí 1), 222 bài nghe gồm 74 đoạn họp 2–3 câu (điền nhiều ô, shadowing dài), thêm vai Designer & Data (7 vai); showcase v2.0 chụp lại 25 ảnh + mục Standup/Dịch ngược/Theo vai/Tiếng Nhật + lịch sử phiên bản, v1 lưu trữ ở `gioi-thieu-v1.html`; `CHANGELOG.md`.

@@ -5,15 +5,26 @@ làm bản lưu trữ (`gioi-thieu-v<N>.html`) để xem lại app từng trông
 
 | Version lớn | Trang giới thiệu | Ảnh chụp |
 |---|---|---|
-| **v3.x** (hiện tại) | [`gioi-thieu.html`](https://hunglv201.github.io/it-english-app/gioi-thieu.html) | `img/showcase/v3/` |
+| **v4.x** (hiện tại) | [`gioi-thieu.html`](https://hunglv201.github.io/it-english-app/gioi-thieu.html) | `img/showcase/v4/` |
+| v3.x | [`gioi-thieu-v3.html`](https://hunglv201.github.io/it-english-app/gioi-thieu-v3.html) (lưu trữ) | `img/showcase/v3/` |
 | v2.0 | [`gioi-thieu-v2.html`](https://hunglv201.github.io/it-english-app/gioi-thieu-v2.html) (lưu trữ) | `img/showcase/v2/` |
 | v1.x | [`gioi-thieu-v1.html`](https://hunglv201.github.io/it-english-app/gioi-thieu-v1.html) (lưu trữ 13/09/2026) | `img/showcase/` |
 
 ---
 
-## v4.0.0 — đang phát triển (nhánh `feature/backend-v4`) · Tài khoản & đồng bộ máy chủ
+## v4.0.0 — 23/09/2026 · Nói tốt hơn, cùng nhau, tài khoản & đồng bộ
 
-> Chưa phát hành. Bật khi điền `cloud-config.js` (xem `docs/BACKEND.md`); để trống thì app chạy như v3.1.
+> Các tính năng cần máy chủ (tài khoản, đồng bộ, AI miễn phí, nhắc học qua thông báo, lớp học, bảng tuần, bạn học) **chỉ bật khi điền `cloud-config.js`** (xem `docs/BACKEND.md`). Để trống thì phần còn lại vẫn chạy đầy đủ, chỉ lưu trên máy.
+
+**Nội dung**
+- 2 ngành mới: 🏗️ **Xây dựng · Kỹ thuật** (kỹ sư hiện trường, QA/QC, an toàn HSE, MEP) và ✈️ **Hàng không · Sân bay** (check-in, cửa ra máy bay, tiếp viên, hành lý) — mỗi ngành 4 vai, 120 ngày, kiểm duyệt chéo (`docs/review/construction.md`, `aviation.md`) → **11 ngành, 47 vai**.
+- 🇯🇵 **Tiếng Nhật công sở**: 51 câu kính ngữ & câu cố định (7 nhóm: chào hỏi, xin phép, nhận việc, 報連相, xin lỗi – nhờ vả, họp & điện thoại, email) có furigana, romaji, giọng đọc Nhật, đọc theo có chấm, đố nhanh; thuật ngữ Nhật trong thẻ từ có furigana + nút nghe.
+- 🎯 **Kiểm tra trình độ 3 phút** ở bước làm quen (nghe 3 câu + đọc to 2 câu) và hỏi "bạn thường học lúc nào?" để đặt giờ nhắc.
+
+**Giữ thói quen & cùng nhau** (cần máy chủ, trừ cam kết 7 ngày)
+- 🔔 **Nhắc học qua thông báo đẩy**: tối đa 1 lần/ngày, vào khoảng giờ bạn hay bắt đầu học (hoặc giờ cố định); vắng 1–4 ngày nhắc nhẹ, ngày 7 nhắc lần cuối rồi im; tổng kết tuần tối Chủ nhật. Chỉ xin quyền sau khi đã học; iPhone có hướng dẫn cài ra màn hình chính.
+- 🤝 **Cam kết 7 ngày** (đặt 50 xu game, học đủ 7 ngày liền nhận 100).
+- 👥 **Lớp học** (mã 8 ký tự, vào lớp cần đồng ý riêng, chủ lớp chỉ xem số tổng hợp + xuất CSV) · **Bảng tuần theo ngành** (tự nguyện, biệt danh, nhóm ~20 người, không rớt hạng) · **Bạn học** (link mời, chuỗi chung, nhắc nhau 1 lần/ngày).
 
 **Tài khoản**
 - Mở app là có **tài khoản khách tự động** — tiến độ lưu trên máy chủ ngay, không cần đăng nhập, không hỏi gì.
