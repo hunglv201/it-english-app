@@ -12,6 +12,10 @@ làm bản lưu trữ (`gioi-thieu-v<N>.html`) để xem lại app từng trông
 
 ---
 
+## Chưa phát hành — Tóm tắt cuối buổi AI vào Sổ lỗi
+
+- Bấm “Kết thúc & chấm điểm buổi” trong Giao tiếp AI: AI trả thêm tối đa 5 lỗi thật của buổi (`errors`), tự vào Sổ lỗi (`mkAdd`) và ôn câu (`psrsAdd`, cả 3 mẫu câu gợi ý). Modal kết quả có mục “Lỗi trong buổi này” + nút “Mở Sổ lỗi”.
+
 ## v4.3.0 — 23/09/2026 · Anh ⇄ Nhật cho BrSE, sổ lỗi, chuẩn bị nhanh, mẫu email
 
 **App**
