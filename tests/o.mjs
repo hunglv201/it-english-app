@@ -27,9 +27,14 @@ report(p,'O no-ai');await p.close();
 p=await page(b,{ai,store:baseStore({cfg:{level:'A2',autoSpeak:false,track:'it',trackChosen:true}})});
 await p.goto(BASE+'game3d/index.html');await p.waitForTimeout(900);
 await p.click('#go');await p.waitForTimeout(400);
-for(let i=0;i<4;i++){await p.evaluate(()=>document.querySelector('#opts .opt').click());await p.waitForTimeout(120);await p.click('#nx');await p.waitForTimeout(300);}
-assert.ok(await p.evaluate(()=>!!document.getElementById('inp')),'chat cuối ngày');await p.waitForTimeout(400);
-for(const m of ['I very tired today.','I learned a new tool.','See you tomorrow.']){await p.evaluate(m=>{document.getElementById('inp').value=m;document.getElementById('snd').click();},m);await p.waitForTimeout(450);}
+for(let i=0;i<5;i++){
+  await p.evaluate(()=>document.querySelector('#opts .opt').click());await p.waitForTimeout(120);
+  await p.click('#nx');await p.waitForTimeout(500);
+  assert.ok(await p.evaluate(()=>!!document.getElementById('inp')),'chat điểm '+i);
+  const n=i===4?3:2;
+  for(let k=0;k<n;k++){const m=i===4&&k===0?'I very tired today.':'I like it.';await p.evaluate(m=>{document.getElementById('inp').value=m;document.getElementById('snd').click();},m);await p.waitForTimeout(450);}
+  if(i<4){await p.click('#endd');await p.waitForTimeout(350);}
+}
 assert.ok(await p.evaluate(()=>!!document.getElementById('endd')),'nút kết thúc sau 3 lượt');
 await shot(p,'o_chat');
 await p.click('#endd');await p.waitForTimeout(300);

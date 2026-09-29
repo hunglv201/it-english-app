@@ -12,6 +12,10 @@ làm bản lưu trữ (`gioi-thieu-v<N>.html`) để xem lại app từng trông
 
 ---
 
+## v4.4.1 — game 3D nâng cấp
+- Nhân vật chi tiết hơn (tóc, mắt chớp, má, kính, tay, bảng tên, biểu tượng cảm xúc), văn phòng có bóng đổ, sofa, tranh, đồng hồ, giá sách.
+- Với AI: cả 5 nhân vật trò chuyện tự do theo vai sau mỗi câu chọn (2–3 lượt, sửa lỗi FIX).
+
 ## v4.4.0 — 29/09/2026 · Game 3D "Ngày đầu đi làm", tóm tắt cuối buổi AI vào Sổ lỗi
 
 - **Game mới `game3d/`** (three.js tự host, không build): văn phòng low-poly, 5 điểm trong ngày (lễ tân → bàn làm việc → bếp → phòng họp → phòng sếp), nhân vật nhép miệng/gật/lắc đầu, trời đổi màu theo giờ, thanh "Ấn tượng". 4 điểm đầu dùng `DATA.dialogues` của ngành đang học; điểm cuối là nói chuyện tự do 3 lượt với quản lý qua AI (cùng key với app; không có AI thì dùng câu chọn). Link ở game 2D › Hồ sơ › Cài đặt. Test `o.mjs`.

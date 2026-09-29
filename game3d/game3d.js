@@ -42,32 +42,46 @@ function parseReply(t){var i=t.indexOf('FIX:');return i<0?{reply:t.trim(),fix:''
 var canvas=$('#c'),renderer,scene,camera,sun,amb,skyMat,people={},clockEl=$('#clock');
 function mat(c){return new THREE.MeshLambertMaterial({color:c});}
 function box(w,h,d,c,x,y,z,parent){var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));m.position.set(x,y,z);(parent||scene).add(m);return m;}
+function sprite(txt,fs,bg){var c=document.createElement('canvas');c.width=256;c.height=96;var x=c.getContext('2d');x.font='700 '+fs+'px sans-serif';x.textAlign='center';x.textBaseline='middle';
+  if(bg){x.fillStyle=bg;var w=Math.min(250,x.measureText(txt).width+34);x.beginPath();x.roundRect?x.roundRect(128-w/2,16,w,64,30):x.rect(128-w/2,16,w,64);x.fill();}
+  x.fillStyle='#fff';x.fillText(txt,128,49);var t=new THREE.CanvasTexture(c);var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false}));sp.scale.set(.85,.32,1);sp.renderOrder=9;return sp;}
 function person(o){
-  var g=new THREE.Group(),skin=mat(o.skin),cloth=mat(o.cloth);
-  var l1=box(.2,.5,.22,o.pants,-.13,.25,0,g),l2=box(.2,.5,.22,o.pants,.13,.25,0,g);
-  var body=new THREE.Mesh(new THREE.CylinderGeometry(.26,.3,.75,12),cloth);body.position.y=.88;g.add(body);
-  var a1=box(.12,.62,.14,o.cloth,-.37,.9,0,g),a2=box(.12,.62,.14,o.cloth,.37,.9,0,g);
-  var head=new THREE.Group();head.position.y=1.5;g.add(head);
-  var hm=new THREE.Mesh(new THREE.SphereGeometry(.25,16,12),skin);head.add(hm);
-  var hair=new THREE.Mesh(new THREE.SphereGeometry(.27,16,10,0,Math.PI*2,0,Math.PI*.55),mat(o.hair));hair.position.set(0,.03,-.02);head.add(hair);
-  [-.09,.09].forEach(function(x){var e=new THREE.Mesh(new THREE.SphereGeometry(.035,8,6),mat(0x1a1a1a));e.position.set(x,.03,.225);head.add(e);});
-  var mouth=box(.1,.028,.02,0x7a2b2b,0,-.09,.235,head);
-  if(o.tie){box(.07,.3,.03,o.tie,0,.95,.27,g);}
-  g.userData={head:head,mouth:mouth,a1:a1,a2:a2,react:null,reactAt:0,base:0};
+  var g=new THREE.Group(),skin=mat(o.skin),cloth=mat(o.cloth),pm=mat(o.pants);
+  var l1=box(.19,.5,.21,o.pants,-.13,.27,0,g),l2=box(.19,.5,.21,o.pants,.13,.27,0,g);
+  box(.22,.09,.32,0x1b1b22,-.13,.05,.04,g);box(.22,.09,.32,0x1b1b22,.13,.05,.04,g);
+  var body=new THREE.Mesh(new THREE.CylinderGeometry(.27,.31,.78,14),cloth);body.position.y=.9;g.add(body);
+  box(.5,.07,.3,o.pants,0,.55,0,g);
+  var a1=new THREE.Group(),a2=new THREE.Group();a1.position.set(-.36,1.22,0);a2.position.set(.36,1.22,0);g.add(a1,a2);
+  [a1,a2].forEach(function(a,ix){var arm=box(.12,.58,.14,o.cloth,0,-.29,0,a);var hand=new THREE.Mesh(new THREE.SphereGeometry(.075,10,8),skin);hand.position.set(0,-.62,0);a.add(hand);});
+  var neck=new THREE.Mesh(new THREE.CylinderGeometry(.09,.1,.14,10),skin);neck.position.y=1.33;g.add(neck);
+  var head=new THREE.Group();head.position.y=1.55;g.add(head);
+  head.add(new THREE.Mesh(new THREE.SphereGeometry(.26,20,16),skin));
+  var hair=new THREE.Mesh(new THREE.SphereGeometry(.28,20,12,0,Math.PI*2,0,Math.PI*.55),mat(o.hair));hair.position.set(0,.03,-.02);head.add(hair);
+  if(o.long){box(.5,.5,.14,o.hair,0,-.12,-.17,head);}
+  var eyes=[];[-.095,.095].forEach(function(x){var w=new THREE.Mesh(new THREE.SphereGeometry(.05,10,8),mat(0xffffff));w.position.set(x,.03,.21);w.scale.z=.5;head.add(w);
+    var e=new THREE.Mesh(new THREE.SphereGeometry(.03,10,8),mat(0x1a1a1a));e.position.set(x,.03,.238);head.add(e);eyes.push(w,e);
+    box(.1,.018,.02,o.hair,x,.12,.235,head);});
+  var nose=new THREE.Mesh(new THREE.SphereGeometry(.03,8,6),skin);nose.position.set(0,-.03,.26);head.add(nose);
+  [-.15,.15].forEach(function(x){var ch=new THREE.Mesh(new THREE.SphereGeometry(.04,8,6),mat(0xf08a8a));ch.position.set(x,-.05,.2);ch.scale.z=.3;head.add(ch);});
+  var mouth=box(.11,.026,.02,0x8a3030,0,-.11,.245,head);
+  if(o.glasses){[-.095,.095].forEach(function(x){var r=new THREE.Mesh(new THREE.TorusGeometry(.06,.01,6,14),mat(0x222222));r.position.set(x,.03,.245);head.add(r);});}
+  if(o.tie){box(.07,.34,.03,o.tie,0,.98,.29,g);}
+  var tag=sprite(o.name,40,'rgba(20,24,44,.82)');tag.position.set(0,2.05,0);g.add(tag);
+  g.userData={head:head,mouth:mouth,a1:a1,a2:a2,eyes:eyes,react:null,reactAt:0,base:0,bub:null,bubAt:0};
   return g;
 }
 var SLOTS=[
-  {k:'reception',time:'08:30',where:'Quầy lễ tân',x:-6,z:-3,name:'Lan',role:'Lễ tân · HR',cast:{skin:0xf2c9a0,cloth:0xe86a92,pants:0x33344d,hair:0x2a1c14}},
-  {k:'desk',time:'10:00',where:'Bàn làm việc',x:-1,z:-3,name:'David',role:'Đồng nghiệp bàn cạnh',cast:{skin:0xe8b48c,cloth:0x4a90d9,pants:0x2b2f3f,hair:0x4b2e1a}},
-  {k:'kitchen',time:'12:15',where:'Bếp văn phòng',x:-6,z:2.5,name:'Emma',role:'Đồng nghiệp phòng khác',cast:{skin:0xf5d5b5,cloth:0x59b36b,pants:0x3a3a3a,hair:0xc0842c}},
-  {k:'meeting',time:'14:00',where:'Phòng họp',x:5,z:-3,name:'Kenji',role:'Trưởng nhóm',cast:{skin:0xe3b58f,cloth:0x6b6bd6,pants:0x22263a,hair:0x151515}},
-  {k:'boss',time:'16:30',where:'Phòng sếp',x:5,z:2.5,name:'Ms. Park',role:'Quản lý — nói chuyện tự do',cast:{skin:0xeac09a,cloth:0x30364f,pants:0x1c1f2e,hair:0x201510,tie:0xd9534f}}
+  {k:'reception',time:'08:30',where:'Quầy lễ tân',x:-6,z:-3,name:'Lan',role:'Lễ tân · HR',goal:'You are Lan, the front-desk/HR person. Greet the new employee, ask their name, tell them about the badge, wifi password and where to sit. Be warm.',cast:{name:'Lan',long:1,skin:0xf2c9a0,cloth:0xe86a92,pants:0x33344d,hair:0x2a1c14}},
+  {k:'desk',time:'10:00',where:'Bàn làm việc',x:-1,z:-3,name:'David',role:'Đồng nghiệp bàn cạnh',goal:'You are David, the colleague at the next desk. Introduce yourself, ask what the new person will work on, offer help, and talk about the team.',cast:{name:'David',skin:0xe8b48c,cloth:0x4a90d9,pants:0x2b2f3f,hair:0x4b2e1a,glasses:1}},
+  {k:'kitchen',time:'12:15',where:'Bếp văn phòng',x:-6,z:2.5,name:'Emma',role:'Đồng nghiệp phòng khác',goal:'You are Emma from another department, meeting the new person in the kitchen at lunch. Make small talk: coffee, lunch, hobbies, weekend, where they live.',cast:{name:'Emma',long:1,skin:0xf5d5b5,cloth:0x59b36b,pants:0x3a3a3a,hair:0xc0842c}},
+  {k:'meeting',time:'14:00',where:'Phòng họp',x:5,z:-3,name:'Kenji',role:'Trưởng nhóm',goal:'You are Kenji, the team lead, in a short team meeting. Ask the new person for a quick self-introduction, then ask a work question they must answer or clarify (deadline, task, problem). Sometimes speak fast so they must ask you to repeat.',cast:{name:'Kenji',skin:0xe3b58f,cloth:0x6b6bd6,pants:0x22263a,hair:0x151515}},
+  {k:'boss',time:'16:30',where:'Phòng sếp',x:5,z:2.5,name:'Ms. Park',role:'Quản lý — nói chuyện tự do',goal:'You are Ms. Park, the manager. It is the END of their first day. Ask how the day went, what they learned, what was difficult, and about tomorrow.',cast:{name:'Ms. Park',long:1,skin:0xeac09a,cloth:0x30364f,pants:0x1c1f2e,hair:0x201510,tie:0xd9534f}}
 ];
 function build(){
   scene=new THREE.Scene();scene.background=new THREE.Color(0x9ec9ff);scene.fog=new THREE.Fog(0x9ec9ff,14,34);
   camera=new THREE.PerspectiveCamera(58,1,.1,60);
   amb=new THREE.HemisphereLight(0xffffff,0x8a8f9e,.85);scene.add(amb);
-  sun=new THREE.DirectionalLight(0xffffff,.8);sun.position.set(-4,9,6);scene.add(sun);
+  sun=new THREE.DirectionalLight(0xffffff,.8);sun.position.set(-4,9,6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);var sc=sun.shadow.camera;sc.left=-13;sc.right=13;sc.top=10;sc.bottom=-10;sc.near=1;sc.far=30;sun.shadow.bias=-.0008;scene.add(sun);
   // sàn + tường
   box(20,.2,15,0xcfd6e6,0,-.1,.5);
   box(20,4,.3,0xf1efe9,0,2,-6);box(.3,4,15,0xece9e2,-10,2,.5);box(.3,4,15,0xece9e2,10,2,.5);
@@ -94,12 +108,22 @@ function build(){
   box(.7,.1,.7,0x30364f,5,.55,.4);box(.7,.7,.1,0x30364f,5,.95,.05);
   // cây cảnh
   [[-9,-5],[9,-5],[9,5],[-9,5],[1,1]].forEach(function(p){box(.5,.4,.5,0xa86b3c,p[0],.2,p[1]);var l=new THREE.Mesh(new THREE.SphereGeometry(.45,10,8),mat(0x3f9d54));l.position.set(p[0],.85,p[1]);scene.add(l);});
+  // sàn caro + trang trí
+  for(var gx=-9;gx<=9;gx+=2)box(.03,.01,15,0xbcc4d8,gx,.005,.5);for(var gz=-5;gz<=7;gz+=2)box(20,.01,.03,0xbcc4d8,0,.006,gz);
+  box(1.6,.5,.7,0x5b6fd6,-8.4,.25,-4.8);box(1.6,.5,.15,0x4a5cbb,-8.4,.7,-5.1); // sofa
+  box(.9,.6,.08,0xffffff,-3.4,2.4,-5.85);box(.85,.55,.02,0xf59e0b,-3.4,2.4,-5.8);box(.9,.6,.08,0xffffff,3.2,2.4,-5.85);box(.85,.55,.02,0x60a5fa,3.2,2.4,-5.8); // tranh
+  var ck=new THREE.Mesh(new THREE.CylinderGeometry(.3,.3,.06,20),mat(0xffffff));ck.rotation.x=Math.PI/2;ck.position.set(2.6,3.3,-5.8);scene.add(ck);box(.03,.22,.02,0x222222,2.6,3.36,-5.76);box(.16,.03,.02,0x222222,2.65,3.3,-5.76);
+  box(2.2,1.6,.3,0x6b4a2e,8.6,.8,-5.5);[.4,.9,1.4].forEach(function(y){box(2,.05,.34,0x8a6a44,8.6,y,-5.5);[0,1,2,3,4].forEach(function(n){box(.25,.3,.2,[0xd9534f,0x4a90d9,0x59b36b,0xf59e0b,0x9b6bd6][n],7.9+n*.35,y+.18,-5.5);});}); // giá sách
+  box(.6,.9,.6,0x30364f,-9,.45,1);box(.4,.3,.4,0xd9534f,-9,1.1,1); // máy pha cà phê
+  [-4,-2].forEach(function(x){box(.9,.05,.9,0xc9a875,x,.75,-3.4);box(.06,.75,.06,0x555b70,x-.4,.37,-3.0);box(.06,.75,.06,0x555b70,x+.4,.37,-3.8);box(.5,.35,.04,0x161b2b,x,1.05,-3.7);});
   // người
   SLOTS.forEach(function(s){var p=person(s.cast);p.position.set(s.x,0,s.z);p.userData.base=s.z;
     p.rotation.y=(s.x<0?.18:-.18);scene.add(p);people[s.k]=p;});
+  scene.traverse(function(o){if(o.isMesh&&o.material!==skyMat){o.castShadow=true;o.receiveShadow=true;}});
 }
 var camTarget={p:new THREE.Vector3(0,7,10),l:new THREE.Vector3(0,0,-1)},camPos=new THREE.Vector3(0,7,10),camLook=new THREE.Vector3(0,0,-1);
 function focusSlot(i){var s=SLOTS[i];camTarget.p.set(s.x+(s.x<0?.9:-.9),1.9,s.z+4.2);camTarget.l.set(s.x,-.05,s.z);}
+function emote(k,e){var p=people[k],u=p.userData;if(u.bub)p.remove(u.bub);var sp=sprite(e,60);sp.scale.set(.9,.34,1);sp.position.set(0,2.55,0);p.add(sp);u.bub=sp;u.bubAt=performance.now();}
 function overview(){camTarget.p.set(0,6.5,11);camTarget.l.set(0,0,-1);}
 function setDayTime(f){ // f 0..1 (08:30 → 17:30)
   var c1=new THREE.Color(0xffd9a8),c2=new THREE.Color(0x9ec9ff),c3=new THREE.Color(0xff9e6b),c;
@@ -120,7 +144,9 @@ function frame(now){
     u.mouth.scale.y=talking?(1+(Math.sin(now/70)>0?3:0)):1;
     var rx=0,ry=0;if(u.react){var e=(now-u.reactAt)/700;if(e>1)u.react=null;else{if(u.react==='nod')rx=Math.sin(e*Math.PI*3)*.28*(1-e);else ry=Math.sin(e*Math.PI*4)*.4*(1-e);}}
     u.head.rotation.x=rx;u.head.rotation.y=ry;
-    if(talking&&!reduce){u.a1.rotation.z=Math.sin(now/220)*.12;u.a2.rotation.z=-Math.sin(now/260)*.12;}else{u.a1.rotation.z=u.a2.rotation.z=0;}
+    var bl=(Math.floor(now/1000+ix*.7)%4===0&&(now%1000)<130)?.1:1;u.eyes.forEach(function(e){e.scale.y=bl;});
+    if(talking&&!reduce){u.a1.rotation.z=Math.sin(now/220)*.35;u.a2.rotation.z=-Math.sin(now/260)*.35;u.a1.rotation.x=Math.sin(now/300)*.25;}else{u.a1.rotation.z=.05;u.a2.rotation.z=-.05;u.a1.rotation.x=0;if(!reduce)u.a1.rotation.x=Math.sin(now/900+ix)*.03;}
+    if(u.bub){var e2=(now-u.bubAt)/1600;if(e2>1){p.remove(u.bub);u.bub=null;}else{u.bub.position.y=2.55+e2*.35;u.bub.material.opacity=1-Math.max(0,e2-.7)/.3;}}
   });
   renderer.render(scene,camera);
 }
@@ -135,21 +161,20 @@ function trackLabel(){return PACK?(PACK.emoji||'')+' '+PACK.label:'💻 IT · Ph
 
 function intro(){
   overview();st.on=false;setImp(50);
-  panel('<div class="box"><h2>Ngày đầu đi làm</h2><div class="muted">Bạn là nhân viên mới ('+esc(trackLabel())+'). Đi qua 5 điểm trong văn phòng: nói đúng, đồng nghiệp sẽ nể bạn. Chọn câu đáp phù hợp ở 4 điểm đầu, rồi nói chuyện tự do với quản lý ở cuối ngày.</div>'+
-    '<div class="muted">'+(aiConfigured()?'✅ AI sẵn sàng cho cuộc nói chuyện cuối ngày.':'ℹ️ Chưa có AI — cuối ngày dùng câu chọn. Nhập key trong Hồ sơ của game chính để nói tự do.')+'</div>'+
+  panel('<div class="box"><h2>Ngày đầu đi làm</h2><div class="muted">Bạn là nhân viên mới ('+esc(trackLabel())+'). Đi qua 5 điểm trong văn phòng: nói đúng, đồng nghiệp sẽ nể bạn. Mỗi điểm: chọn câu đáp, rồi (nếu có AI) nói chuyện tự do với nhân vật đó.</div>'+
+    '<div class="muted">'+(aiConfigured()?'✅ AI sẵn sàng: mỗi nhân vật sẽ trò chuyện tự do với bạn.':'ℹ️ Chưa có AI — chỉ có câu chọn. Nhập key trong Hồ sơ game chính để nói chuyện tự do ở mỗi điểm.')+'</div>'+
     '<div class="muted">Điểm cao nhất: <b>'+S.best+'</b> · Số lần chơi: <b>'+S.plays+'</b></div>'+
     '<button class="btn" id="go">Bắt đầu 08:30</button></div>');
   $('#go').onclick=function(){start();};
 }
 function start(){
   st.on=true;st.i=0;st.list=[];st.miss=[];st.good=0;st.total=0;st.done=false;setImp(50);
-  var need=aiConfigured()?4:5;st.dlg=pickDialogs(need);
+  var need=5;st.dlg=pickDialogs(need);
   if(st.dlg.length<need){toast('Gói này chưa đủ hội thoại');}
   scene0();
 }
 function scene0(){
   var s=SLOTS[st.i];focusSlot(st.i);clockEl.textContent=s.time;setDayTime(st.i/(SLOTS.length-1));
-  if(st.i===SLOTS.length-1&&aiConfigured())return chatScene();
   var d=st.dlg[Math.min(st.i,st.dlg.length-1)];
   if(!d){return finish();}
   choiceScene(s,d);
@@ -168,26 +193,26 @@ function answer(btn,o,d,s,opts){
   var all=document.querySelectorAll('#opts .opt');all.forEach(function(b){b.disabled=true;});
   st.total++;var p=people[s.k].userData;p.reactAt=performance.now();
   var good=opts.filter(function(x){return x.good;})[0];
-  if(o.good){st.good++;btn.classList.add('ok');setImp(st.imp+16);p.react='nod';}
-  else{btn.classList.add('no');setImp(st.imp-9);p.react='shake';
+  if(o.good){st.good++;btn.classList.add('ok');setImp(st.imp+16);p.react='nod';emote(s.k,'👍');}
+  else{btn.classList.add('no');setImp(st.imp-9);p.react='shake';emote(s.k,'🤔');
     all.forEach(function(b,ix){if(opts[ix]===good)b.classList.add('ok');});
     st.miss.push({wrong:o.t,right:good?good.t:'',note:o.fb||''});}
-  var fb=$('#fbx');fb.innerHTML='<div class="fb '+(o.good?'ok':'no')+'">'+(o.good?'✅ ':'❌ ')+esc(o.fb||'')+'</div><button class="btn" id="nx" style="margin-top:8px;width:100%">'+(st.i>=SLOTS.length-1?'Kết thúc ngày':'Tiếp — '+SLOTS[st.i+1].time)+'</button>';
+  var fb=$('#fbx');fb.innerHTML='<div class="fb '+(o.good?'ok':'no')+'">'+(o.good?'✅ ':'❌ ')+esc(o.fb||'')+'</div><button class="btn" id="nx" style="margin-top:8px;width:100%">'+(aiConfigured()?'💬 Nói chuyện tiếp với '+s.name:(st.i>=SLOTS.length-1?'Kết thúc ngày':'Tiếp — '+SLOTS[st.i+1].time))+'</button>';
   if(good)speak(good.t);
-  $('#nx').onclick=next;
+  $('#nx').onclick=function(){if(aiConfigured())chatScene(s);else next();};
 }
 function next(){st.i++;if(st.i>=SLOTS.length)return finish();scene0();}
 
 /* --- Cuộc nói chuyện AI với quản lý --- */
 function bossSystem(){
-  var lvl=(loadApp().cfg||{}).level||'A2',who=PACK?PACK.persona:'a Vietnamese software developer',ctx=PACK?PACK.context:'a software company';
-  return 'You are Ms. Park, a friendly but busy manager at '+ctx+'. The person talking to you is '+who+' (CEFR '+lvl+') at the END of their first day at work. Chat about how the first day went, what they learned, and tomorrow. Use very simple English, max 2 short sentences, and ask ONE question at a time. After your reply, on a NEW line write "FIX:" followed by either OK (if their last message was fine) or "wrong => right ~ short Vietnamese note" for the most important mistake. Never skip the FIX line.';
+  var s=SLOTS[st.i],lvl=(loadApp().cfg||{}).level||'A2',who=PACK?PACK.persona:'a Vietnamese software developer',ctx=PACK?PACK.context:'a software company';
+  return s.goal+' The setting is '+ctx+', time '+s.time+' on the new person\'s FIRST DAY. The person talking to you is '+who+' (CEFR '+lvl+'). Stay in character, use very simple English, max 2 short sentences, ask ONE question at a time, and react naturally to what they say. After your reply, on a NEW line write "FIX:" followed by either OK (if their last message was fine) or "wrong => right ~ short Vietnamese note" for the most important mistake. Never skip the FIX line.';
 }
-function chatScene(){
-  var s=SLOTS[st.i];st.chat={turns:[],user:0,busy:false};
+function chatScene(s){
+  focusSlot(st.i);st.chat={turns:[],user:0,busy:false,need:(st.i===SLOTS.length-1?3:2)};
   panel('<div class="box"><div class="who">'+esc(s.where)+' · '+esc(s.name)+' <span class="muted" style="text-transform:none">'+esc(s.role)+'</span></div>'+
     '<div class="chat" id="chat"></div><div class="row"><input class="tx" id="inp" placeholder="Trả lời bằng tiếng Anh…" autocomplete="off"><button class="btn ghost" id="mic" aria-label="Nói">🎤</button><button class="btn" id="snd">Gửi</button></div>'+
-    '<div class="muted" id="cnt">Lượt 0/3 — nói đủ 3 lượt để kết thúc ngày</div></div>');
+    '<div class="muted" id="cnt">Lượt 0/'+st.chat.need+' — nói đủ để đi tiếp</div></div>');
   $('#snd').onclick=function(){send();};
   $('#inp').onkeydown=function(e){if(e.key==='Enter')send();};
   $('#mic').onclick=mic;
@@ -204,7 +229,7 @@ async function bossTurn(msgs,first){
 }
 async function send(){
   var ch=st.chat,inp=$('#inp');if(!ch||ch.busy)return;var t=inp.value.trim();if(!t)return;inp.value='';
-  var ub=bubble('me',esc(t));ch.user++;$('#cnt').textContent='Lượt '+Math.min(ch.user,3)+'/3';
+  var ub=bubble('me',esc(t));ch.user++;$('#cnt').textContent='Lượt '+Math.min(ch.user,ch.need)+'/'+ch.need;
   var msgs=(ch.turns.length?[{role:'user',content:'(I walk into your office at the end of my first day.)'}]:[]).concat(ch.turns.map(function(m){return {role:m.role,content:m.content};})).concat([{role:'user',content:t}]);
   ch.turns.push({role:'user',content:t});ch.busy=true;var wait=bubble('ai','…');
   try{var raw=await aiCall(bossSystem(),msgs);var r=parseReply(raw);wait.textContent=r.reply;ch.turns.push({role:'assistant',content:raw});speak(r.reply);
@@ -212,10 +237,10 @@ async function send(){
     if(ok){setImp(st.imp+8);st.good++;}else{setImp(st.imp+2);var m=r.fix.match(/^(.*?)\s*=>\s*(.*?)(?:\s*~\s*(.*))?$/);
       if(m){st.miss.push({wrong:m[1].trim(),right:m[2].trim(),note:(m[3]||'').trim()});ub.innerHTML+='<div class="vi">💡 '+esc(m[2].trim())+(m[3]?' — '+esc(m[3].trim()):'')+'</div>';}}
     st.total++;
-    var pu=people.boss.userData;pu.react=ok?'nod':'shake';pu.reactAt=performance.now();
-  }catch(e){wait.textContent='(AI đang bận — thử gửi lại câu đó)';ch.user--;$('#cnt').textContent='Lượt '+ch.user+'/3';ch.turns.pop();}
+    var pu=people[SLOTS[st.i].k].userData;pu.react=ok?'nod':'shake';pu.reactAt=performance.now();emote(SLOTS[st.i].k,ok?'😊':'🤔');
+  }catch(e){wait.textContent='(AI đang bận — thử gửi lại câu đó)';ch.user--;$('#cnt').textContent='Lượt '+ch.user+'/'+ch.need;ch.turns.pop();}
   ch.busy=false;
-  if(ch.user>=3&&!$('#endd')){var b=document.createElement('button');b.className='btn';b.id='endd';b.style.width='100%';b.textContent='Kết thúc ngày đi làm';b.onclick=finish;$('#cnt').after(b);}
+  if(ch.user>=ch.need&&!$('#endd')){var last=st.i>=SLOTS.length-1,b=document.createElement('button');b.className='btn';b.id='endd';b.style.width='100%';b.textContent=last?'Kết thúc ngày đi làm':'Tiếp — '+SLOTS[st.i+1].time;b.onclick=last?finish:next;$('#cnt').after(b);}
 }
 function mic(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){toast('Trình duyệt không hỗ trợ mic');return;}
   var r=new SR();r.lang='en-US';r.onresult=function(e){$('#inp').value=e.results[0][0].transcript;};r.onerror=function(){toast('Không nghe được, thử lại');};try{r.start();toast('Đang nghe…');}catch(e){}}
@@ -233,7 +258,7 @@ function finish(){
 
 /* ---------- Khởi động ---------- */
 function boot(){
-  try{renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:true});}catch(e){$('#nogl').style.display='flex';return;}
+  try{renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:true});renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;}catch(e){$('#nogl').style.display='flex';return;}
   if(!renderer.getContext()){$('#nogl').style.display='flex';return;}
   build();resize();addEventListener('resize',resize);setDayTime(0);
   camPos.copy(camTarget.p);camLook.copy(camTarget.l);
