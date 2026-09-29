@@ -12,7 +12,13 @@ làm bản lưu trữ (`gioi-thieu-v<N>.html`) để xem lại app từng trông
 
 ---
 
-## Chưa phát hành — Tóm tắt cuối buổi AI vào Sổ lỗi
+## v4.4.0 — 29/09/2026 · Game 3D "Ngày đầu đi làm", tóm tắt cuối buổi AI vào Sổ lỗi
+
+- **Game mới `game3d/`** (three.js tự host, không build): văn phòng low-poly, 5 điểm trong ngày (lễ tân → bàn làm việc → bếp → phòng họp → phòng sếp), nhân vật nhép miệng/gật/lắc đầu, trời đổi màu theo giờ, thanh "Ấn tượng". 4 điểm đầu dùng `DATA.dialogues` của ngành đang học; điểm cuối là nói chuyện tự do 3 lượt với quản lý qua AI (cùng key với app; không có AI thì dùng câu chọn). Link ở game 2D › Hồ sơ › Cài đặt. Test `o.mjs`.
+- **Tóm tắt cuối buổi AI vào Sổ lỗi**: “Kết thúc & chấm điểm buổi” trả thêm tối đa 5 lỗi thật (`errors`), tự vào Sổ lỗi (`mkAdd`) và ôn câu (`psrsAdd`, cả 3 mẫu câu gợi ý); modal có mục “Lỗi trong buổi này” + nút “Mở Sổ lỗi”.
+- Sửa `weekendShield` tính thứ theo UTC (lệch múi giờ) + test `j.mjs` dùng ngày tương đối.
+
+### (chi tiết cũ) Tóm tắt cuối buổi AI vào Sổ lỗi
 
 - Bấm “Kết thúc & chấm điểm buổi” trong Giao tiếp AI: AI trả thêm tối đa 5 lỗi thật của buổi (`errors`), tự vào Sổ lỗi (`mkAdd`) và ôn câu (`psrsAdd`, cả 3 mẫu câu gợi ý). Modal kết quả có mục “Lỗi trong buổi này” + nút “Mở Sổ lỗi”.
 
