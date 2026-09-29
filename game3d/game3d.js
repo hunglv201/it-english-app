@@ -180,8 +180,8 @@ function frame(now){
   var dt=Math.min(.05,(now-t0)/1000);t0=now;
   var pt=$('#panel'),top=CH-(pt?pt.offsetHeight:200);
   var avail=Math.max(160,top-70),fyT,scT,camT;
-  if(view.over||!st.on){scT=Math.min(CW/(W*1.5),avail/330);fyT=70+(avail+WALL*scT)/2;camT=reduce?2.5*W:(2.5*W+Math.sin(now/7000)*1.9*W);}
-  else{scT=Math.min(CW/420,avail/300);fyT=70+(avail+WALL*scT)/2+6;camT=slotX(view.room)+20;}
+  if(view.over||!st.on){scT=Math.min(CW/(W*1.15),avail/290);fyT=70+(avail+WALL*scT)/2;camT=reduce?2.5*W:(2.5*W+Math.sin(now/7000)*1.9*W);}
+  else{scT=Math.min(CW/290,avail/290);fyT=70+(avail+WALL*scT)/2+6;camT=slotX(view.room)+20;}
   var k1=1-Math.pow(.004,dt);
   view.fy+=(fyT-view.fy)*k1;view.sc+=(scT-view.sc)*k1;view.camX+=(camT-view.camX)*k1;
   // người chơi đi bộ

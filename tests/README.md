@@ -20,3 +20,5 @@ Chạy toàn bộ: `tests/run.sh` (tự bật server tĩnh cổng 8765). Ảnh c
 `lib.mjs`: viewport 375×667, chặn Google Fonts, giả `speechSynthesis`, giả AI qua `window.claude.use('sample')` (hàm `ai`/`aiJson` truyền vào), nạp sẵn `localStorage`.
 Biến môi trường: `BASE_URL`, `CHROMIUM_PATH`, `PLAYWRIGHT_MODULE`, `SHOTS_DIR`.
 Mỗi test in `ERRORS: none` khi không có lỗi JS/console.
+
+- `o.mjs` — game "Ngày đầu đi làm" (`game3d/`, canvas 2D): 5 điểm chọn đáp, chat AI ở cả 5 nhân vật, tổng kết lỗi, link từ Hồ sơ game.
