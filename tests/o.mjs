@@ -21,7 +21,7 @@ for(let i=0;i<5;i++){
 const r=await p.evaluate(()=>({t:document.getElementById('panel').textContent,imp:window.__g3d.st.imp,total:window.__g3d.st.total,best:window.__g3d.S().best}));
 console.log('result',JSON.stringify({imp:r.imp,total:r.total,best:r.best}));
 assert.equal(r.total,5);assert.ok(/Ấn tượng/.test(r.t)&&/Chơi lại/.test(r.t));await shot(p,'o_end');
-assert.ok(await p.evaluate(()=>{const c=document.getElementById('c'),g=c.getContext('webgl2')||c.getContext('webgl');return !!g;}),'WebGL');
+assert.ok(await p.evaluate(()=>{const c=document.getElementById('c');return c.width>0&&c.getContext('2d').getImageData(c.width/2,c.height/3,1,1).data[3]>0;}),'canvas vẽ được');
 report(p,'O no-ai');await p.close();
 // 2) có AI → điểm cuối là nói chuyện tự do 3 lượt, lỗi vào tổng kết
 p=await page(b,{ai,store:baseStore({cfg:{level:'A2',autoSpeak:false,track:'it',trackChosen:true}})});

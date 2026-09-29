@@ -971,7 +971,7 @@ function vProfile(){
     toggleRow('🔊','Âm thanh',G.sound!==false,v=>{G.sound=v;saveG();main.classList.remove('vin');vProfile();}),
     toggleRow('🌸','Hoa rơi & hiệu ứng nền',G.fx!==false,v=>{G.fx=v;saveG();document.body.classList.toggle('nofx',!v);main.classList.remove('vin');vProfile();}),
     setRow('👑','Boss chặng & kết cục',pbCount()+'/'+PHASES.length+(pbT().end?' · 🏆':''),pbSheet),
-    setRow('🏢','Ngày đầu đi làm (3D)','mới',()=>{location.href='../game3d/'+(window.TRACK?('?track='+window.TRACK):'');}),
+    setRow('🏢','Ngày đầu đi làm','mới',()=>{location.href='../game3d/'+(window.TRACK?('?track='+window.TRACK):'');}),
     setRow('🧭','Ngành đang học',(PACK?PACK.emoji+' '+PACK.short:'💻 IT'),trackSheet),
     setRow('📖','Xem lại hướng dẫn','',tutorial),
     setRow('📱','Mở app học '+APPN,'',openApp),

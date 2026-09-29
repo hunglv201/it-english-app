@@ -5,7 +5,7 @@ const ASSETS = [
   'packs/office.gen.js', 'packs/hotel.gen.js', 'packs/sales.gen.js', 'packs/factory.gen.js',
   'packs/logistics.gen.js', 'packs/finance.gen.js', 'packs/marketing.gen.js', 'packs/health.gen.js', 'packs/construction.gen.js', 'packs/aviation.gen.js', 'packs/education.gen.js', 'packs/legal.gen.js', 'packs/custom.js',
   'ja/keigo.js', 'ja/brse.js', 'mail/templates.js',
-  'game3d/index.html', 'game3d/game3d.js', 'game3d/three.min.js',
+  'game3d/index.html', 'game3d/game3d.js',
   'cloud-config.js', 'sync-core.js', 'cloud.js', 'vendor/supabase.min.js',
   'chinh-sach.html', 'dieu-khoan.html', 'xoa-du-lieu.html',
   'manifest.webmanifest', 'icon-192.png', 'icon-512.png'

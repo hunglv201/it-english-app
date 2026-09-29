@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <script>/* CSP chỉ khi tự host (GitHub Pages/localhost) */(function(){if(!/(^|\.)github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname))return;var m=document.createElement("meta");m.httpEquiv="Content-Security-Policy";m.content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://generativelanguage.googleapis.com https://api.anthropic.com https://api.groq.com; object-src 'none'; base-uri 'none'; form-action 'none'";document.head.appendChild(m);})();</script>
-<title>Nói Nghề 3D — Ngày đầu đi làm</title>
+<title>Nói Nghề — Ngày đầu đi làm</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <meta name="theme-color" content="#1b2340">
-<meta name="description" content="Game 3D low-poly luyện tiếng Anh công sở: một ngày đầu đi làm, năm cuộc hội thoại, chọn câu đáp để gây ấn tượng.">
+<meta name="description" content="Game 2D hoạt hình luyện tiếng Anh công sở: một ngày đầu đi làm, năm cuộc hội thoại, chọn câu đáp để gây ấn tượng.">
 <style>
 :root{--bg:#1b2340;--card:rgba(20,26,50,.92);--line:rgba(255,255,255,.14);--tx:#f4f6ff;--mut:#aab3d6;--ok:#4ade80;--bad:#fb7185;--acc:#fbbf24;--blue:#60a5fa}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -43,12 +43,11 @@ input.tx{flex:1;min-width:0;background:rgba(255,255,255,.1);border:1px solid var
 .b.me{align-self:flex-end;background:rgba(96,165,250,.25)}.b.ai{align-self:flex-start;background:rgba(255,255,255,.1)}
 #toast{position:fixed;left:50%;top:60px;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);padding:8px 14px;border-radius:99px;font-size:13px;z-index:9;opacity:0;transition:opacity .25s;pointer-events:none}
 #toast.on{opacity:1}
-#nogl{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px;text-align:center;z-index:8}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<canvas id="c" aria-label="Văn phòng 3D"></canvas>
+<canvas id="c" aria-label="Văn phòng"></canvas>
 <div id="hud">
   <a class="pill" href="../game/" aria-label="Về game chính">←</a>
   <div class="pill" id="clock">08:30</div>
@@ -56,7 +55,6 @@ input.tx{flex:1;min-width:0;background:rgba(255,255,255,.1);border:1px solid var
 </div>
 <div id="panel"></div>
 <div id="toast"></div>
-<div id="nogl"><div class="box"><h2>Máy chưa hỗ trợ 3D</h2><div class="muted">Trình duyệt này không bật được WebGL. Thử Chrome/Safari bản mới, hoặc chơi game 2D.</div><a class="btn" href="../game/" style="text-decoration:none;text-align:center">Về game chính</a></div></div>
 <script>(function(){var T={office:1,it:1,hotel:1,sales:1,factory:1,logistics:1,finance:1,marketing:1,health:1,construction:1,aviation:1,education:1,legal:1,custom:1},t='',s=null;
 try{s=JSON.parse(localStorage.getItem('it-english-v1')||'null');}catch(e){}
 var q=(location.search.match(/[?&]track=([a-z]+)/)||[])[1];
@@ -68,7 +66,6 @@ if(!T[t])t='office';window.TRACK=t;
 if(t==='it')document.write('<script src="../data.gen.js"><\/script><script src="../phrases.gen.js"><\/script><script src="../roles.gen.js"><\/script>');
 else if(t==='custom')document.write('<script src="../packs/office.gen.js"><\/script><script src="../packs/custom.js"><\/script>');
 else document.write('<script src="../packs/'+t+'.gen.js"><\/script>');})();</script>
-<script src="three.min.js"></script>
 <script src="game3d.js"></script>
 </body>
 </html>
