@@ -11,7 +11,7 @@ return "Let's check the deadline and the blorptastic report together. What do yo
 const aiJson=`
 if(/explain the English word "blorptastic"/.test(prompt))return {t:'blorptastic',ipa:'/blɔːp/',pos:'adj',vi:'tuyệt vời (từ thử)',ex:'It is blorptastic.',exVi:'Nó tuyệt.'};
 if(/This is a transcript/.test(prompt))return {score:6,summary:'Nói rõ ý nhưng nhiều từ đệm.',fixes:[{wrong:'I very like',right:'I really like',note:'đặt really trước động từ'}],better:'I really like my job. I help customers every day.',tips:['Dừng ngắn thay vì nói um.']};
-if(/Evaluate ONLY Me/.test(prompt))return {score:7,tips:['Nêu kết quả cụ thể hơn.'],phrases:['As a result, we saved two days.'],criteria:[{name:'Trả lời đúng câu hỏi',score:4,note:'Ổn'},{name:'Có ví dụ cụ thể',score:2,note:'Thiếu kết quả'}]};
+if(/Evaluate ONLY Me/.test(prompt))return {score:7,tips:['Nêu kết quả cụ thể hơn.'],phrases:['As a result, we saved two days.'],errors:[{wrong:'I am a sales staff',right:'I am a salesperson',note:'staff là danh từ không đếm được'},{wrong:'We saved two days',right:'We saved two days',note:'giống nhau, bỏ qua'},{wrong:'',right:'bad'}],criteria:[{name:'Trả lời đúng câu hỏi',score:4,note:'Ổn'},{name:'Có ví dụ cụ thể',score:2,note:'Thiếu kết quả'}]};
 return [];`;
 const due=Date.now()-1000;
 const b=await launch();
@@ -67,6 +67,21 @@ for(const m of ['I am a sales staff.','I solved a customer problem last year.','
 await p.evaluate(()=>aiReview());await p.waitForTimeout(400);
 const rv=await p.evaluate(()=>({t:document.querySelector('.modal').textContent,prompt:window.__calls.filter(c=>c.json).pop().prompt}));
 assert.ok(/Có ví dụ cụ thể/.test(rv.t)&&/từ mục tiêu/.test(rv.t)&&/criteria/.test(rv.prompt));await shot(p,'j_interview_review');
+const mk=await p.evaluate(()=>({list:(store.mistakes||[]).map(m=>({src:m.src,wrong:m.wrong,right:m.right})),ps:!!psrs()['I am a salesperson'],ph:!!psrs()['As a result, we saved two days.']}));
+console.log('review→mistakes',JSON.stringify(mk));
+assert.equal(mk.list.length,1,'chỉ 1 lỗi hợp lệ (bỏ lỗi trùng chữ + lỗi thiếu wrong)');
+assert.deepEqual(mk.list[0],{src:'fix',wrong:'I am a sales staff',right:'I am a salesperson'});
+assert.ok(mk.ps&&mk.ph,'câu sửa + mẫu câu vào ôn câu');
+assert.ok(/Lỗi trong buổi này/.test(rv.t)&&/Đã thêm 1 lỗi mới vào Sổ lỗi/.test(rv.t)&&/Mở Sổ lỗi/.test(rv.t),'modal hiện lỗi + nút');
+await p.evaluate(()=>{[...document.querySelectorAll('.modal .btn')].find(x=>/Mở Sổ lỗi/.test(x.textContent)).click();});await p.waitForTimeout(300);
+assert.equal(await p.evaluate(()=>window.__view),'mistakes','nút mở Sổ lỗi');
+assert.ok(await p.evaluate(()=>/salesperson/.test(document.getElementById('main').textContent)),'Sổ lỗi hiện lỗi mới');
+await shot(p,'j_review_mistakes');
+// chấm lại lần 2 cùng ngày: không nhân đôi
+await p.evaluate(()=>{aiScenario='x_interview';aiTurns=[];aiStart();});await p.waitForTimeout(300);
+for(const m of ['a','b','c'])await p.evaluate(m=>{document.getElementById('aiInput').value=m;aiSend();},m),await p.waitForTimeout(300);
+await p.evaluate(()=>aiReview());await p.waitForTimeout(400);
+assert.equal(await p.evaluate(()=>store.mistakes.length),1,'chấm lại không nhân đôi');
 await p.evaluate(()=>closeModal());
 
 // 5) Phát âm 3 mức
@@ -91,9 +106,13 @@ assert.ok(await p.evaluate(()=>!!psrs()['I really like']));
 report(p,'J practice');await p.close();
 
 // 7) Lá chắn cuối tuần (hàm thuần)
-p=await page(b,{store:st({hist:{'2026-09-14':1,'2026-09-15':2,'2026-09-16':1,'2026-09-17':1,'2026-09-18':3}})});
+const iso=x=>x.toISOString().slice(0,10),addD=(x,n)=>new Date(x.getTime()+n*864e5);
+let fri=new Date();fri.setHours(12,0,0,0);while(fri.getDay()!==5||fri>addD(new Date(),-3))fri=addD(fri,-1);
+const fH={};for(let i=0;i<5;i++)fH[iso(addD(fri,-i))]=1;
+const D={fri:iso(fri),mon:iso(addD(fri,3)),tue:iso(addD(fri,4)),thu:iso(addD(fri,-1))};
+p=await page(b,{store:st({hist:fH})});
 await p.goto(BASE+'index.html');await p.waitForTimeout(500);
-const t7=await p.evaluate(()=>({fri_mon:weekendShield('2026-09-18','2026-09-21'),fri_tue:weekendShield('2026-09-18','2026-09-22'),thu_mon:weekendShield('2026-09-17','2026-09-21')}));
+const t7=await p.evaluate(D=>({fri_mon:weekendShield(D.fri,D.mon),fri_tue:weekendShield(D.fri,D.tue),thu_mon:weekendShield(D.thu,D.mon)}),D);
 console.log('shield',JSON.stringify(t7));assert.deepEqual(t7,{fri_mon:true,fri_tue:false,thu_mon:false});
 await p.close();
 

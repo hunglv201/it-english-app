@@ -4477,9 +4477,9 @@ function celebrate(big,small){
 }
 function streakMilestone(n){return ({3:'3 ngày liền — bắt đầu thành thói quen',7:'1 tuần! Người giữ được 7 ngày học đều hơn hẳn',14:'2 tuần liền 👏',30:'1 tháng không nghỉ 🏆',50:'50 ngày!',100:'100 ngày — quá đỉnh 🏆',365:'Tròn 1 năm 🎉'})[n]||'';}
 function weekendShield(lastActive,today){ // bỏ lỡ chỉ Thứ Bảy/Chủ nhật và 7 ngày trước đó học ≥5 ngày → giữ chuỗi
-  var a=new Date(lastActive+'T00:00:00'),b=new Date(today+'T00:00:00'),miss=[];
+  var a=new Date(lastActive+'T00:00:00Z'),b=new Date(today+'T00:00:00Z'),miss=[];
   for(var d=new Date(a.getTime()+864e5);d<b;d=new Date(d.getTime()+864e5))miss.push(d);
-  if(!miss.length||miss.length>2||!miss.every(function(x){var g=x.getDay();return g===0||g===6;}))return false;
+  if(!miss.length||miss.length>2||!miss.every(function(x){var g=x.getUTCDay();return g===0||g===6;}))return false;
   var n=0,h=store.hist||{};for(var i=1;i<=7;i++){var k=new Date(miss[0].getTime()-i*864e5).toISOString().slice(0,10);if(h[k])n++;}
   return n>=5;
 }
